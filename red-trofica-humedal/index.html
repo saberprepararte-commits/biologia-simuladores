@@ -1,941 +1,260 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulador realista de red trófica</title>
-  <style>
-    :root {
-      --bg1: #e4f4ec;
-      --bg2: #f8fbf6;
-      --ink: #15352c;
-      --muted: #60756d;
-      --card: #ffffff;
-      --accent: #16745d;
-      --accent2: #e0a638;
-      --danger: #c8423b;
-      --warn: #d88825;
-      --soft: #e7f5ee;
-      --line: #6fa891;
-      --water: #bde3ea;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--ink);
-      background: linear-gradient(180deg, var(--bg1), var(--bg2));
-    }
-
-    header {
-      padding: 24px;
-      background:
-        linear-gradient(135deg, rgba(7, 51, 42, .96), rgba(20, 92, 73, .96)),
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,.2), transparent 35%);
-      color: white;
-    }
-
-    header h1 { margin: 0 0 8px; font-size: clamp(25px, 3vw, 38px); }
-    header p { margin: 0; max-width: 1100px; color: #d7eee6; line-height: 1.55; }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 350px 1fr;
-      gap: 18px;
-      padding: 18px;
-    }
-
-    .panel, .ecosystem, .guide, .model-note {
-      background: rgba(255,255,255,.96);
-      border: 1px solid #d7e8e0;
-      border-radius: 24px;
-      box-shadow: 0 12px 34px rgba(27, 75, 59, .12);
-    }
-
-    .panel {
-      padding: 18px;
-      position: sticky;
-      top: 14px;
-      height: fit-content;
-    }
-
-    h2 { margin: 0 0 12px; font-size: 21px; }
-    h3 { margin: 0; }
-
-    label {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      font-weight: bold;
-      margin: 14px 0 7px;
-    }
-
-    label span.value {
-      font-weight: normal;
-      color: var(--accent);
-    }
-
-    select, input[type="range"], button { width: 100%; }
-
-    select {
-      padding: 10px;
-      border-radius: 14px;
-      border: 1px solid #bed9ce;
-      color: var(--ink);
-      background: #fff;
-    }
-
-    input[type="range"] { accent-color: var(--accent); }
-
-    .hint {
-      color: var(--muted);
-      font-size: 12.5px;
-      line-height: 1.35;
-      margin-top: 4px;
-    }
-
-    .button-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 15px;
-      padding: 11px 12px;
-      background: var(--accent);
-      color: white;
-      font-weight: 800;
-      cursor: pointer;
-      transition: .18s ease;
-    }
-
-    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
-    button.secondary { background: #e9f5ef; color: var(--accent); }
-    button.warning { background: var(--accent2); color: #47330e; margin-top: 8px; }
-
-    .ecosystem { padding: 18px; }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .metric {
-      min-height: 78px;
-      border-radius: 18px;
-      padding: 10px;
-      background: var(--soft);
-      text-align: center;
-      display: grid;
-      place-items: center;
-      border: 1px solid #d3e7de;
-    }
-
-    .metric strong { display: block; font-size: 23px; color: var(--accent); line-height: 1; }
-    .metric span { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
-    .metric.danger strong { color: var(--danger); }
-    .metric.warn strong { color: var(--warn); }
-
-    .stage {
-      position: relative;
-      min-height: 520px;
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid #c9e1d8;
-      background:
-        radial-gradient(circle at 18% 88%, rgba(37, 134, 88, .28), transparent 28%),
-        radial-gradient(circle at 85% 22%, rgba(224, 166, 56, .25), transparent 23%),
-        linear-gradient(180deg, rgba(203,234,236,.95) 0%, rgba(207,236,229,.95) 44%, rgba(172,215,185,.95) 100%);
-    }
-
-    .stage::before {
-      content: "";
-      position: absolute;
-      inset: auto -8% -10% -8%;
-      height: 38%;
-      background:
-        radial-gradient(ellipse at 20% 40%, rgba(60,120,65,.45), transparent 40%),
-        radial-gradient(ellipse at 70% 30%, rgba(47,108,82,.38), transparent 35%),
-        linear-gradient(180deg, rgba(77,139,91,.2), rgba(43,103,71,.42));
-      pointer-events: none;
-    }
-
-    .stage.dark { filter: saturate(.75) brightness(.82); }
-    .stage.toxic { box-shadow: inset 0 0 0 999px rgba(112, 88, 55, .22); }
-    .stage.collapse { box-shadow: inset 0 0 0 999px rgba(100, 35, 35, .20); }
-
-    svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .species {
-      position: absolute;
-      width: 158px;
-      border-radius: 20px;
-      padding: 10px;
-      background: rgba(255,255,255,.93);
-      border: 2px solid #cae2d7;
-      box-shadow: 0 9px 18px rgba(21, 67, 52, .13);
-      text-align: center;
-      transition: .3s ease;
-      z-index: 3;
-    }
-
-    .species .emoji { font-size: 34px; display: block; line-height: 1.05; }
-    .species h3 { font-size: 14px; margin: 4px 0 6px; }
-    .species .role { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-
-    .bar { height: 10px; border-radius: 99px; overflow: hidden; background: #e5eeea; }
-    .fill { height: 100%; width: 50%; border-radius: 99px; background: var(--accent); transition: width .3s ease, background .3s ease; }
-    .pop { margin-top: 5px; font-size: 12px; color: var(--muted); }
-
-    .species.low { border-color: var(--warn); background: #fff8ec; }
-    .species.dead { opacity: .45; filter: grayscale(1); border-color: var(--danger); background: #fff0ef; }
-    .species.boost { border-color: var(--accent); transform: translateY(-2px); }
-    .species.low .fill { background: var(--warn); }
-    .species.dead .fill { background: var(--danger); }
-
-    .producer { left: 7%; top: 65%; }
-    .grazer { left: 25%; top: 49%; }
-    .fish { left: 46%; top: 65%; }
-    .bird { left: 61%; top: 37%; }
-    .apex { left: 78%; top: 16%; }
-    .decomposer { left: 36%; top: 12%; }
-
-    .log {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 12px;
-    }
-
-    .log-box, .mini-box {
-      background: #f7fbf8;
-      border: 1px solid #dbece5;
-      border-radius: 18px;
-      padding: 13px;
-      min-height: 104px;
-      line-height: 1.45;
-      color: var(--muted);
-    }
-
-    .log-box strong, .mini-box strong { color: var(--ink); }
-
-    .bars {
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .abiotic-row {
-      display: grid;
-      grid-template-columns: 95px 1fr 40px;
-      gap: 8px;
-      align-items: center;
-      font-size: 12px;
-    }
-
-    .abiotic-row .track {
-      height: 9px;
-      background: #e3eee9;
-      border-radius: 99px;
-      overflow: hidden;
-    }
-
-    .abiotic-row .track div { height: 100%; background: var(--accent); border-radius: 99px; }
-
-    .guide {
-      margin: 0 18px 18px;
-      padding: 18px;
-    }
-
-    .question-grid, .model-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .qcard, .model-note {
-      background: #f8fbf9;
-      border: 1px solid #dcebe5;
-      border-radius: 18px;
-      padding: 14px;
-      line-height: 1.4;
-    }
-
-    .qcard strong, .model-note strong { color: var(--accent); }
-    .model-grid { margin-top: 12px; }
-
-    @media (max-width: 1100px) {
-      .layout { grid-template-columns: 1fr; }
-      .panel { position: relative; top: 0; }
-      .metrics { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    @media (max-width: 760px) {
-      .metrics, .question-grid, .model-grid, .log { grid-template-columns: 1fr; }
-      .stage { min-height: 760px; }
-      .species { width: 142px; }
-      .producer { left: 7%; top: 78%; }
-      .grazer { left: 8%; top: 55%; }
-      .fish { left: 52%; top: 73%; }
-      .bird { left: 52%; top: 47%; }
-      .apex { left: 51%; top: 19%; }
-      .decomposer { left: 8%; top: 18%; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Simulador realista de red trófica</title>
+<style>
+:root{--bg1:#e4f4ec;--bg2:#f8fbf6;--ink:#15352c;--muted:#60756d;--card:#fff;--accent:#16745d;--accent2:#e0a638;--danger:#c8423b;--warn:#d88825;--soft:#e7f5ee;--line:#6fa891}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2))}
+header{padding:24px;background:linear-gradient(135deg,rgba(7,51,42,.96),rgba(20,92,73,.96));color:white}
+header h1{margin:0 0 8px;font-size:clamp(25px,3vw,38px)}
+header p{margin:0;max-width:1100px;color:#d7eee6;line-height:1.55}
+.layout{display:grid;grid-template-columns:350px 1fr;gap:18px;padding:18px}
+.panel,.ecosystem,.guide,.model-note{background:rgba(255,255,255,.96);border:1px solid #d7e8e0;border-radius:24px;box-shadow:0 12px 34px rgba(27,75,59,.12)}
+.panel{padding:18px;position:sticky;top:14px;height:max-content}
+h2{margin:0 0 12px;font-size:21px}
+label{display:flex;justify-content:space-between;gap:8px;font-weight:bold;margin:14px 0 7px}
+label span.value{font-weight:normal;color:var(--accent)}
+select,input[type="range"],button{width:100%}
+select{padding:10px;border-radius:14px;border:1px solid #bed9ce;color:var(--ink);background:white}
+input[type="range"]{accent-color:var(--accent)}
+.hint{color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:4px}
+.button-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+button{border:0;border-radius:15px;padding:11px 12px;background:var(--accent);color:white;font-weight:800;cursor:pointer;transition:.18s ease}
+button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+button.secondary{background:#e9f5ef;color:var(--accent)}
+button.warning{background:var(--accent2);color:#47330e;margin-top:8px}
+.lang{margin:6px 0 12px;background:#f1faf6;color:var(--accent);border:1px solid #cfe8dc}
+.ecosystem{padding:18px}
+.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+.metric{min-height:78px;border-radius:18px;padding:10px;background:var(--soft);text-align:center;display:grid;place-items:center;border:1px solid #d3e7de}
+.metric strong{display:block;font-size:23px;color:var(--accent);line-height:1}
+.metric span{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.metric.danger strong{color:var(--danger)}
+.metric.warn strong{color:var(--warn)}
+.stage{position:relative;min-height:520px;border-radius:24px;overflow:hidden;border:1px solid #c9e1d8;background:radial-gradient(circle at 18% 88%,rgba(37,134,88,.28),transparent 28%),radial-gradient(circle at 85% 22%,rgba(224,166,56,.25),transparent 23%),linear-gradient(180deg,rgba(203,234,236,.95) 0%,rgba(207,236,229,.95) 44%,rgba(172,215,185,.95) 100%)}
+.stage::before{content:"";position:absolute;inset:auto -8% -10% -8%;height:38%;background:radial-gradient(ellipse at 20% 40%,rgba(60,120,65,.45),transparent 40%),radial-gradient(ellipse at 70% 30%,rgba(47,108,82,.38),transparent 35%),linear-gradient(180deg,rgba(77,139,91,.2),rgba(43,103,71,.42));pointer-events:none}
+.stage.dark{filter:saturate(.75) brightness(.82)}
+.stage.toxic{box-shadow:inset 0 0 0 999px rgba(112,88,55,.22)}
+.stage.collapse{box-shadow:inset 0 0 0 999px rgba(100,35,35,.20)}
+svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.species{position:absolute;width:158px;border-radius:20px;padding:10px;background:rgba(255,255,255,.93);border:2px solid #cae2d7;box-shadow:0 9px 18px rgba(21,67,52,.13);text-align:center;transition:.3s ease;z-index:3}
+.species .emoji{font-size:34px;display:block;line-height:1.05}
+.species h3{font-size:14px;margin:4px 0 6px}
+.species .role{font-size:11px;color:var(--muted);margin-bottom:6px}
+.bar{height:10px;border-radius:99px;overflow:hidden;background:#e5eeea}
+.fill{height:100%;width:50%;border-radius:99px;background:var(--accent);transition:width .3s ease,background .3s ease}
+.pop{margin-top:5px;font-size:12px;color:var(--muted)}
+.species.low{border-color:var(--warn);background:#fff8ec}.species.dead{opacity:.45;filter:grayscale(1);border-color:var(--danger);background:#fff0ef}.species.boost{border-color:var(--accent);transform:translateY(-2px)}.species.low .fill{background:var(--warn)}.species.dead .fill{background:var(--danger)}
+.producer{left:7%;top:65%}.grazer{left:25%;top:49%}.fish{left:46%;top:65%}.bird{left:61%;top:37%}.apex{left:78%;top:16%}.decomposer{left:36%;top:12%}
+.log{margin-top:14px;display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.log-box,.mini-box{background:#f7fbf8;border:1px solid #dbece5;border-radius:18px;padding:13px;min-height:104px;line-height:1.45;color:var(--muted)}
+.log-box strong,.mini-box strong{color:var(--ink)}.bars{display:grid;gap:8px;margin-top:10px}.abiotic-row{display:grid;grid-template-columns:95px 1fr 40px;gap:8px;align-items:center;font-size:12px}.abiotic-row .track{height:9px;background:#e3eee9;border-radius:99px;overflow:hidden}.abiotic-row .track div{height:100%;background:var(--accent);border-radius:99px}
+.guide{margin:0 18px 18px;padding:18px}.question-grid,.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.qcard,.model-note{background:#f8fbf9;border:1px solid #dcebe5;border-radius:18px;padding:14px;line-height:1.4}.qcard strong,.model-note strong{color:var(--accent)}.model-grid{margin-top:12px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.panel{position:relative;top:0}.metrics{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.metrics,.question-grid,.model-grid,.log{grid-template-columns:1fr}.stage{min-height:760px}.species{width:142px}.producer{left:7%;top:78%}.grazer{left:8%;top:55%}.fish{left:52%;top:73%}.bird{left:52%;top:47%}.apex{left:51%;top:19%}.decomposer{left:8%;top:18%}}
+</style>
 </head>
 <body>
-  <header>
-    <h1 id="title">Simulador realista de red trófica</h1>
-    <p id="subtitle">Modelo educativo de un humedal: explora productividad primaria, cascadas tróficas, oxígeno disuelto, detritos, nutrientes y contaminación. Ajusta variables y observa respuestas más cercanas a un ecosistema real.</p>
-  </header>
-
-  <main class="layout">
-    <aside class="panel">
-      <h2 id="controlsTitle">Panel de investigación</h2>
-
-      <label id="languageLabel">Idioma</label>
-      <select id="language">
-        <option value="es">Español</option>
-        <option value="en">English</option>
-      </select>
-
-      <label><span id="sunLabel">Radiación solar</span><span class="value" id="sunValue">80%</span></label>
-      <input id="sun" type="range" min="0" max="100" value="80" />
-      <div class="hint" id="sunHint">Controla la fotosíntesis. Si llega a 0, la producción primaria se detiene.</div>
-
-      <label><span id="waterLabel">Agua disponible</span><span class="value" id="waterValue">78%</span></label>
-      <input id="water" type="range" min="0" max="100" value="78" />
-      <div class="hint" id="waterHint">Representa nivel de agua y hábitat. En 0 ocurre colapso rápido.</div>
-
-      <label><span id="pollutionLabel">Contaminación</span><span class="value" id="pollutionValue">12%</span></label>
-      <input id="pollution" type="range" min="0" max="100" value="12" />
-      <div class="hint" id="pollutionHint">Aumenta toxicidad, turbidez, estrés y pérdida de oxígeno disuelto.</div>
-
-      <label><span id="nutrientLabel">Nutrientes</span><span class="value" id="nutrientValue">55%</span></label>
-      <input id="nutrients" type="range" min="0" max="100" value="55" />
-      <div class="hint" id="nutrientHint">Pocos nutrientes limitan productores; demasiados pueden favorecer eutrofización.</div>
-
-      <label id="removeLabel">Intervención: retirar especie</label>
-      <select id="removeSpecies">
-        <option value="none">Ninguna</option>
-        <option value="producer">Productores: algas y plantas</option>
-        <option value="grazer">Herbívoros: caracoles/zooplancton</option>
-        <option value="fish">Peces pequeños</option>
-        <option value="bird">Garzas</option>
-        <option value="apex">Depredador tope: caimán</option>
-        <option value="decomposer">Descomponedores</option>
-      </select>
-
-      <label id="invasiveLabel">Especie invasora</label>
-      <select id="invasive">
-        <option value="none">No introducir</option>
-        <option value="floatingPlant">Planta flotante invasora</option>
-        <option value="predatoryFish">Pez invasor depredador</option>
-      </select>
-
-      <div class="button-row">
-        <button id="playBtn">Iniciar</button>
-        <button class="secondary" id="resetBtn">Reiniciar</button>
-      </div>
-      <button class="warning" id="eventBtn">Aplicar disturbio</button>
-    </aside>
-
-    <section class="ecosystem">
-      <h2 id="ecosystemTitle">Humedal: red trófica simplificada</h2>
-      <div class="metrics">
-        <div class="metric" id="mBio"><strong id="biodiversity">100</strong><span id="bioLabel">Integridad biótica</span></div>
-        <div class="metric" id="mStability"><strong id="stability">100</strong><span id="stabLabel">Estabilidad</span></div>
-        <div class="metric" id="mEnergy"><strong id="energy">100</strong><span id="energyLabel">Flujo de energía</span></div>
-        <div class="metric" id="mOxygen"><strong id="oxygenMetric">78</strong><span id="oxygenLabel">Oxígeno disuelto</span></div>
-        <div class="metric" id="mDetritus"><strong id="detritusMetric">20</strong><span id="detritusLabel">Detritos</span></div>
-        <div class="metric" id="mRisk"><strong id="risk">Bajo</strong><span id="riskLabel">Riesgo ecológico</span></div>
-      </div>
-
-      <div class="stage" id="stage">
-        <svg viewBox="0 0 1000 560" preserveAspectRatio="none">
-          <defs>
-            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L0,6 L9,3 z" fill="#6fa891" />
-            </marker>
-          </defs>
-          <line x1="170" y1="390" x2="330" y2="315" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)" />
-          <line x1="405" y1="315" x2="540" y2="390" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)" />
-          <line x1="610" y1="385" x2="700" y2="255" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)" />
-          <line x1="760" y1="245" x2="850" y2="155" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)" />
-          <line x1="835" y1="150" x2="475" y2="115" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)" />
-          <line x1="465" y1="160" x2="180" y2="390" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)" />
-          <line x1="615" y1="390" x2="460" y2="140" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)" />
-        </svg>
-
-        <div class="species producer" data-id="producer">
-          <span class="emoji">🌿</span>
-          <h3 id="producerName">Algas y plantas acuáticas</h3>
-          <div class="role" id="producerRole">Productores</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="producerPop">Biomasa: 85</div>
-        </div>
-
-        <div class="species grazer" data-id="grazer">
-          <span class="emoji">🐌</span>
-          <h3 id="grazerName">Caracoles y zooplancton</h3>
-          <div class="role" id="grazerRole">Consumidores primarios</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="grazerPop">Población: 55</div>
-        </div>
-
-        <div class="species fish" data-id="fish">
-          <span class="emoji">🐟</span>
-          <h3 id="fishName">Peces pequeños</h3>
-          <div class="role" id="fishRole">Consumidores secundarios</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="fishPop">Población: 50</div>
-        </div>
-
-        <div class="species bird" data-id="bird">
-          <span class="emoji">🪶</span>
-          <h3 id="birdName">Garzas</h3>
-          <div class="role" id="birdRole">Depredadores intermedios</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="birdPop">Población: 32</div>
-        </div>
-
-        <div class="species apex" data-id="apex">
-          <span class="emoji">🐊</span>
-          <h3 id="apexName">Caimán</h3>
-          <div class="role" id="apexRole">Depredador tope</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="apexPop">Población: 18</div>
-        </div>
-
-        <div class="species decomposer" data-id="decomposer">
-          <span class="emoji">🍄</span>
-          <h3 id="decomposerName">Hongos y bacterias</h3>
-          <div class="role" id="decomposerRole">Recicladores</div>
-          <div class="bar"><div class="fill"></div></div>
-          <div class="pop" id="decomposerPop">Actividad: 58</div>
-        </div>
-      </div>
-
-      <div class="log">
-        <div class="log-box" id="logBox"><strong>Estado inicial:</strong> ajusta variables y presiona “Iniciar”. El modelo responderá con cambios graduales y cascadas tróficas.</div>
-        <div class="mini-box">
-          <strong id="abioticTitle">Variables internas</strong>
-          <div class="bars">
-            <div class="abiotic-row"><span id="toxinLabel">Toxicidad</span><div class="track"><div id="toxinBar"></div></div><span id="toxinValue">0</span></div>
-            <div class="abiotic-row"><span id="turbidityLabel">Turbidez</span><div class="track"><div id="turbidityBar"></div></div><span id="turbidityValue">0</span></div>
-            <div class="abiotic-row"><span id="recyclingLabel">Reciclaje</span><div class="track"><div id="recyclingBar"></div></div><span id="recyclingValue">0</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <section class="guide">
-    <h2 id="questionsTitle">Preguntas para laboratorio</h2>
-    <div class="question-grid">
-      <div class="qcard"><strong id="q1Title">Predicción</strong><br><span id="q1">Antes de iniciar, baja la radiación solar a 0. ¿Qué organismo debería responder primero y por qué?</span></div>
-      <div class="qcard"><strong id="q2Title">Cascada trófica</strong><br><span id="q2">Retira el depredador tope. Describe qué sucede con garzas, peces pequeños y herbívoros.</span></div>
-      <div class="qcard"><strong id="q3Title">Productividad</strong><br><span id="q3">Compara un escenario con agua alta y otro con agua en 0. ¿Qué cambia en el flujo de energía?</span></div>
-      <div class="qcard"><strong id="q4Title">Contaminación</strong><br><span id="q4">Aumenta la contaminación por encima de 70%. ¿Qué ocurre con el oxígeno disuelto y los peces?</span></div>
-      <div class="qcard"><strong id="q5Title">Invasión biológica</strong><br><span id="q5">Introduce una planta flotante invasora. Explica por qué puede subir la biomasa vegetal y al mismo tiempo aumentar el riesgo.</span></div>
-      <div class="qcard"><strong id="q6Title">Argumentación</strong><br><span id="q6">¿Qué intervención generó el mayor colapso? Sustenta con evidencia del simulador.</span></div>
-    </div>
-
-    <div class="model-grid">
-      <div class="model-note"><strong id="model1Title">Base del modelo</strong><br><span id="model1">La energía entra por productores fotosintéticos; si luz o agua llegan a cero, se detiene la producción primaria y el sistema pierde su fuente principal de energía.</span></div>
-      <div class="model-note"><strong id="model2Title">Cascadas</strong><br><span id="model2">La remoción de una especie no afecta solo a esa especie: modifica depredación, competencia, herbivoría, detritos y reciclaje de nutrientes.</span></div>
-      <div class="model-note"><strong id="model3Title">Limitación</strong><br><span id="model3">Este es un modelo educativo simplificado. No reemplaza datos de campo, calibración local ni series temporales reales.</span></div>
-    </div>
-  </section>
-
-  <script>
-    const base = {
-      producer: 85,
-      grazer: 55,
-      fish: 50,
-      bird: 32,
-      apex: 18,
-      decomposer: 58
-    };
-
-    let state = { ...base };
-    let abiotic = { oxygen: 78, detritus: 18, toxin: 12, turbidity: 16, recycling: 70 };
-    let running = false;
-    let timer = null;
-    let tickCount = 0;
-    let stressMemory = { noLight: 0, noWater: 0 };
-
-    const $ = id => document.getElementById(id);
-    const clamp = (v, min = 0, max = 100) => Math.max(min, Math.min(max, v));
-    const rounded = v => Math.round(clamp(v));
-
-    const i18n = {
-      es: {
-        title: 'Simulador realista de red trófica',
-        subtitle: 'Modelo educativo de un humedal: explora productividad primaria, cascadas tróficas, oxígeno disuelto, detritos, nutrientes y contaminación. Ajusta variables y observa respuestas más cercanas a un ecosistema real.',
-        controlsTitle: 'Panel de investigación', languageLabel: 'Idioma', sunLabel: 'Radiación solar', waterLabel: 'Agua disponible', pollutionLabel: 'Contaminación', nutrientLabel: 'Nutrientes',
-        sunHint: 'Controla la fotosíntesis. Si llega a 0, la producción primaria se detiene.',
-        waterHint: 'Representa nivel de agua y hábitat. En 0 ocurre colapso rápido.',
-        pollutionHint: 'Aumenta toxicidad, turbidez, estrés y pérdida de oxígeno disuelto.',
-        nutrientHint: 'Pocos nutrientes limitan productores; demasiados pueden favorecer eutrofización.',
-        removeLabel: 'Intervención: retirar especie', invasiveLabel: 'Especie invasora', play: 'Iniciar', pause: 'Pausar', reset: 'Reiniciar', event: 'Aplicar disturbio',
-        ecosystemTitle: 'Humedal: red trófica simplificada', bioLabel: 'Integridad biótica', stabLabel: 'Estabilidad', energyLabel: 'Flujo de energía', oxygenLabel: 'Oxígeno disuelto', detritusLabel: 'Detritos', riskLabel: 'Riesgo ecológico',
-        abioticTitle: 'Variables internas', toxinLabel: 'Toxicidad', turbidityLabel: 'Turbidez', recyclingLabel: 'Reciclaje',
-        low: 'Bajo', medium: 'Medio', high: 'Alto', critical: 'Crítico',
-        biomass: 'Biomasa', population: 'Población', activity: 'Actividad',
-        producerName: 'Algas y plantas acuáticas', grazerName: 'Caracoles y zooplancton', fishName: 'Peces pequeños', birdName: 'Garzas', apexName: 'Caimán', decomposerName: 'Hongos y bacterias',
-        producerRole: 'Productores', grazerRole: 'Consumidores primarios', fishRole: 'Consumidores secundarios', birdRole: 'Depredadores intermedios', apexRole: 'Depredador tope', decomposerRole: 'Recicladores',
-        questionsTitle: 'Preguntas para laboratorio',
-        q1Title: 'Predicción', q1: 'Antes de iniciar, baja la radiación solar a 0. ¿Qué organismo debería responder primero y por qué?',
-        q2Title: 'Cascada trófica', q2: 'Retira el depredador tope. Describe qué sucede con garzas, peces pequeños y herbívoros.',
-        q3Title: 'Productividad', q3: 'Compara un escenario con agua alta y otro con agua en 0. ¿Qué cambia en el flujo de energía?',
-        q4Title: 'Contaminación', q4: 'Aumenta la contaminación por encima de 70%. ¿Qué ocurre con el oxígeno disuelto y los peces?',
-        q5Title: 'Invasión biológica', q5: 'Introduce una planta flotante invasora. Explica por qué puede subir la biomasa vegetal y al mismo tiempo aumentar el riesgo.',
-        q6Title: 'Argumentación', q6: '¿Qué intervención generó el mayor colapso? Sustenta con evidencia del simulador.',
-        model1Title: 'Base del modelo', model1: 'La energía entra por productores fotosintéticos; si luz o agua llegan a cero, se detiene la producción primaria y el sistema pierde su fuente principal de energía.',
-        model2Title: 'Cascadas', model2: 'La remoción de una especie no afecta solo a esa especie: modifica depredación, competencia, herbivoría, detritos y reciclaje de nutrientes.',
-        model3Title: 'Limitación', model3: 'Este es un modelo educativo simplificado. No reemplaza datos de campo, calibración local ni series temporales reales.',
-        initialLog: '<strong>Estado inicial:</strong> ajusta variables y presiona “Iniciar”. El modelo responderá con cambios graduales y cascadas tróficas.',
-        runningLog: '<strong>Simulación activa:</strong> observa cambios acumulativos. Las respuestas no son instantáneas: primero reaccionan productores y variables abióticas; luego consumidores y depredadores.',
-        pausedLog: '<strong>Pausado:</strong> modifica una variable y continúa para comparar escenarios.',
-        resetLog: '<strong>Reinicio completo:</strong> el humedal volvió a condiciones de referencia.',
-        noSunLog: '<strong>Colapso por falta de luz:</strong> la fotosíntesis se detiene. Los productores caen rápido y después disminuyen herbívoros, peces y depredadores.',
-        noWaterLog: '<strong>Colapso hídrico:</strong> sin agua no hay medio físico suficiente; cae el oxígeno, desaparece el hábitat acuático y la mortalidad se acelera.',
-        pollutionLog: '<strong>Estrés por contaminación:</strong> aumenta la toxicidad y la turbidez; el oxígeno baja y los peces son de los grupos más sensibles.',
-        hypoxiaLog: '<strong>Hipoxia:</strong> el oxígeno disuelto es bajo. Aumenta la mortalidad de peces y consumidores acuáticos.',
-        eutroLog: '<strong>Eutrofización probable:</strong> demasiados nutrientes elevan biomasa vegetal/turbidez y luego reducen oxígeno por respiración y descomposición.',
-        removeProducer: '<strong>Productores retirados:</strong> se elimina la entrada principal de energía. El colapso de consumidores ocurre en cadena.',
-        removeGrazer: '<strong>Herbívoros retirados:</strong> disminuye la transferencia hacia peces; los productores pueden aumentar por menor consumo, pero la red pierde energía hacia niveles superiores.',
-        removeFish: '<strong>Peces pequeños retirados:</strong> aumentan herbívoros por menor depredación y caen garzas/caimanes por falta de presas.',
-        removeBird: '<strong>Garzas retiradas:</strong> los peces pequeños se liberan de presión depredadora y pueden reducir herbívoros.',
-        removeApex: '<strong>Depredador tope retirado:</strong> se libera el mesodepredador; las garzas aumentan y presionan peces pequeños, generando cascada descendente.',
-        removeDecomposer: '<strong>Descomponedores retirados:</strong> se acumulan detritos, baja el reciclaje de nutrientes y puede disminuir el oxígeno.',
-        plantInvasion: '<strong>Planta flotante invasora:</strong> aumenta cobertura vegetal, pero también sombreado, turbidez y riesgo de hipoxia.',
-        fishInvasion: '<strong>Pez depredador invasor:</strong> reduce peces pequeños/herbívoros nativos y altera el flujo de energía.',
-        eventDrought: '<strong>Disturbio:</strong> sequía súbita. Baja el agua, se reduce oxígeno y se acelera estrés poblacional.',
-        eventRunoff: '<strong>Disturbio:</strong> escorrentía con nutrientes y contaminantes. Puede iniciar eutrofización e hipoxia.',
-        eventRestoration: '<strong>Restauración:</strong> mejora el agua y baja la contaminación; el sistema gana oportunidad de recuperación.',
-        decomposerStarvationLog: '<strong>Inanición de descomponedores:</strong> tras el pulso inicial de materia muerta, se agota el sustrato orgánico disponible. Sin nueva producción primaria, hongos y bacterias también colapsan.'
-      },
-      en: {
-        title: 'Realistic food web simulator',
-        subtitle: 'Educational wetland model: explore primary productivity, trophic cascades, dissolved oxygen, detritus, nutrients, and pollution. Adjust variables and observe more ecosystem-like responses.',
-        controlsTitle: 'Research panel', languageLabel: 'Language', sunLabel: 'Solar radiation', waterLabel: 'Available water', pollutionLabel: 'Pollution', nutrientLabel: 'Nutrients',
-        sunHint: 'Controls photosynthesis. At 0, primary production stops.',
-        waterHint: 'Represents water level and habitat. At 0, rapid collapse occurs.',
-        pollutionHint: 'Increases toxicity, turbidity, stress, and dissolved oxygen loss.',
-        nutrientHint: 'Low nutrients limit producers; excess nutrients can promote eutrophication.',
-        removeLabel: 'Intervention: remove species', invasiveLabel: 'Invasive species', play: 'Start', pause: 'Pause', reset: 'Reset', event: 'Apply disturbance',
-        ecosystemTitle: 'Wetland: simplified food web', bioLabel: 'Biotic integrity', stabLabel: 'Stability', energyLabel: 'Energy flow', oxygenLabel: 'Dissolved oxygen', detritusLabel: 'Detritus', riskLabel: 'Ecological risk',
-        abioticTitle: 'Internal variables', toxinLabel: 'Toxicity', turbidityLabel: 'Turbidity', recyclingLabel: 'Recycling',
-        low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical',
-        biomass: 'Biomass', population: 'Population', activity: 'Activity',
-        producerName: 'Algae and aquatic plants', grazerName: 'Snails and zooplankton', fishName: 'Small fish', birdName: 'Herons', apexName: 'Caiman', decomposerName: 'Fungi and bacteria',
-        producerRole: 'Producers', grazerRole: 'Primary consumers', fishRole: 'Secondary consumers', birdRole: 'Intermediate predators', apexRole: 'Apex predator', decomposerRole: 'Recyclers',
-        questionsTitle: 'Lab questions',
-        q1Title: 'Prediction', q1: 'Before starting, lower solar radiation to 0. Which organism should respond first and why?',
-        q2Title: 'Trophic cascade', q2: 'Remove the apex predator. Describe what happens to herons, small fish, and herbivores.',
-        q3Title: 'Productivity', q3: 'Compare high water with water at 0. What changes in energy flow?',
-        q4Title: 'Pollution', q4: 'Increase pollution above 70%. What happens to dissolved oxygen and fish?',
-        q5Title: 'Biological invasion', q5: 'Introduce a floating invasive plant. Explain why plant biomass may rise while risk also increases.',
-        q6Title: 'Argumentation', q6: 'Which intervention caused the greatest collapse? Support your answer with simulator evidence.',
-        model1Title: 'Model basis', model1: 'Energy enters through photosynthetic producers; if light or water reaches zero, primary production stops and the system loses its main energy source.',
-        model2Title: 'Cascades', model2: 'Removing one species does not affect only that species: it changes predation, competition, herbivory, detritus, and nutrient recycling.',
-        model3Title: 'Limitation', model3: 'This is a simplified educational model. It does not replace field data, local calibration, or real time-series data.',
-        initialLog: '<strong>Initial state:</strong> adjust variables and press “Start”. The model will respond through gradual changes and trophic cascades.',
-        runningLog: '<strong>Simulation active:</strong> observe cumulative changes. Responses are not instantaneous: producers and abiotic variables respond first; consumers and predators follow.',
-        pausedLog: '<strong>Paused:</strong> change a variable and continue to compare scenarios.',
-        resetLog: '<strong>Full reset:</strong> the wetland returned to reference conditions.',
-        noSunLog: '<strong>Light collapse:</strong> photosynthesis stops. Producers fall quickly, then herbivores, fish, and predators decline.',
-        noWaterLog: '<strong>Water collapse:</strong> without water there is not enough physical habitat; oxygen drops, aquatic habitat disappears, and mortality accelerates.',
-        pollutionLog: '<strong>Pollution stress:</strong> toxicity and turbidity rise; oxygen declines and fish are among the more sensitive groups.',
-        hypoxiaLog: '<strong>Hypoxia:</strong> dissolved oxygen is low. Mortality increases in fish and aquatic consumers.',
-        eutroLog: '<strong>Likely eutrophication:</strong> excessive nutrients raise plant biomass/turbidity and later reduce oxygen through respiration and decomposition.',
-        removeProducer: '<strong>Producers removed:</strong> the main energy input is removed. Consumer collapse follows through the chain.',
-        removeGrazer: '<strong>Herbivores removed:</strong> energy transfer to fish declines; producers may rise due to reduced grazing, but upper levels lose energy.',
-        removeFish: '<strong>Small fish removed:</strong> herbivores increase through predator release, while herons/caimans decline from prey shortage.',
-        removeBird: '<strong>Herons removed:</strong> small fish are released from predation and may reduce herbivores.',
-        removeApex: '<strong>Apex predator removed:</strong> mesopredators are released; herons increase and pressure small fish, creating a downward cascade.',
-        removeDecomposer: '<strong>Decomposers removed:</strong> detritus accumulates, nutrient recycling declines, and oxygen may fall.',
-        plantInvasion: '<strong>Floating invasive plant:</strong> plant cover increases, but shading, turbidity, and hypoxia risk also rise.',
-        fishInvasion: '<strong>Invasive predatory fish:</strong> native small fish/herbivores decline and energy flow is altered.',
-        eventDrought: '<strong>Disturbance:</strong> sudden drought. Water drops, oxygen declines, and population stress accelerates.',
-        eventRunoff: '<strong>Disturbance:</strong> nutrient and contaminant runoff. It can initiate eutrophication and hypoxia.',
-        eventRestoration: '<strong>Restoration:</strong> water improves and pollution declines; the system gains recovery potential.',
-        decomposerStarvationLog: '<strong>Decomposer starvation:</strong> after the initial pulse of dead organic matter, available substrate is depleted. Without new primary production, fungi and bacteria also collapse.'
-      }
-    };
-
-    const keysToTranslate = ['title','subtitle','controlsTitle','languageLabel','sunLabel','waterLabel','pollutionLabel','nutrientLabel','sunHint','waterHint','pollutionHint','nutrientHint','removeLabel','invasiveLabel','ecosystemTitle','bioLabel','stabLabel','energyLabel','oxygenLabel','detritusLabel','riskLabel','abioticTitle','toxinLabel','turbidityLabel','recyclingLabel','producerName','grazerName','fishName','birdName','apexName','decomposerName','producerRole','grazerRole','fishRole','birdRole','apexRole','decomposerRole','questionsTitle','q1Title','q1','q2Title','q2','q3Title','q3','q4Title','q4','q5Title','q5','q6Title','q6','model1Title','model1','model2Title','model2','model3Title','model3'];
-
-    function lang() { return $('language').value; }
-    function tr(k) { return i18n[lang()][k]; }
-
-    function translate() {
-      keysToTranslate.forEach(k => { if ($(k)) $(k).textContent = tr(k); });
-      $('playBtn').textContent = running ? tr('pause') : tr('play');
-      $('resetBtn').textContent = tr('reset');
-      $('eventBtn').textContent = tr('event');
-      render();
-    }
-
-    function sliderValues() {
-      return {
-        sun: +$('sun').value,
-        water: +$('water').value,
-        pollution: +$('pollution').value,
-        nutrients: +$('nutrients').value,
-        removed: $('removeSpecies').value,
-        invasive: $('invasive').value
-      };
-    }
-
-    function setLog(message) {
-      $('logBox').innerHTML = message;
-    }
-
-    function updateSliderLabels() {
-      const s = sliderValues();
-      $('sunValue').textContent = `${s.sun}%`;
-      $('waterValue').textContent = `${s.water}%`;
-      $('pollutionValue').textContent = `${s.pollution}%`;
-      $('nutrientValue').textContent = `${s.nutrients}%`;
-    }
-
-    function modelStep() {
-      const s = sliderValues();
-      const light = s.sun / 100;
-      const water = s.water / 100;
-      const removed = s.removed;
-      const invasion = s.invasive;
-
-      let P = state.producer;
-      let G = state.grazer;
-      let F = state.fish;
-      let B = state.bird;
-      let A = state.apex;
-      let D = state.decomposer;
-
-      const severeNoLight = s.sun <= 2;
-      const severeNoWater = s.water <= 2;
-      const excessNutrients = s.nutrients > 75;
-      const lowNutrients = s.nutrients < 20;
-
-      stressMemory.noLight = severeNoLight ? stressMemory.noLight + 1 : 0;
-      stressMemory.noWater = severeNoWater ? stressMemory.noWater + 1 : 0;
-
-      abiotic.toxin = clamp(s.pollution * 0.85 + (invasion === 'predatoryFish' ? 8 : 0));
-      abiotic.turbidity = clamp(s.pollution * 0.45 + Math.max(0, s.nutrients - 55) * 0.65 + (invasion === 'floatingPlant' ? 24 : 0) + abiotic.detritus * 0.12);
-      abiotic.recycling = removed === 'decomposer' ? clamp(D * 0.35) : clamp(D * 1.2 - abiotic.toxin * 0.25);
-
-      const effectiveLight = clamp(s.sun - abiotic.turbidity * 0.42) / 100;
-      const nutrientFactor = clamp((s.nutrients * 0.65 + abiotic.recycling * 0.35), 1, 100) / 100;
-      const habitatFactor = water;
-      const toxicity = abiotic.toxin / 100;
-
-      let plantGrowth = P * (0.105 * effectiveLight * habitatFactor * nutrientFactor * (1 - 0.65 * toxicity));
-      let plantRespiration = P * (0.024 + toxicity * 0.06);
-      let grazing = 0.0019 * P * G;
-
-      if (lowNutrients) plantGrowth *= 0.35;
-      if (excessNutrients && light > 0.25 && water > 0.3) plantGrowth *= 1.18;
-      if (invasion === 'floatingPlant') {
-        plantGrowth += 2.1;
-        plantRespiration += P * 0.025;
-      }
-      if (severeNoLight) plantRespiration += P * 0.34;
-      if (severeNoWater) plantRespiration += P * 0.46;
-
-      P += plantGrowth - plantRespiration - grazing;
-
-      const predFG = 0.0021 * F * G;
-      const predBF = 0.0017 * B * F;
-      const predAF = 0.0009 * A * F;
-      const predAB = 0.00065 * A * B;
-      const grazerFood = grazing * 0.38;
-      const fishFood = predFG * 0.34;
-      const birdFood = predBF * 0.28;
-      const apexFood = (predAF + predAB) * 0.25;
-
-      let oxygenStress = abiotic.oxygen < 35 ? (35 - abiotic.oxygen) / 35 : 0;
-      let waterStress = s.water < 25 ? (25 - s.water) / 25 : 0;
-      let producerScarcity = P < 18 ? (18 - P) / 18 : 0;
-
-      G += grazerFood - predFG - G * (0.036 + toxicity * 0.075 + oxygenStress * 0.09 + waterStress * 0.15 + producerScarcity * 0.13);
-      F += fishFood - predBF - predAF - F * (0.034 + toxicity * 0.105 + oxygenStress * 0.20 + waterStress * 0.17);
-      B += birdFood - predAB - B * (0.026 + toxicity * 0.045 + waterStress * 0.05);
-      A += apexFood - A * (0.020 + toxicity * 0.035 + waterStress * 0.035);
-
-      if (invasion === 'predatoryFish') {
-        F -= F * 0.08;
-        G -= G * 0.05;
-        B -= B * 0.03;
-        A += 0.4;
-      }
-
-      if (removed === 'producer') P = 0;
-      if (removed === 'grazer') G = 0;
-      if (removed === 'fish') F = 0;
-      if (removed === 'bird') B = 0;
-      if (removed === 'apex') A = 0;
-      if (removed === 'decomposer') D = 0;
-
-      if (removed === 'grazer') P += 1.6;
-      if (removed === 'fish') G += 1.2;
-      if (removed === 'bird') F += 1.3;
-      if (removed === 'apex') {
-        B += 1.4;
-        F -= F * 0.035;
-      }
-
-      const mortality = Math.max(0, state.producer - P) + Math.max(0, state.grazer - G) + Math.max(0, state.fish - F) + Math.max(0, state.bird - B) + Math.max(0, state.apex - A);
-      abiotic.detritus = clamp(abiotic.detritus + mortality * 0.10 + P * 0.008 + s.pollution * 0.025 - D * 0.045);
-
-      if (removed !== 'decomposer') {
-        const substrateAvailable = abiotic.detritus + mortality * 0.35 + P * 0.04;
-        const substrateLimit = clamp(substrateAvailable / 38, 0, 1);
-        const starvationPressure = substrateLimit < 0.38 ? (0.38 - substrateLimit) * 0.26 : 0;
-        const prolongedCollapse =
-          (severeNoLight ? Math.min(stressMemory.noLight, 18) * 0.018 : 0) +
-          (severeNoWater ? Math.min(stressMemory.noWater, 18) * 0.026 : 0);
-        const decomposerGrowth = abiotic.detritus * 0.055 * substrateLimit;
-        const decomposerLoss = D * (0.032 + toxicity * 0.055 + starvationPressure + prolongedCollapse + (severeNoWater ? 0.20 : 0));
-        D += decomposerGrowth - decomposerLoss;
-
-        if (severeNoLight && stressMemory.noLight > 8 && abiotic.detritus < 25) D *= 0.82;
-        if (severeNoLight && stressMemory.noLight > 15) D *= 0.90;
-      }
-
-      const oxygenProduction = P * effectiveLight * 0.45;
-      const oxygenDemand = G * 0.030 + F * 0.060 + B * 0.018 + A * 0.015 + D * 0.055 + abiotic.detritus * 0.070;
-      const reaeration = s.water * 0.22;
-      abiotic.oxygen = clamp(16 + oxygenProduction + reaeration - oxygenDemand - s.pollution * 0.35 - (excessNutrients ? 12 : 0) - (severeNoWater ? 45 : 0));
-
-      if (severeNoWater) {
-        P *= 0.55; G *= 0.62; F *= 0.50; B *= 0.82; A *= 0.86; D *= 0.72;
-      }
-      if (severeNoLight) {
-        P *= 0.62;
-        if (P < 25) { G *= 0.78; F *= 0.84; B *= 0.90; A *= 0.92; }
-      }
-      if (abiotic.oxygen < 18) {
-        G *= 0.88; F *= 0.72; B *= 0.92; A *= 0.94;
-      }
-      if (s.pollution > 80) {
-        P *= 0.88; G *= 0.82; F *= 0.76; B *= 0.88; A *= 0.90; D *= 0.84;
-      }
-
-      state = {
-        producer: clamp(P),
-        grazer: clamp(G),
-        fish: clamp(F),
-        bird: clamp(B),
-        apex: clamp(A),
-        decomposer: clamp(D)
-      };
-
-      chooseLog();
-      render();
-    }
-
-    function chooseLog() {
-      const s = sliderValues();
-      if ((s.sun <= 2 || s.water <= 2) && state.decomposer < 24 && tickCount > 8) return setLog(tr('decomposerStarvationLog'));
-      if (s.water <= 2) return setLog(tr('noWaterLog'));
-      if (s.sun <= 2) return setLog(tr('noSunLog'));
-      if (s.pollution > 70) return setLog(tr('pollutionLog'));
-      if (abiotic.oxygen < 30) return setLog(tr('hypoxiaLog'));
-      if (s.nutrients > 78 && s.pollution > 25) return setLog(tr('eutroLog'));
-      if (s.invasive === 'floatingPlant') return setLog(tr('plantInvasion'));
-      if (s.invasive === 'predatoryFish') return setLog(tr('fishInvasion'));
-
-      const removalLogs = {
-        producer: 'removeProducer',
-        grazer: 'removeGrazer',
-        fish: 'removeFish',
-        bird: 'removeBird',
-        apex: 'removeApex',
-        decomposer: 'removeDecomposer'
-      };
-
-      if (removalLogs[s.removed]) return setLog(tr(removalLogs[s.removed]));
-      setLog(tr('runningLog'));
-    }
-
-    function render() {
-      updateSliderLabels();
-
-      const labelType = {
-        producer: tr('biomass'),
-        grazer: tr('population'),
-        fish: tr('population'),
-        bird: tr('population'),
-        apex: tr('population'),
-        decomposer: tr('activity')
-      };
-
-      Object.keys(state).forEach(id => {
-        const card = document.querySelector(`[data-id="${id}"]`);
-        const value = rounded(state[id]);
-        card.querySelector('.fill').style.width = `${value}%`;
-        card.querySelector('.pop').textContent = `${labelType[id]}: ${value}`;
-        card.classList.toggle('dead', value < 5);
-        card.classList.toggle('low', value >= 5 && value < 28);
-        card.classList.toggle('boost', value > 78);
-      });
-
-      const vals = Object.values(state);
-      const living = vals.filter(v => v >= 5).length;
-      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-      const imbalance = Math.max(...vals) - Math.min(...vals);
-      const s = sliderValues();
-
-      const energy = clamp((state.producer * 0.46 + state.grazer * 0.24 + state.fish * 0.16 + state.bird * 0.08 + state.apex * 0.06) - s.pollution * 0.25);
-      const stability = clamp(avg - imbalance * 0.20 + abiotic.oxygen * 0.22 - abiotic.toxin * 0.18 - abiotic.detritus * 0.08);
-      const biotic = clamp((living / 6) * 100 + avg * 0.25 - abiotic.toxin * 0.18);
-      const riskScore = clamp(100 - stability + abiotic.toxin * 0.35 + (100 - abiotic.oxygen) * 0.35 + (6 - living) * 10 + abiotic.detritus * 0.12);
-
-      $('biodiversity').textContent = rounded(biotic);
-      $('stability').textContent = rounded(stability);
-      $('energy').textContent = rounded(energy);
-      $('oxygenMetric').textContent = rounded(abiotic.oxygen);
-      $('detritusMetric').textContent = rounded(abiotic.detritus);
-
-      let risk = tr('low');
-      if (riskScore > 82) risk = tr('critical');
-      else if (riskScore > 62) risk = tr('high');
-      else if (riskScore > 38) risk = tr('medium');
-      $('risk').textContent = risk;
-
-      setMetricClass('mOxygen', abiotic.oxygen < 30, abiotic.oxygen < 50);
-      setMetricClass('mRisk', riskScore > 62, riskScore > 38);
-      setMetricClass('mStability', stability < 35, stability < 55);
-      setMetricClass('mEnergy', energy < 35, energy < 55);
-      setMetricClass('mDetritus', abiotic.detritus > 70, abiotic.detritus > 45);
-      setMetricClass('mBio', biotic < 35, biotic < 55);
-
-      const stage = $('stage');
-      stage.classList.toggle('dark', s.sun < 20 || abiotic.turbidity > 70);
-      stage.classList.toggle('toxic', s.pollution > 55 || abiotic.toxin > 55);
-      stage.classList.toggle('collapse', riskScore > 82);
-
-      updateInternalBars();
-    }
-
-    function setMetricClass(id, danger, warn) {
-      const el = $(id);
-      el.classList.toggle('danger', danger);
-      el.classList.toggle('warn', !danger && warn);
-    }
-
-    function updateInternalBars() {
-      const values = {
-        toxin: rounded(abiotic.toxin),
-        turbidity: rounded(abiotic.turbidity),
-        recycling: rounded(abiotic.recycling)
-      };
-
-      Object.keys(values).forEach(k => {
-        $(`${k}Value`).textContent = values[k];
-        $(`${k}Bar`).style.width = `${values[k]}%`;
-      });
-    }
-
-    function playPause() {
-      running = !running;
-      $('playBtn').textContent = running ? tr('pause') : tr('play');
-
-      if (running) {
-        setLog(tr('runningLog'));
-        timer = setInterval(() => {
-          tickCount += 1;
-          modelStep();
-        }, 950);
-      } else {
-        clearInterval(timer);
-        setLog(tr('pausedLog'));
-      }
-    }
-
-    function reset() {
-      running = false;
-      clearInterval(timer);
-      tickCount = 0;
-      stressMemory = { noLight: 0, noWater: 0 };
-      state = { ...base };
-      abiotic = { oxygen: 78, detritus: 18, toxin: 12, turbidity: 16, recycling: 70 };
-
-      $('sun').value = 80;
-      $('water').value = 78;
-      $('pollution').value = 12;
-      $('nutrients').value = 55;
-      $('removeSpecies').value = 'none';
-      $('invasive').value = 'none';
-
-      $('playBtn').textContent = tr('play');
-      setLog(tr('resetLog'));
-      render();
-    }
-
-    function applyDisturbance() {
-      const options = ['drought', 'runoff', 'restoration'];
-      const event = options[Math.floor(Math.random() * options.length)];
-
-      if (event === 'drought') {
-        $('water').value = Math.max(0, +$('water').value - 32);
-        abiotic.oxygen = clamp(abiotic.oxygen - 18);
-        setLog(tr('eventDrought'));
-      }
-
-      if (event === 'runoff') {
-        $('pollution').value = Math.min(100, +$('pollution').value + 26);
-        $('nutrients').value = Math.min(100, +$('nutrients').value + 24);
-        abiotic.detritus = clamp(abiotic.detritus + 14);
-        setLog(tr('eventRunoff'));
-      }
-
-      if (event === 'restoration') {
-        $('water').value = Math.min(100, +$('water').value + 18);
-        $('pollution').value = Math.max(0, +$('pollution').value - 22);
-        abiotic.detritus = clamp(abiotic.detritus - 12);
-        setLog(tr('eventRestoration'));
-      }
-
-      modelStep();
-    }
-
-    function previewChange() {
-      chooseLog();
-      render();
-    }
-
-    ['sun', 'water', 'pollution', 'nutrients', 'removeSpecies', 'invasive'].forEach(id => {
-      $(id).addEventListener('input', previewChange);
-      $(id).addEventListener('change', previewChange);
-    });
-
-    $('language').addEventListener('change', translate);
-    $('playBtn').addEventListener('click', playPause);
-    $('resetBtn').addEventListener('click', reset);
-    $('eventBtn').addEventListener('click', applyDisturbance);
-
-    translate();
-    setLog(tr('initialLog'));
-    render();
-  </script>
+<header>
+<h1 id="title"></h1>
+<p id="subtitle"></p>
+</header>
+
+<main class="layout">
+<aside class="panel">
+<h2 id="panelTitle"></h2>
+<button id="langBtn" class="lang">English</button>
+
+<label><span id="sunLabel"></span><span class="value" id="sunValue">78%</span></label>
+<input id="sun" type="range" min="0" max="100" value="78"/>
+<div class="hint" id="sunHint"></div>
+
+<label><span id="waterLabel"></span><span class="value" id="waterValue">78%</span></label>
+<input id="water" type="range" min="0" max="100" value="78"/>
+<div class="hint" id="waterHint"></div>
+
+<label><span id="pollutionLabel"></span><span class="value" id="pollutionValue">8%</span></label>
+<input id="pollution" type="range" min="0" max="100" value="8"/>
+<div class="hint" id="pollutionHint"></div>
+
+<label><span id="nutrientLabel"></span><span class="value" id="nutrientValue">55%</span></label>
+<input id="nutrients" type="range" min="0" max="100" value="55"/>
+<div class="hint" id="nutrientHint"></div>
+
+<label id="removeLabel"></label>
+<select id="removeSpecies">
+<option value="none" id="removeNone"></option>
+<option value="grazer" id="removeGrazer"></option>
+<option value="fish" id="removeFish"></option>
+<option value="bird" id="removeBird"></option>
+<option value="apex" id="removeApex"></option>
+</select>
+
+<label id="invasiveLabel"></label>
+<select id="invasive">
+<option value="none" id="invasiveNone"></option>
+<option value="floatingPlant" id="invasivePlant"></option>
+<option value="predatoryFish" id="invasiveFish"></option>
+</select>
+
+<div class="button-row">
+<button id="playBtn"></button>
+<button class="secondary" id="resetBtn"></button>
+</div>
+<button class="warning" id="eventBtn"></button>
+</aside>
+
+<section class="ecosystem">
+<h2 id="ecosystemTitle"></h2>
+<div class="metrics">
+<div class="metric" id="mBio"><strong id="biodiversity">98</strong><span id="bioLabel"></span></div>
+<div class="metric" id="mStability"><strong id="stability">96</strong><span id="stabilityLabel"></span></div>
+<div class="metric" id="mEnergy"><strong id="energy">60</strong><span id="energyLabel"></span></div>
+<div class="metric" id="mOxygen"><strong id="oxygenMetric">76</strong><span id="oxygenLabel"></span></div>
+<div class="metric" id="mDetritus"><strong id="detritusMetric">18</strong><span id="detritusLabel"></span></div>
+<div class="metric" id="mRisk"><strong id="risk">Bajo</strong><span id="riskLabel"></span></div>
+</div>
+
+<div class="stage" id="stage">
+<svg viewBox="0 0 1000 560" preserveAspectRatio="none">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#6fa891"/></marker></defs>
+<line x1="170" y1="390" x2="330" y2="315" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)"/>
+<line x1="405" y1="315" x2="540" y2="390" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)"/>
+<line x1="610" y1="385" x2="700" y2="255" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)"/>
+<line x1="760" y1="245" x2="850" y2="155" stroke="#6fa891" stroke-width="4" marker-end="url(#arrow)"/>
+<line x1="835" y1="150" x2="475" y2="115" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
+<line x1="465" y1="160" x2="180" y2="390" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
+<line x1="615" y1="390" x2="460" y2="140" stroke="#6fa891" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
+</svg>
+<div class="species producer" data-id="producer"><span class="emoji">🌿</span><h3 id="producerName"></h3><div class="role" id="producerRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+<div class="species grazer" data-id="grazer"><span class="emoji">🐌</span><h3 id="grazerName"></h3><div class="role" id="grazerRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+<div class="species fish" data-id="fish"><span class="emoji">🐟</span><h3 id="fishName"></h3><div class="role" id="fishRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+<div class="species bird" data-id="bird"><span class="emoji">🪶</span><h3 id="birdName"></h3><div class="role" id="birdRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+<div class="species apex" data-id="apex"><span class="emoji">🐊</span><h3 id="apexName"></h3><div class="role" id="apexRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+<div class="species decomposer" data-id="decomposer"><span class="emoji">🍄</span><h3 id="decomposerName"></h3><div class="role" id="decomposerRole"></div><div class="bar"><div class="fill"></div></div><div class="pop"></div></div>
+</div>
+
+<div class="log">
+<div class="log-box" id="logBox"></div>
+<div class="mini-box">
+<strong id="internalTitle"></strong>
+<div class="bars">
+<div class="abiotic-row"><span id="toxinLabel"></span><div class="track"><div id="toxinBar"></div></div><span id="toxinValue">0</span></div>
+<div class="abiotic-row"><span id="turbidityLabel"></span><div class="track"><div id="turbidityBar"></div></div><span id="turbidityValue">0</span></div>
+<div class="abiotic-row"><span id="recyclingLabel"></span><div class="track"><div id="recyclingBar"></div></div><span id="recyclingValue">0</span></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+<section class="guide">
+<h2 id="questionsTitle"></h2>
+<div class="question-grid">
+<div class="qcard"><strong id="q1Title"></strong><br><span id="q1Text"></span></div>
+<div class="qcard"><strong id="q2Title"></strong><br><span id="q2Text"></span></div>
+<div class="qcard"><strong id="q3Title"></strong><br><span id="q3Text"></span></div>
+<div class="qcard"><strong id="q4Title"></strong><br><span id="q4Text"></span></div>
+<div class="qcard"><strong id="q5Title"></strong><br><span id="q5Text"></span></div>
+<div class="qcard"><strong id="q6Title"></strong><br><span id="q6Text"></span></div>
+</div>
+<div class="model-grid">
+<div class="model-note"><strong id="m1Title"></strong><br><span id="m1Text"></span></div>
+<div class="model-note"><strong id="m2Title"></strong><br><span id="m2Text"></span></div>
+<div class="model-note"><strong id="m3Title"></strong><br><span id="m3Text"></span></div>
+</div>
+</section>
+
+<script>
+const CONTROL={sliders:{sun:78,water:78,pollution:8,nutrients:55},state:{producer:70,grazer:50,fish:36,bird:24,apex:14,decomposer:45},abiotic:{oxygen:76,detritus:18,toxin:8,turbidity:14,recycling:68}};
+let state={...CONTROL.state}, abiotic={...CONTROL.abiotic}, running=false, timer=null, tickCount=0, currentLang='es';
+const $=id=>document.getElementById(id), clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,v)), rounded=v=>Math.round(clamp(v));
+
+const I18N={
+es:{
+langBtn:'English',title:'Simulador realista de red trófica',subtitle:'Modelo educativo de un humedal: inicia con un grupo control estable y permite modificar variables para observar cambios en productividad primaria, consumidores, oxígeno, detritos y eutrofización.',
+panelTitle:'Panel de investigación',sunLabel:'Radiación solar',sunHint:'Controla la fotosíntesis. En el grupo control está en 78%.',waterLabel:'Agua disponible',waterHint:'Representa nivel de agua y hábitat. En el grupo control está en 78%.',pollutionLabel:'Contaminación',pollutionHint:'Debe permanecer baja en un ecosistema balanceado.',nutrientLabel:'Nutrientes',nutrientHint:'El rango 45–65% sostiene productores sin provocar eutrofización.',removeLabel:'Intervención: retirar especie',invasiveLabel:'Especie invasora',play:'Iniciar',pause:'Pausar',reset:'Grupo control',event:'Aplicar disturbio',
+ecosystemTitle:'Humedal: grupo control estable',bioLabel:'Integridad biótica',stabilityLabel:'Estabilidad',energyLabel:'Flujo de energía',oxygenLabel:'Oxígeno disuelto',detritusLabel:'Detritos',riskLabel:'Riesgo ecológico',internalTitle:'Variables internas',toxinLabel:'Toxicidad',turbidityLabel:'Turbidez',recyclingLabel:'Reciclaje',
+low:'Bajo',medium:'Medio',high:'Alto',critical:'Crítico',biomass:'Biomasa',population:'Población',activity:'Actividad',
+producerName:'Algas y plantas acuáticas',producerRole:'Productores',grazerName:'Caracoles y zooplancton',grazerRole:'Consumidores primarios',fishName:'Peces pequeños',fishRole:'Consumidores secundarios',birdName:'Garzas',birdRole:'Depredadores intermedios',apexName:'Caimán',apexRole:'Depredador tope',decomposerName:'Hongos y bacterias',decomposerRole:'Recicladores',
+removeNone:'Ninguna',removeGrazer:'Herbívoros: caracoles/zooplancton',removeFish:'Peces pequeños',removeBird:'Garzas',removeApex:'Depredador tope: caimán',invasiveNone:'No introducir',invasivePlant:'Planta flotante invasora',invasiveFish:'Pez invasor depredador',
+questionsTitle:'Preguntas para laboratorio',q1Title:'Grupo control',q1Text:'Observa el grupo control durante 30 segundos. ¿Las poblaciones se mantienen estables?',q2Title:'Productores',q2Text:'Aumenta productores indirectamente subiendo luz o nutrientes. ¿Cuándo se fortalece la red y cuándo aparece eutrofización?',q3Title:'Cascada trófica',q3Text:'Retira herbívoros, peces pequeños, garzas o caimán y observa: ¿qué pasa con su presa, con su depredador y con los niveles siguientes?',q4Title:'Contaminación',q4Text:'Aumenta la contaminación por encima de 70%. ¿Qué ocurre con oxígeno, peces y descomponedores?',q5Title:'Eutrofización',q5Text:'Lleva los productores por encima de 70%. Explica por qué aumenta el detrito y cae el oxígeno.',q6Title:'Argumentación',q6Text:'Compara el grupo control con un escenario alterado usando evidencia numérica.',
+m1Title:'Grupo control',m1Text:'El simulador inicia siempre en un escenario ideal y estable. Si no modificas variables, las poblaciones deben mantenerse.',m2Title:'Productores al 70%',m2Text:'Cerca de 70% de productores se considera el punto adecuado para sostener la web trófica.',m3Title:'Eutrofización',m3Text:'Más de 70% de productores puede indicar exceso de biomasa: suben detritos y descomponedores, baja el oxígeno y luego caen consumidores.',
+logControl:'<strong>Grupo control:</strong> escenario ideal estable. Las poblaciones se mantienen para servir como comparación.',logControlApplied:'<strong>Grupo control:</strong> escenario ideal aplicado. Productores cerca de 70%, agua y luz suficientes, nutrientes moderados y contaminación baja. Si no cambias variables, la red debe mantenerse estable.',logPaused:'<strong>Pausado:</strong> puedes modificar variables y continuar.',logActive:'<strong>Simulación activa:</strong> compara este escenario con el grupo control.',logWater:'<strong>Colapso hídrico:</strong> sin agua suficiente desaparece el hábitat acuático, baja el oxígeno y aumenta la mortalidad.',logLight:'<strong>Colapso por falta de luz:</strong> la fotosíntesis se detiene. Primero caen productores, luego consumidores y finalmente descomponedores cuando se agota el sustrato.',logPollution:'<strong>Contaminación alta:</strong> aumenta toxicidad, turbidez y estrés; bajan oxígeno y poblaciones acuáticas.',logEutrophy:'<strong>Eutrofización:</strong> los productores superan el 70%. Al principio hay más biomasa, pero luego suben detritos y descomponedores, baja el oxígeno y caen consumidores.',logGrazer:'<strong>Consumidores primarios retirados:</strong> los productores aumentan por menor herbivoría, pero peces, garzas y caimán disminuyen por falta de transferencia de energía.',logFish:'<strong>Peces retirados:</strong> su presa aumenta: caracoles/zooplancton suben por liberación de depredación. Sus depredadores, garzas y caimán, disminuyen por falta de alimento.',logBird:'<strong>Garzas retiradas:</strong> su presa aumenta: peces pequeños suben. El caimán disminuye porque pierde parte de su recurso alimentario.',logApex:'<strong>Depredador tope retirado:</strong> se liberan las garzas, aumentan y presionan a los peces pequeños; luego cambian los consumidores primarios y productores.',logInvasivePlant:'<strong>Planta flotante invasora:</strong> sube biomasa vegetal y sombreado; aumenta riesgo de eutrofización.',logInvasiveFish:'<strong>Pez invasor depredador:</strong> reduce peces/herbívoros nativos y altera el flujo de energía.',logDrought:'<strong>Disturbio:</strong> sequía súbita.',logRunoff:'<strong>Disturbio:</strong> entrada de nutrientes y contaminantes.',logRestoration:'<strong>Restauración:</strong> mejora del agua y reducción de contaminación.'
+},
+en:{
+langBtn:'Español',title:'Realistic Food Web Simulator',subtitle:'Educational wetland model: it starts with a stable control group and allows variables to be changed to observe shifts in primary productivity, consumers, oxygen, detritus, and eutrophication.',
+panelTitle:'Research Panel',sunLabel:'Solar radiation',sunHint:'Controls photosynthesis. In the control group, it is set at 78%.',waterLabel:'Available water',waterHint:'Represents water level and habitat. In the control group, it is set at 78%.',pollutionLabel:'Pollution',pollutionHint:'It should remain low in a balanced ecosystem.',nutrientLabel:'Nutrients',nutrientHint:'The 45–65% range supports producers without causing eutrophication.',removeLabel:'Intervention: remove species',invasiveLabel:'Invasive species',play:'Start',pause:'Pause',reset:'Control group',event:'Apply disturbance',
+ecosystemTitle:'Wetland: stable control group',bioLabel:'Biotic integrity',stabilityLabel:'Stability',energyLabel:'Energy flow',oxygenLabel:'Dissolved oxygen',detritusLabel:'Detritus',riskLabel:'Ecological risk',internalTitle:'Internal variables',toxinLabel:'Toxicity',turbidityLabel:'Turbidity',recyclingLabel:'Recycling',
+low:'Low',medium:'Medium',high:'High',critical:'Critical',biomass:'Biomass',population:'Population',activity:'Activity',
+producerName:'Algae and aquatic plants',producerRole:'Producers',grazerName:'Snails and zooplankton',grazerRole:'Primary consumers',fishName:'Small fish',fishRole:'Secondary consumers',birdName:'Herons',birdRole:'Intermediate predators',apexName:'Caiman',apexRole:'Apex predator',decomposerName:'Fungi and bacteria',decomposerRole:'Recyclers',
+removeNone:'None',removeGrazer:'Herbivores: snails/zooplankton',removeFish:'Small fish',removeBird:'Herons',removeApex:'Apex predator: caiman',invasiveNone:'Do not introduce',invasivePlant:'Invasive floating plant',invasiveFish:'Invasive predatory fish',
+questionsTitle:'Lab questions',q1Title:'Control group',q1Text:'Observe the control group for 30 seconds. Do the populations remain stable?',q2Title:'Producers',q2Text:'Increase producers indirectly by raising light or nutrients. When does the web become stronger, and when does eutrophication appear?',q3Title:'Trophic cascade',q3Text:'Remove herbivores, small fish, herons, or caiman and observe: what happens to its prey, its predator, and the next trophic levels?',q4Title:'Pollution',q4Text:'Increase pollution above 70%. What happens to oxygen, fish, and decomposers?',q5Title:'Eutrophication',q5Text:'Push producers above 70%. Explain why detritus increases and oxygen drops.',q6Title:'Argumentation',q6Text:'Compare the control group with an altered scenario using numerical evidence.',
+m1Title:'Control group',m1Text:'The simulator always starts in an ideal and stable scenario. If you do not change variables, populations should remain stable.',m2Title:'Producers at 70%',m2Text:'Around 70% producers is considered the appropriate point to support the food web.',m3Title:'Eutrophication',m3Text:'More than 70% producers may indicate excess biomass: detritus and decomposers rise, oxygen drops, and consumers decline.',
+logControl:'<strong>Control group:</strong> stable ideal scenario. Populations remain stable and serve as a comparison.',logControlApplied:'<strong>Control group:</strong> ideal scenario applied. Producers are near 70%, with enough water and light, moderate nutrients, and low pollution. If you do not change variables, the web should remain stable.',logPaused:'<strong>Paused:</strong> you can change variables and continue.',logActive:'<strong>Simulation active:</strong> compare this scenario with the control group.',logWater:'<strong>Water collapse:</strong> without enough water, aquatic habitat disappears, oxygen drops, and mortality increases.',logLight:'<strong>Light collapse:</strong> photosynthesis stops. Producers fall first, then consumers, and decomposers eventually decline when substrate is exhausted.',logPollution:'<strong>High pollution:</strong> toxicity, turbidity, and stress increase; oxygen and aquatic populations decline.',logEutrophy:'<strong>Eutrophication:</strong> producers exceed 70%. At first biomass rises, but then detritus and decomposers increase, oxygen drops, and consumers decline.',logGrazer:'<strong>Primary consumers removed:</strong> producers increase due to reduced herbivory, but fish, herons, and caiman decline because energy transfer is reduced.',logFish:'<strong>Fish removed:</strong> their prey increases: snails/zooplankton rise due to predator release. Their predators, herons and caiman, decline because food is limited.',logBird:'<strong>Herons removed:</strong> their prey increases: small fish rise. The caiman declines because it loses part of its food source.',logApex:'<strong>Apex predator removed:</strong> herons are released, increase, and pressure small fish; then primary consumers and producers change.',logInvasivePlant:'<strong>Invasive floating plant:</strong> plant biomass and shading increase; eutrophication risk rises.',logInvasiveFish:'<strong>Invasive predatory fish:</strong> native fish/herbivores decline and energy flow is altered.',logDrought:'<strong>Disturbance:</strong> sudden drought.',logRunoff:'<strong>Disturbance:</strong> nutrient and contaminant input.',logRestoration:'<strong>Restoration:</strong> water improves and pollution declines.'
+}
+};
+function T(k){return I18N[currentLang][k]||k}
+function sliders(){return {sun:+$('sun').value,water:+$('water').value,pollution:+$('pollution').value,nutrients:+$('nutrients').value,removed:$('removeSpecies').value,invasive:$('invasive').value}}
+function isControlScenario(){const s=sliders();return s.sun===78&&s.water===78&&s.pollution===8&&s.nutrients===55&&s.removed==='none'&&s.invasive==='none'}
+function setLog(m){$('logBox').innerHTML=m}
+function applyLanguage(){
+document.documentElement.lang=currentLang;
+['title','subtitle','panelTitle','sunLabel','sunHint','waterLabel','waterHint','pollutionLabel','pollutionHint','nutrientLabel','nutrientHint','removeLabel','invasiveLabel','ecosystemTitle','bioLabel','stabilityLabel','energyLabel','oxygenLabel','detritusLabel','riskLabel','internalTitle','toxinLabel','turbidityLabel','recyclingLabel','producerName','producerRole','grazerName','grazerRole','fishName','fishRole','birdName','birdRole','apexName','apexRole','decomposerName','decomposerRole','removeNone','removeGrazer','removeFish','removeBird','removeApex','invasiveNone','invasivePlant','invasiveFish','questionsTitle','q1Title','q1Text','q2Title','q2Text','q3Title','q3Text','q4Title','q4Text','q5Title','q5Text','q6Title','q6Text','m1Title','m1Text','m2Title','m2Text','m3Title','m3Text'].forEach(id=>{if($(id))$(id).textContent=T(id)});
+$('langBtn').textContent=T('langBtn');$('playBtn').textContent=running?T('pause'):T('play');$('resetBtn').textContent=T('reset');$('eventBtn').textContent=T('event');chooseLog();render();
+}
+function applyControl(){running=false;clearInterval(timer);tickCount=0;$('sun').value=78;$('water').value=78;$('pollution').value=8;$('nutrients').value=55;$('removeSpecies').value='none';$('invasive').value='none';state={...CONTROL.state};abiotic={...CONTROL.abiotic};$('playBtn').textContent=T('play');setLog(T('logControlApplied'));render()}
+function calculateTargets(){
+const s=sliders();if(isControlScenario())return {state:{...CONTROL.state},abiotic:{...CONTROL.abiotic},eutrophy:0,quality:1};
+const severeNoLight=s.sun<=2,severeNoWater=s.water<=2;
+const lightQ=Math.pow(clamp(s.sun/78,0,1.35),.85),waterQ=Math.pow(clamp(s.water/78,0,1.25),.95),pollutionQ=clamp(1-s.pollution/100,0,1),nutrientQ=s.nutrients<=55?clamp(s.nutrients/55,0,1):1+Math.min((s.nutrients-55)*.012,.45);
+let producerTarget=70*lightQ*waterQ*nutrientQ*Math.pow(pollutionQ,.72);if(s.nutrients>70&&s.sun>40&&s.water>40)producerTarget+=(s.nutrients-70)*.9;if(s.invasive==='floatingPlant')producerTarget+=18;if(severeNoLight||severeNoWater)producerTarget=0;producerTarget=clamp(producerTarget,0,96);
+const eutrophy=clamp(Math.max(0,producerTarget-70)/30+Math.max(0,s.nutrients-70)/55+(s.invasive==='floatingPlant'?.35:0),0,1);
+const toxin=clamp(s.pollution*.9+(s.invasive==='predatoryFish'?8:0)),turbidity=clamp(s.pollution*.42+Math.max(0,s.nutrients-55)*.7+Math.max(0,producerTarget-70)*.9+(s.invasive==='floatingPlant'?22:0)+abiotic.detritus*.08);
+const oxygen=clamp(76+Math.min(producerTarget,70)*.10+s.water*.11-s.pollution*.38-abiotic.detritus*.11-eutrophy*42-(severeNoWater?55:0));
+const oxygenQ=clamp(oxygen/76,0,1.1),quality=clamp(waterQ*pollutionQ*oxygenQ*(1-eutrophy*.72),0,1.12);
+const foodBase=producerTarget<=70?producerTarget:Math.max(15,70-(producerTarget-70)*.45);
+let grazerTarget=clamp(foodBase*.72*quality,0,85),fishTarget=clamp(grazerTarget*.72*quality,0,70),birdTarget=clamp(fishTarget*.62*quality+2,0,50),apexTarget=clamp((birdTarget*.42+fishTarget*.10)*quality+2,0,34),decomposerTarget=clamp(45+eutrophy*34+Math.max(0,abiotic.detritus-18)*.6-(producerTarget<12&&abiotic.detritus<16?30:0)-(severeNoWater?35:0));
+if(s.invasive==='predatoryFish'){fishTarget*=.55;grazerTarget*=.82;birdTarget*=.75;apexTarget+=3}
+if(s.removed==='grazer'){grazerTarget=0;producerTarget=clamp(producerTarget+22,0,96);fishTarget*=.22;birdTarget*=.38;apexTarget*=.45;decomposerTarget=clamp(decomposerTarget+8)}
+if(s.removed==='fish'){fishTarget=0;grazerTarget=clamp(grazerTarget+28,0,96);producerTarget=clamp(producerTarget-grazerTarget*.10,0,96);birdTarget*=.25;apexTarget*=.40}
+if(s.removed==='bird'){birdTarget=0;fishTarget=clamp(fishTarget+20,0,86);grazerTarget=clamp(grazerTarget-fishTarget*.07,0,96);producerTarget=clamp(producerTarget+5,0,96);apexTarget*=.48}
+if(s.removed==='apex'){apexTarget=0;birdTarget=clamp(birdTarget+18,0,72);fishTarget=clamp(fishTarget-birdTarget*.16,0,86);grazerTarget=clamp(grazerTarget+Math.max(0,42-fishTarget)*.30,0,96);producerTarget=clamp(producerTarget-grazerTarget*.075,0,96)}
+return {state:{producer:producerTarget,grazer:grazerTarget,fish:fishTarget,bird:birdTarget,apex:apexTarget,decomposer:decomposerTarget},abiotic:{oxygen,toxin,turbidity,recycling:clamp(decomposerTarget*1.25-toxin*.18),detritus:abiotic.detritus},eutrophy,quality};
+}
+function modelStep(){
+const s=sliders(),prev={...state},result=calculateTargets(),target=result.state;
+if(isControlScenario()){state={...CONTROL.state};abiotic={...CONTROL.abiotic};setLog(T('logControl'));render();return}
+state.producer+=(target.producer-state.producer)*.18;state.grazer+=(target.grazer-state.grazer)*.10;state.fish+=(target.fish-state.fish)*.075;state.bird+=(target.bird-state.bird)*.055;state.apex+=(target.apex-state.apex)*.04;state.decomposer+=(target.decomposer-state.decomposer)*.12;
+const mortality=Object.keys(prev).reduce((sum,k)=>sum+Math.max(0,prev[k]-state[k]),0);
+abiotic.detritus=clamp(abiotic.detritus+mortality*.16+Math.max(0,state.producer-70)*.18+s.pollution*.018-state.decomposer*.035-(state.producer<10?1.1:0));
+abiotic.oxygen+=(result.abiotic.oxygen-abiotic.oxygen)*.22;abiotic.toxin+=(result.abiotic.toxin-abiotic.toxin)*.25;abiotic.turbidity+=(result.abiotic.turbidity-abiotic.turbidity)*.25;abiotic.recycling+=(result.abiotic.recycling-abiotic.recycling)*.18;
+Object.keys(state).forEach(k=>state[k]=clamp(state[k]));chooseLog(result);render();
+}
+function chooseLog(result=calculateTargets()){
+const s=sliders();if(isControlScenario())return setLog(T('logControl'));if(s.water<=2)return setLog(T('logWater'));if(s.sun<=2)return setLog(T('logLight'));if(s.pollution>70)return setLog(T('logPollution'));if(result.eutrophy>.18||state.producer>70)return setLog(T('logEutrophy'));
+const removal={grazer:T('logGrazer'),fish:T('logFish'),bird:T('logBird'),apex:T('logApex')};if(removal[s.removed])return setLog(removal[s.removed]);if(s.invasive==='floatingPlant')return setLog(T('logInvasivePlant'));if(s.invasive==='predatoryFish')return setLog(T('logInvasiveFish'));setLog(T('logActive'));
+}
+function render(){
+const s=sliders();$('sunValue').textContent=`${s.sun}%`;$('waterValue').textContent=`${s.water}%`;$('pollutionValue').textContent=`${s.pollution}%`;$('nutrientValue').textContent=`${s.nutrients}%`;
+const labels={producer:T('biomass'),grazer:T('population'),fish:T('population'),bird:T('population'),apex:T('population'),decomposer:T('activity')};
+Object.keys(state).forEach(id=>{const card=document.querySelector(`[data-id="${id}"]`),value=rounded(state[id]);card.querySelector('.fill').style.width=`${value}%`;card.querySelector('.pop').textContent=`${labels[id]}: ${value}`;card.classList.toggle('dead',value<5);card.classList.toggle('low',value>=5&&value<28);card.classList.toggle('boost',value>78)});
+const values=Object.values(state),living=values.filter(v=>v>=5).length,avg=values.reduce((a,b)=>a+b,0)/values.length,imbalance=Math.max(...values)-Math.min(...values);
+const energy=clamp(state.producer*.42+state.grazer*.25+state.fish*.17+state.bird*.09+state.apex*.07-abiotic.toxin*.15),stability=isControlScenario()?96:clamp(avg-imbalance*.16+abiotic.oxygen*.25-abiotic.toxin*.20-Math.max(0,state.producer-70)*.35),biotic=isControlScenario()?98:clamp((living/6)*100+avg*.20-abiotic.toxin*.16),riskScore=clamp(100-stability+abiotic.toxin*.28+(100-abiotic.oxygen)*.30+Math.max(0,state.producer-70)*.45+(6-living)*8);
+$('biodiversity').textContent=rounded(biotic);$('stability').textContent=rounded(stability);$('energy').textContent=rounded(energy);$('oxygenMetric').textContent=rounded(abiotic.oxygen);$('detritusMetric').textContent=rounded(abiotic.detritus);$('risk').textContent=riskScore>82?T('critical'):riskScore>62?T('high'):riskScore>38?T('medium'):T('low');
+setMetricClass('mOxygen',abiotic.oxygen<30,abiotic.oxygen<50);setMetricClass('mRisk',riskScore>62,riskScore>38);setMetricClass('mStability',stability<35,stability<55);setMetricClass('mEnergy',energy<35,energy<55);setMetricClass('mDetritus',abiotic.detritus>70,abiotic.detritus>45);setMetricClass('mBio',biotic<35,biotic<55);
+$('toxinValue').textContent=rounded(abiotic.toxin);$('turbidityValue').textContent=rounded(abiotic.turbidity);$('recyclingValue').textContent=rounded(abiotic.recycling);$('toxinBar').style.width=`${rounded(abiotic.toxin)}%`;$('turbidityBar').style.width=`${rounded(abiotic.turbidity)}%`;$('recyclingBar').style.width=`${rounded(abiotic.recycling)}%`;
+const stage=$('stage');stage.classList.toggle('dark',s.sun<20||abiotic.turbidity>70);stage.classList.toggle('toxic',s.pollution>55||abiotic.toxin>55);stage.classList.toggle('collapse',riskScore>82);
+}
+function setMetricClass(id,danger,warn){const el=$(id);el.classList.toggle('danger',danger);el.classList.toggle('warn',!danger&&warn)}
+function playPause(){running=!running;$('playBtn').textContent=running?T('pause'):T('play');if(running){setLog(isControlScenario()?T('logControl'):T('logActive'));timer=setInterval(()=>{tickCount++;modelStep()},950)}else{clearInterval(timer);setLog(T('logPaused'))}}
+function applyDisturbance(){const events=['drought','runoff','restoration'],e=events[Math.floor(Math.random()*events.length)];if(e==='drought'){$('water').value=Math.max(0,+$('water').value-32);abiotic.oxygen=clamp(abiotic.oxygen-15);setLog(T('logDrought'))}if(e==='runoff'){$('pollution').value=Math.min(100,+$('pollution').value+24);$('nutrients').value=Math.min(100,+$('nutrients').value+25);abiotic.detritus=clamp(abiotic.detritus+12);setLog(T('logRunoff'))}if(e==='restoration'){$('water').value=Math.min(100,+$('water').value+18);$('pollution').value=Math.max(0,+$('pollution').value-20);abiotic.detritus=clamp(abiotic.detritus-10);setLog(T('logRestoration'))}render()}
+function previewChange(){chooseLog();render()}
+['sun','water','pollution','nutrients','removeSpecies','invasive'].forEach(id=>{$(id).addEventListener('input',previewChange);$(id).addEventListener('change',previewChange)});
+$('playBtn').addEventListener('click',playPause);$('resetBtn').addEventListener('click',applyControl);$('eventBtn').addEventListener('click',applyDisturbance);$('langBtn').addEventListener('click',()=>{currentLang=currentLang==='es'?'en':'es';applyLanguage()});
+applyControl();applyLanguage();
+</script>
 </body>
 </html>
