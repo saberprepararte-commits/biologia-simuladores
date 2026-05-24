@@ -1,950 +1,1080 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Membrane Transport BioLab</title>
-<style>
-:root{
-  --bg1:#08172a;
-  --bg2:#102b45;
-  --panel:rgba(255,255,255,.88);
-  --glass:rgba(255,255,255,.12);
-  --line:rgba(255,255,255,.18);
-  --ink:#0d2638;
-  --muted:#5f7180;
-  --blue:#2fb7ff;
-  --cyan:#56f0ff;
-  --purple:#8b68ff;
-  --pink:#ff6cb5;
-  --green:#37d67a;
-  --yellow:#ffd166;
-  --danger:#ef476f;
-  --shadow:0 18px 45px rgba(0,0,0,.28);
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:Inter,Arial,Helvetica,sans-serif;
-  color:#eefaff;
-  background:
-    radial-gradient(circle at 14% 18%,rgba(47,183,255,.28),transparent 25%),
-    radial-gradient(circle at 86% 12%,rgba(139,104,255,.24),transparent 24%),
-    radial-gradient(circle at 50% 108%,rgba(55,214,122,.16),transparent 34%),
-    linear-gradient(135deg,var(--bg1),var(--bg2));
-  overflow-x:hidden;
-}
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background-image:
-    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
-  background-size:42px 42px;
-  opacity:.7;
-}
-
-.app{
-  position:relative;
-  z-index:1;
-  max-width:1650px;
-  margin:0 auto;
-  padding:16px;
-  display:grid;
-  grid-template-columns:330px minmax(620px,1fr) 380px;
-  grid-template-rows:auto 250px;
-  gap:14px;
-}
-
-.header{
-  grid-column:1/-1;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
-}
-
-.brand{
-  display:flex;
-  gap:14px;
-  align-items:center;
-}
-
-.logo{
-  width:64px;
-  height:64px;
-  border-radius:22px;
-  display:grid;
-  place-items:center;
-  font-size:34px;
-  color:#05131d;
-  background:
-    radial-gradient(circle at 32% 24%,#fff,transparent 18%),
-    linear-gradient(135deg,var(--cyan),var(--purple));
-  box-shadow:0 0 32px rgba(86,240,255,.36),0 16px 30px rgba(0,0,0,.24);
-}
-
-h1{
-  margin:0;
-  font-size:clamp(28px,4vw,52px);
-  line-height:1;
-  letter-spacing:-1.5px;
-}
-
-.subtitle{
-  margin:7px 0 0;
-  max-width:950px;
-  color:#b9d4e7;
-  line-height:1.45;
-  font-size:15px;
-}
-
-button,select,input{font-family:inherit}
-
-button{
-  border:0;
-  border-radius:15px;
-  padding:11px 14px;
-  font-weight:900;
-  cursor:pointer;
-  color:#071622;
-  background:linear-gradient(135deg,var(--cyan),var(--blue));
-  box-shadow:0 12px 25px rgba(0,0,0,.24);
-  transition:.18s ease;
-}
-
-button:hover{transform:translateY(-1px);filter:brightness(1.05)}
-button.secondary{background:rgba(255,255,255,.12);color:#eefaff;border:1px solid var(--line)}
-
-.panel{
-  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.08));
-  border:1px solid var(--line);
-  border-radius:28px;
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(16px);
-}
-
-.controls{
-  padding:16px;
-  grid-column:1;
-  grid-row:2/4;
-}
-
-.panel-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.panel-head h2{
-  margin:0;
-  font-size:19px;
-  letter-spacing:-.4px;
-}
-
-.badge{
-  font-size:11px;
-  font-weight:1000;
-  color:#071622;
-  background:var(--cyan);
-  padding:6px 9px;
-  border-radius:999px;
-}
-
-.field{
-  padding:11px 0;
-  border-bottom:1px solid rgba(255,255,255,.10);
-}
-
-.field:last-child{border-bottom:0}
-
-label{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:7px;
-  font-weight:900;
-  font-size:13px;
-}
-
-.value{
-  color:var(--cyan);
-  font-weight:1000;
-}
-
-.hint{
-  font-size:12px;
-  color:#b9d4e7;
-  line-height:1.32;
-  margin-top:6px;
-}
-
-input[type="range"]{
-  width:100%;
-  accent-color:var(--cyan);
-}
-
-select{
-  width:100%;
-  padding:10px 11px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.10);
-  color:#eefaff;
-  outline:none;
-  font-weight:800;
-}
-
-option{background:#112b42;color:#fff}
-
-.time-box{
-  display:grid;
-  gap:6px;
-  margin-top:8px;
-  padding:10px;
-  border-radius:16px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-}
-
-.time-box select{
-  background:rgba(255,255,255,.16);
-}
-
-.progress{
-  height:9px;
-  border-radius:999px;
-  overflow:hidden;
-  background:rgba(255,255,255,.12);
-}
-
-.progress div{
-  height:100%;
-  width:0%;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--cyan),var(--green));
-  transition:width .25s;
-}
-
-.button-stack{
-  display:grid;
-  gap:9px;
-  margin-top:14px;
-}
-
-.lab{
-  grid-column:2;
-  grid-row:2;
-  padding:16px;
-  min-height:680px;
-  overflow:hidden;
-}
-
-.lab-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.lab-head h2{
-  margin:0;
-  font-size:23px;
-  letter-spacing:-.5px;
-}
-
-.state-pill{
-  padding:9px 12px;
-  border-radius:999px;
-  background:rgba(86,240,255,.13);
-  color:var(--cyan);
-  border:1px solid rgba(86,240,255,.28);
-  font-weight:1000;
-  font-size:13px;
-}
-
-.chamber{
-  position:relative;
-  height:520px;
-  border-radius:34px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.18);
-  background:
-    radial-gradient(circle at 24% 35%,rgba(47,183,255,.16),transparent 25%),
-    radial-gradient(circle at 78% 34%,rgba(255,108,181,.14),transparent 23%),
-    linear-gradient(90deg,#102c46 0%,#0d2237 49%,#14304c 50%,#0b1c30 100%);
-  box-shadow:inset 0 0 90px rgba(0,0,0,.32);
-}
-
-.side-label{
-  position:absolute;
-  top:18px;
-  z-index:3;
-  font-size:13px;
-  font-weight:1000;
-  padding:8px 11px;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.18);
-}
-
-.outside-label{left:18px;color:#bcecff}
-.inside-label{right:18px;color:#ffd1e9}
-
-.membrane{
-  position:absolute;
-  left:50%;
-  top:0;
-  bottom:0;
-  width:104px;
-  transform:translateX(-50%);
-  z-index:2;
-}
-
-.lipid{
-  position:absolute;
-  left:50%;
-  width:70px;
-  height:24px;
-  transform:translateX(-50%);
-  border-radius:999px;
-  background:linear-gradient(90deg,#ffe066,#ffb703);
-  box-shadow:0 0 18px rgba(255,209,102,.22);
-}
-
-.lipid::before,.lipid::after{
-  content:"";
-  position:absolute;
-  top:20px;
-  width:5px;
-  height:34px;
-  border-radius:999px;
-  background:linear-gradient(180deg,#ffb703,rgba(255,183,3,.18));
-}
-
-.lipid::before{left:24px;transform:rotate(9deg)}
-.lipid::after{right:24px;transform:rotate(-9deg)}
-
-.protein{
-  position:absolute;
-  left:50%;
-  width:86px;
-  height:68px;
-  transform:translateX(-50%);
-  border-radius:26px;
-  background:
-    radial-gradient(circle at 50% 50%,rgba(255,255,255,.55) 0 16%,transparent 17%),
-    linear-gradient(135deg,var(--purple),var(--cyan));
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:0 0 26px rgba(86,240,255,.26);
-  z-index:3;
-}
-
-.protein.p1{top:92px}
-.protein.p2{top:238px}
-.protein.p3{bottom:86px}
-
-.pore{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:22px;
-  height:42px;
-  transform:translate(-50%,-50%);
-  border-radius:999px;
-  background:#071622;
-  box-shadow:inset 0 0 10px rgba(86,240,255,.45);
-}
-
-.pump-label{
-  position:absolute;
-  left:50%;
-  top:50%;
-  translate:-50% -50%;
-  font-weight:1000;
-  color:#071622;
-  background:var(--yellow);
-  border-radius:999px;
-  padding:2px 6px;
-  font-size:10px;
-}
-
-.particle{
-  position:absolute;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  font-weight:1000;
-  color:white;
-  text-shadow:0 1px 5px rgba(0,0,0,.35);
-  box-shadow:0 8px 16px rgba(0,0,0,.22);
-  z-index:4;
-  pointer-events:none;
-  animation:drift var(--dur,5s) ease-in-out infinite alternate;
-}
-
-.solute{
-  width:24px;
-  height:24px;
-  background:linear-gradient(135deg,var(--pink),var(--purple));
-}
-
-.water{
-  width:19px;
-  height:19px;
-  background:linear-gradient(135deg,#9ce9ff,var(--water));
-  border-radius:62% 38% 62% 38% / 65% 40% 60% 35%;
-  transform:rotate(45deg);
-}
-
-.ion{
-  width:20px;
-  height:20px;
-  background:linear-gradient(135deg,var(--green),var(--cyan));
-}
-
-.atp{
-  width:28px;
-  height:20px;
-  border-radius:10px;
-  background:linear-gradient(135deg,var(--yellow),#ff9f1c);
-  color:#4b2700;
-  font-size:10px;
-}
-
-@keyframes drift{
-  0%{translate:0 0}
-  35%{translate:var(--dx1,10px) var(--dy1,-8px)}
-  70%{translate:var(--dx2,-8px) var(--dy2,9px)}
-  100%{translate:var(--dx3,7px) var(--dy3,-6px)}
-}
-
-.flow-arrow{
-  position:absolute;
-  left:50%;
-  top:50%;
-  z-index:5;
-  font-size:34px;
-  font-weight:1000;
-  color:var(--cyan);
-  text-shadow:0 3px 12px rgba(0,0,0,.4);
-  animation:pulse 1.5s ease-in-out infinite;
-  pointer-events:none;
-}
-
-@keyframes pulse{
-  0%,100%{opacity:.45;scale:1}
-  50%{opacity:1;scale:1.18}
-}
-
-.metrics{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-top:12px;
-}
-
-.metric{
-  padding:13px;
-  border-radius:20px;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
-}
-
-.metric strong{
-  display:block;
-  font-size:27px;
-  line-height:1;
-  color:#fff;
-  margin-bottom:5px;
-}
-
-.metric span{
-  color:#b9d4e7;
-  font-size:12px;
-}
-
-.metric.good strong{color:var(--green)}
-.metric.warn strong{color:var(--yellow)}
-.metric.bad strong{color:var(--danger)}
-.metric.blue strong{color:var(--cyan)}
-
-.analytics{
-  grid-column:3;
-  grid-row:2/4;
-  padding:16px;
-  display:grid;
-  gap:12px;
-}
-
-.module{
-  padding:13px;
-  border-radius:22px;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
-}
-
-.module-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  color:#b9d4e7;
-  font-size:13px;
-  margin-bottom:8px;
-}
-
-canvas{
-  width:100%;
-  background:#061320;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-}
-
-#concChart{height:235px}
-#fluxChart{height:175px}
-
-.legend{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  color:#b9d4e7;
-  font-size:12px;
-  margin-top:8px;
-}
-
-.line{
-  width:16px;
-  height:4px;
-  display:inline-block;
-  border-radius:999px;
-  margin-right:5px;
-  vertical-align:middle;
-  background:var(--pink);
-}
-
-.line.in{background:var(--cyan)}
-.line.flux{background:var(--green)}
-.line.water{background:var(--water)}
-
-.logbox{
-  padding:14px;
-  border-radius:20px;
-  color:#b9d4e7;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
-  line-height:1.45;
-  min-height:110px;
-}
-
-.logbox strong{color:#fff}
-
-.bottom-guide{
-  grid-column:2;
-  grid-row:3;
-  padding:16px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.qcard{
-  padding:13px;
-  border-radius:18px;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
-  color:#b9d4e7;
-  line-height:1.35;
-  font-size:13px;
-}
-
-.qcard strong{display:block;color:var(--cyan);margin-bottom:4px}
-
-@media(max-width:1280px){
-  .app{grid-template-columns:320px 1fr;grid-template-rows:auto auto auto auto}
-  .header{grid-column:1/-1}
-  .controls{grid-column:1;grid-row:2}
-  .lab{grid-column:2;grid-row:2}
-  .analytics{grid-column:1/-1;grid-row:3;grid-template-columns:1fr 1fr}
-  .bottom-guide{grid-column:1/-1;grid-row:4}
-}
-
-@media(max-width:900px){
-  .app{display:block;padding:10px}
-  .header,.controls,.lab,.analytics,.bottom-guide{margin-bottom:12px}
-  .analytics{display:block}
-  .module,.logbox{margin-bottom:12px}
-  .metrics{grid-template-columns:repeat(2,1fr)}
-  .bottom-guide{grid-template-columns:1fr}
-  .chamber{height:450px}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de Transporte de Membrana</title>
+  <style>
+    :root {
+      --bg1: #eaf7ff;
+      --bg2: #fff4df;
+      --ink: #18324a;
+      --muted: #607488;
+      --card: rgba(255,255,255,.9);
+      --line: #d7e5f0;
+      --primary: #1565c0;
+      --primary2: #0d47a1;
+      --danger: #c62828;
+      --shadow: 0 18px 42px rgba(32, 72, 110, .15);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, #ffffff 0 10%, transparent 36%),
+        linear-gradient(135deg, #e9f6ff 0%, #f6fbff 46%, #fff2db 100%);
+    }
+
+    header {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 18px 18px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 2.7vw, 2.4rem);
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      background: #fff7dc;
+      border: 1px solid #ffe29a;
+      color: #7a5700;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: .86rem;
+      box-shadow: 0 8px 22px rgba(122, 87, 0, .08);
+    }
+
+    main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 10px 18px 22px;
+      display: grid;
+      grid-template-columns: minmax(520px, 1fr) 380px;
+      gap: 16px;
+    }
+
+    .sim-card, .panel {
+      background: var(--card);
+      border: 1px solid rgba(210, 228, 242, .95);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(9px);
+    }
+
+    .sim-card {
+      padding: 14px;
+      position: relative;
+      min-height: 650px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 610px;
+      display: block;
+      border-radius: 20px;
+      border: 1px solid #c9dceb;
+      background: linear-gradient(90deg, var(--bg1) 0 50%, var(--bg2) 50% 100%);
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .hint {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 26px;
+      color: var(--muted);
+      font-size: .88rem;
+      background: rgba(255,255,255,.88);
+      border: 1px solid #dce8f2;
+      border-radius: 16px;
+      padding: 9px 11px;
+    }
+
+    .panel {
+      padding: 14px;
+      max-height: calc(100vh - 92px);
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section {
+      background: linear-gradient(180deg, #ffffff, #fbfdff);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 13px;
+    }
+
+    .section h2 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      letter-spacing: -.01em;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.35;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button, select, input {
+      font: inherit;
+    }
+
+    button, select {
+      border: 1px solid #c8d8e8;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 13px;
+      padding: 9px 11px;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+    }
+
+    button:hover, select:hover {
+      border-color: #8bb8df;
+      box-shadow: 0 9px 20px rgba(21, 101, 192, .12);
+    }
+
+    button:active { transform: scale(.98); }
+
+    .primary {
+      background: linear-gradient(180deg, var(--primary), var(--primary2));
+      color: #fff;
+      border-color: var(--primary2);
+      font-weight: 700;
+    }
+
+    .danger {
+      background: #fff1f1;
+      color: var(--danger);
+      border-color: #ffc7c7;
+      font-weight: 700;
+    }
+
+    .lang {
+      background: #18324a;
+      color: white;
+      border-color: #18324a;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    .wide { width: 100%; }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .molecules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: .84rem;
+    }
+
+    .chip.active {
+      outline: 3px solid #bbe1ff;
+      border-color: #6db3e8;
+      background: #f0f9ff;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      box-shadow: inset 0 -2px 2px rgba(0,0,0,.16);
+    }
+
+    .toggle {
+      display: grid;
+      grid-template-columns: 1fr 46px;
+      gap: 9px;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 9px 10px;
+      margin-top: 7px;
+    }
+
+    .toggle strong { font-size: .92rem; }
+
+    .switch {
+      width: 45px;
+      height: 25px;
+      background: #d3dde8;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .switch::after {
+      content: "";
+      width: 21px;
+      height: 21px;
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,.24);
+      transition: left .18s ease;
+    }
+
+    .switch.on { background: #2e7d32; }
+    .switch.on::after { left: 22px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.35rem;
+      margin-top: 2px;
+    }
+
+    .barlist {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .barline {
+      display: grid;
+      grid-template-columns: 86px 1fr 46px;
+      gap: 7px;
+      align-items: center;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .track {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid #dbe8f2;
+      background: #eef5fa;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 50%;
+      border-radius: 999px;
+      transition: width .16s ease;
+    }
+
+    .message {
+      margin-top: 10px;
+      background: #f2f8ff;
+      border-left: 5px solid var(--primary);
+      border-radius: 15px;
+      padding: 10px 11px;
+      line-height: 1.35;
+      font-size: .9rem;
+    }
+
+    .challenge {
+      background: #fffaf0;
+      border-left: 5px solid #ef8f00;
+      border-radius: 15px;
+      padding: 10px 11px;
+      line-height: 1.35;
+      font-size: .9rem;
+    }
+
+    input[type="range"] { width: 100%; }
+
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .panel { max-height: none; }
+      .sim-card { min-height: auto; }
+      canvas { height: 560px; }
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-  <header class="header">
-    <div class="brand">
-      <div class="logo">🧫</div>
-      <div>
-        <h1 id="title">Membrane Transport BioLab</h1>
-        <p class="subtitle" id="subtitle">Simula difusión simple, difusión facilitada, ósmosis y transporte activo a través de una membrana celular.</p>
-      </div>
+  <header>
+    <div>
+      <h1 id="title">Simulador de transporte de membrana</h1>
+      <p id="subtitle" class="subtitle">Explora difusión, ósmosis, canales de membrana y transporte activo.</p>
     </div>
-    <button class="secondary" id="langBtn">English</button>
+    <div class="top-actions">
+      <div id="badge" class="badge">Versión propia para clase</div>
+      <button id="langBtn" class="lang">English</button>
+    </div>
   </header>
 
-  <aside class="panel controls">
-    <div class="panel-head"><h2 id="panelTitle">Panel experimental</h2><span class="badge" id="controlBadge">CONTROL</span></div>
+  <main>
+    <section class="sim-card">
+      <canvas id="canvas"></canvas>
+      <div id="hint" class="hint">Haz clic en el lado izquierdo o derecho para agregar partículas. Abre canales y observa el movimiento.</div>
+    </section>
 
-    <div class="field">
-      <label><span id="modeLabel">Tipo de transporte</span></label>
-      <select id="mode">
-        <option value="simple" id="modeSimple">Difusión simple</option>
-        <option value="facilitated" id="modeFacilitated">Difusión facilitada</option>
-        <option value="osmosis" id="modeOsmosis">Ósmosis</option>
-        <option value="active" id="modeActive">Transporte activo</option>
-      </select>
-      <div class="hint" id="modeHint">Elige el mecanismo que deseas observar.</div>
-    </div>
+    <aside class="panel">
+      <section class="section">
+        <h2 id="mainControlsTitle">Controles principales</h2>
+        <div class="row">
+          <button id="playBtn" class="primary">Pausar</button>
+          <button id="stepBtn">Paso a paso</button>
+          <button id="resetBtn" class="danger">Reiniciar</button>
+        </div>
+        <div style="height:10px"></div>
+        <label id="presetLabel" class="small" for="preset">Escena rápida</label>
+        <select id="preset" class="wide">
+          <option value="osmosis">Ósmosis: solutos grandes a la derecha</option>
+          <option value="diffusion">Difusión simple: moléculas pequeñas a la izquierda</option>
+          <option value="facilitated">Difusión facilitada: iones y glucosa</option>
+          <option value="active">Transporte activo: bomba contra gradiente</option>
+          <option value="clean">Lienzo limpio</option>
+        </select>
+      </section>
 
-    <div class="field"><label><span id="outsideLabel">Soluto afuera</span><span class="value" id="outsideValue">80</span></label><input id="outside" type="range" min="0" max="100" value="80"><div class="hint" id="outsideHint">Mayor concentración externa favorece entrada por gradiente.</div></div>
-    <div class="field"><label><span id="insideLabel">Soluto adentro</span><span class="value" id="insideValue">25</span></label><input id="inside" type="range" min="0" max="100" value="25"><div class="hint" id="insideHint">La diferencia entre afuera y adentro determina el gradiente.</div></div>
-    <div class="field"><label><span id="waterOutLabel">Agua afuera</span><span class="value" id="waterOutValue">75</span></label><input id="waterOut" type="range" min="0" max="100" value="75"><div class="hint" id="waterOutHint">En ósmosis, el agua se mueve hacia donde hay más solutos.</div></div>
-    <div class="field"><label><span id="channelsLabel">Canales</span><span class="value" id="channelsValue">70%</span></label><input id="channels" type="range" min="0" max="100" value="70"><div class="hint" id="channelsHint">Los canales aumentan la velocidad de difusión facilitada.</div></div>
-    <div class="field"><label><span id="atpLabel">ATP disponible</span><span class="value" id="atpValue">80%</span></label><input id="atp" type="range" min="0" max="100" value="80"><div class="hint" id="atpHint">El transporte activo requiere ATP para mover sustancias contra gradiente.</div></div>
+      <section class="section">
+        <h2 id="moleculeTitle">Molécula para agregar</h2>
+        <div id="moleculeButtons" class="molecules"></div>
+        <div style="height:10px"></div>
+        <div class="grid2">
+          <button id="addLeftBtn">Agregar izquierda</button>
+          <button id="addRightBtn">Agregar derecha</button>
+        </div>
+      </section>
 
-    <div class="time-box">
-      <label style="display:block;margin:0" for="duration"><span id="durationLabel">Tiempo de observación</span></label>
-      <select id="duration">
-        <option value="30">30 s</option>
-        <option value="60">60 s</option>
-        <option value="90">90 s</option>
-        <option value="120">120 s</option>
-      </select>
-      <div class="progress"><div id="timeProgress"></div></div>
-      <div class="hint"><span id="elapsedLabel">Tiempo transcurrido</span>: <b id="elapsedRead">0 s / 30 s</b></div>
-    </div>
+      <section class="section">
+        <h2 id="transportTitle">Canales y transporte</h2>
+        <div id="toggleBox"></div>
+        <div style="height:10px"></div>
+        <label id="pumpDirectionLabel" class="small" for="pumpDirection">Dirección de la bomba activa</label>
+        <select id="pumpDirection" class="wide">
+          <option value="LR">Izquierda → derecha</option>
+          <option value="RL">Derecha → izquierda</option>
+        </select>
+      </section>
 
-    <div class="button-stack">
-      <button id="playBtn">Iniciar</button>
-      <button class="secondary" id="resetBtn">Grupo control</button>
-    </div>
-  </aside>
+      <section class="section">
+        <h2><span id="temperatureTitle">Temperatura / agitación</span> <span id="temperatureValue" class="small">1.0x</span></h2>
+        <input id="temperature" type="range" min="0.4" max="2.4" value="1" step="0.1" />
+        <p id="temperatureHelp" class="small">A mayor temperatura, mayor movimiento molecular.</p>
+      </section>
 
-  <main class="panel lab">
-    <div class="lab-head"><h2 id="labTitle">Cámara de membrana celular</h2><span class="state-pill" id="statePill">Equilibrio en progreso</span></div>
+      <section class="section">
+        <h2 id="liveDataTitle">Datos en vivo</h2>
+        <div class="stats">
+          <div class="stat"><span id="leftText">Izquierda</span><strong id="leftTotal">0</strong></div>
+          <div class="stat"><span id="rightText">Derecha</span><strong id="rightTotal">0</strong></div>
+        </div>
+        <div id="barList" class="barlist"></div>
+        <div id="message" class="message">Observa el gradiente de concentración.</div>
+      </section>
 
-    <div class="chamber" id="chamber">
-      <div class="side-label outside-label" id="outsideSide">Medio extracelular</div>
-      <div class="side-label inside-label" id="insideSide">Citoplasma</div>
-      <div class="membrane" id="membrane"></div>
-      <div class="flow-arrow" id="flowArrow">→</div>
-    </div>
-
-    <div class="metrics">
-      <div class="metric blue"><strong id="gradientMetric">55</strong><span id="gradientLabel">Gradiente</span></div>
-      <div class="metric good"><strong id="fluxMetric">0.0</strong><span id="fluxLabel">Flujo neto</span></div>
-      <div class="metric"><strong id="osmoticMetric">0.0</strong><span id="osmoticLabel">Movimiento de agua</span></div>
-      <div class="metric warn"><strong id="energyMetric">0</strong><span id="energyLabel">Energía usada</span></div>
-    </div>
+      <section class="section">
+        <h2 id="challengeTitle">Reto para estudiantes</h2>
+        <div id="challengeText" class="challenge"></div>
+        <div style="height:10px"></div>
+        <button id="challengeBtn">Nuevo reto</button>
+      </section>
+    </aside>
   </main>
 
-  <aside class="panel analytics">
-    <div class="module">
-      <div class="module-head"><strong id="concTitle">Concentraciones</strong><span id="concNote">afuera / adentro</span></div>
-      <canvas id="concChart" width="700" height="400"></canvas>
-      <div class="legend"><span><i class="line"></i><span id="legendOut">Afuera</span></span><span><i class="line in"></i><span id="legendIn">Adentro</span></span></div>
-    </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-    <div class="module">
-      <div class="module-head"><strong id="fluxTitle">Flujo y ósmosis</strong><span id="fluxNote">tiempo</span></div>
-      <canvas id="fluxChart" width="700" height="300"></canvas>
-      <div class="legend"><span><i class="line flux"></i><span id="legendFlux">Flujo</span></span><span><i class="line water"></i><span id="legendWater">Agua</span></span></div>
-    </div>
+    const TEXT = {
+      es: {
+        title: 'Simulador de transporte de membrana',
+        subtitle: 'Explora difusión, ósmosis, canales de membrana y transporte activo.',
+        badge: 'Versión propia para clase',
+        langBtn: 'English',
+        hint: 'Haz clic en el lado izquierdo o derecho para agregar partículas. Abre canales y observa el movimiento.',
+        mainControlsTitle: 'Controles principales',
+        play: 'Reproducir', pause: 'Pausar', step: 'Paso a paso', reset: 'Reiniciar',
+        presetLabel: 'Escena rápida',
+        presets: {
+          osmosis: 'Ósmosis: solutos grandes a la derecha',
+          diffusion: 'Difusión simple: moléculas pequeñas a la izquierda',
+          facilitated: 'Difusión facilitada: iones y glucosa',
+          active: 'Transporte activo: bomba contra gradiente',
+          clean: 'Lienzo limpio'
+        },
+        moleculeTitle: 'Molécula para agregar',
+        addLeft: 'Agregar izquierda', addRight: 'Agregar derecha',
+        transportTitle: 'Canales y transporte',
+        pumpDirectionLabel: 'Dirección de la bomba activa',
+        pumpLR: 'Izquierda → derecha', pumpRL: 'Derecha → izquierda',
+        temperatureTitle: 'Temperatura / agitación',
+        temperatureHelp: 'A mayor temperatura, mayor movimiento molecular.',
+        liveDataTitle: 'Datos en vivo',
+        leftText: 'Izquierda', rightText: 'Derecha',
+        challengeTitle: 'Reto para estudiantes', challengeBtn: 'Nuevo reto',
+        leftArea: 'Exterior / lado A', rightArea: 'Interior / lado B',
+        atp: 'ATP usado: ',
+        molecule: {
+          water: 'Agua', oxygen: 'Molécula pequeña', ion: 'Ion', glucose: 'Glucosa', protein: 'Proteína grande'
+        },
+        toggle: {
+          simple: ['Difusión simple', 'Permite moléculas pequeñas no polares.'],
+          aquaporin: ['Acuaporinas', 'Permite paso de agua y muestra ósmosis.'],
+          ion: ['Canal iónico', 'Permite paso de iones a favor del gradiente.'],
+          glucose: ['Transportador de glucosa', 'Permite glucosa por difusión facilitada.'],
+          pump: ['Bomba activa + ATP', 'Mueve iones usando energía.']
+        },
+        msg: {
+          start: 'Observa el gradiente de concentración.',
+          osmosisPreset: 'Ósmosis: el agua tiende a moverse hacia el lado con más solutos.',
+          diffusionPreset: 'Difusión simple: las moléculas pequeñas cruzan la bicapa.',
+          facilitatedPreset: 'Difusión facilitada: algunas moléculas necesitan proteínas de membrana.',
+          activePreset: 'Transporte activo: la bomba usa ATP para mover iones.',
+          cleanPreset: 'Lienzo limpio: agrega partículas y prueba los canales.',
+          simple: 'Difusión simple: movimiento neto hacia menor concentración.',
+          osmosis: 'Ósmosis: el agua se mueve más hacia donde hay mayor concentración de solutos.',
+          ion: 'Canal iónico: los iones se mueven a favor del gradiente.',
+          glucose: 'Difusión facilitada: la glucosa cruza con ayuda de una proteína.',
+          pump: 'Transporte activo: la bomba usa ATP y puede mover contra el gradiente.',
+          balanced: 'Los solutos están relativamente equilibrados.',
+          moreLeft: 'Hay más solutos a la izquierda. El agua tenderá a moverse hacia la izquierda si hay acuaporinas.',
+          moreRight: 'Hay más solutos a la derecha. El agua tenderá a moverse hacia la derecha si hay acuaporinas.'
+        },
+        challenges: [
+          'Activa solo las acuaporinas. ¿Hacia qué lado se mueve más agua?',
+          'Agrega muchas moléculas pequeñas a un lado y activa difusión simple. ¿Qué sucede con la concentración?',
+          'Coloca iones en ambos lados. ¿Por qué necesitan un canal para cruzar mejor?',
+          'Activa la bomba de ATP. ¿Qué diferencia notas frente a la difusión facilitada?',
+          'Agrega proteínas grandes. ¿Por qué no atraviesan la membrana?'
+        ]
+      },
+      en: {
+        title: 'Membrane Transport Simulator',
+        subtitle: 'Explore diffusion, osmosis, membrane channels, and active transport.',
+        badge: 'Original classroom version',
+        langBtn: 'Español',
+        hint: 'Click on the left or right side to add particles. Open channels and observe their movement.',
+        mainControlsTitle: 'Main controls',
+        play: 'Play', pause: 'Pause', step: 'Step by step', reset: 'Reset',
+        presetLabel: 'Quick scene',
+        presets: {
+          osmosis: 'Osmosis: large solutes on the right',
+          diffusion: 'Simple diffusion: small molecules on the left',
+          facilitated: 'Facilitated diffusion: ions and glucose',
+          active: 'Active transport: pump against gradient',
+          clean: 'Clean canvas'
+        },
+        moleculeTitle: 'Molecule to add',
+        addLeft: 'Add left', addRight: 'Add right',
+        transportTitle: 'Channels and transport',
+        pumpDirectionLabel: 'Active pump direction',
+        pumpLR: 'Left → right', pumpRL: 'Right → left',
+        temperatureTitle: 'Temperature / agitation',
+        temperatureHelp: 'Higher temperature creates more molecular movement.',
+        liveDataTitle: 'Live data',
+        leftText: 'Left', rightText: 'Right',
+        challengeTitle: 'Student challenge', challengeBtn: 'New challenge',
+        leftArea: 'Outside / side A', rightArea: 'Inside / side B',
+        atp: 'ATP used: ',
+        molecule: {
+          water: 'Water', oxygen: 'Small molecule', ion: 'Ion', glucose: 'Glucose', protein: 'Large protein'
+        },
+        toggle: {
+          simple: ['Simple diffusion', 'Allows small nonpolar molecules to pass.'],
+          aquaporin: ['Aquaporins', 'Allows water to pass and shows osmosis.'],
+          ion: ['Ion channel', 'Allows ions to move down their gradient.'],
+          glucose: ['Glucose transporter', 'Allows glucose through facilitated diffusion.'],
+          pump: ['Active pump + ATP', 'Moves ions using energy.']
+        },
+        msg: {
+          start: 'Observe the concentration gradient.',
+          osmosisPreset: 'Osmosis: water tends to move toward the side with more solutes.',
+          diffusionPreset: 'Simple diffusion: small molecules cross the bilayer.',
+          facilitatedPreset: 'Facilitated diffusion: some molecules need membrane proteins.',
+          activePreset: 'Active transport: the pump uses ATP to move ions.',
+          cleanPreset: 'Clean canvas: add particles and test the channels.',
+          simple: 'Simple diffusion: net movement toward lower concentration.',
+          osmosis: 'Osmosis: water moves more toward the area with higher solute concentration.',
+          ion: 'Ion channel: ions move down their gradient.',
+          glucose: 'Facilitated diffusion: glucose crosses with help from a protein.',
+          pump: 'Active transport: the pump uses ATP and can move against the gradient.',
+          balanced: 'The solutes are relatively balanced.',
+          moreLeft: 'There are more solutes on the left. Water will tend to move left if aquaporins are open.',
+          moreRight: 'There are more solutes on the right. Water will tend to move right if aquaporins are open.'
+        },
+        challenges: [
+          'Turn on only the aquaporins. Which side does more water move toward?',
+          'Add many small molecules to one side and turn on simple diffusion. What happens to concentration?',
+          'Place ions on both sides. Why do they need a channel to cross more easily?',
+          'Turn on the ATP pump. What difference do you notice compared with facilitated diffusion?',
+          'Add large proteins. Why do they not cross the membrane?'
+        ]
+      }
+    };
 
-    <div class="logbox" id="logBox"></div>
-  </aside>
+    const PARTICLES = {
+      water:   { color: '#00acc1', radius: 4, symbol: 'H₂O', category: 'water' },
+      oxygen:  { color: '#2e7d32', radius: 5, symbol: 'O₂', category: 'small' },
+      ion:     { color: '#1976d2', radius: 6, symbol: '+', category: 'ion' },
+      glucose: { color: '#ef8f00', radius: 7, symbol: 'Glu', category: 'glucose' },
+      protein: { color: '#7b1fa2', radius: 10, symbol: 'P', category: 'large' }
+    };
 
-  <section class="panel bottom-guide">
-    <div class="qcard"><strong id="q1Title">Gradiente</strong><span id="q1Text">Compara concentración interna y externa. ¿Hacia dónde debería moverse el soluto?</span></div>
-    <div class="qcard"><strong id="q2Title">Proteínas</strong><span id="q2Text">Aumenta o reduce canales. ¿Qué ocurre con la velocidad del transporte?</span></div>
-    <div class="qcard"><strong id="q3Title">Energía</strong><span id="q3Text">Activa el transporte activo y reduce ATP. ¿Qué pasa con el movimiento contra gradiente?</span></div>
-  </section>
-</div>
+    const CHANNELS = {
+      aquaporin: { y: .24, h: .11, color: '#00acc1', label: 'H₂O' },
+      ion:       { y: .42, h: .11, color: '#1976d2', label: 'Ion' },
+      glucose:   { y: .60, h: .11, color: '#ef8f00', label: 'Glu' },
+      pump:      { y: .80, h: .13, color: '#7b1fa2', label: 'ATP' }
+    };
 
-<script>
-const $=id=>document.getElementById(id);
-const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,v));
-const round=v=>Math.round(v);
-let lang='es', running=false, timer=null, time=0, duration=30;
-let state={outside:80,inside:25,waterOut:75,waterIn:45,flux:0,waterFlux:0,energy:0};
-let hOut=[80], hIn=[25], hFlux=[0], hWater=[0];
-const CONTROL={mode:'simple',outside:80,inside:25,waterOut:75,channels:70,atp:80,duration:30};
+    const state = {
+      lang: 'es',
+      running: true,
+      selected: 'water',
+      temperature: 1,
+      particles: [],
+      atp: 0,
+      message: '',
+      challengeIndex: 0,
+      pumpDirection: 'LR',
+      open: { simple: false, aquaporin: true, ion: false, glucose: false, pump: false }
+    };
 
-const I18N={
-  es:{
-    langBtn:'English',title:'Membrane Transport BioLab',subtitle:'Simula difusión simple, difusión facilitada, ósmosis y transporte activo a través de una membrana celular.',
-    panelTitle:'Panel experimental',controlBadge:'CONTROL',modeLabel:'Tipo de transporte',modeSimple:'Difusión simple',modeFacilitated:'Difusión facilitada',modeOsmosis:'Ósmosis',modeActive:'Transporte activo',modeHint:'Elige el mecanismo que deseas observar.',
-    outsideLabel:'Soluto afuera',outsideHint:'Mayor concentración externa favorece entrada por gradiente.',insideLabel:'Soluto adentro',insideHint:'La diferencia entre afuera y adentro determina el gradiente.',
-    waterOutLabel:'Agua afuera',waterOutHint:'En ósmosis, el agua se mueve hacia donde hay más solutos.',channelsLabel:'Canales',channelsHint:'Los canales aumentan la velocidad de difusión facilitada.',atpLabel:'ATP disponible',atpHint:'El transporte activo requiere ATP para mover sustancias contra gradiente.',
-    durationLabel:'Tiempo de observación',elapsedLabel:'Tiempo transcurrido',start:'Iniciar',pause:'Pausar',reset:'Grupo control',
-    labTitle:'Cámara de membrana celular',outsideSide:'Medio extracelular',insideSide:'Citoplasma',stateEquilibrium:'Equilibrio en progreso',stateActive:'Bomba activa',stateOsmosis:'Ósmosis activa',stateLowEnergy:'ATP insuficiente',stateStopped:'Tiempo cumplido',
-    gradientLabel:'Gradiente',fluxLabel:'Flujo neto',osmoticLabel:'Movimiento de agua',energyLabel:'Energía usada',
-    concTitle:'Concentraciones',concNote:'afuera / adentro',legendOut:'Afuera',legendIn:'Adentro',fluxTitle:'Flujo y ósmosis',fluxNote:'tiempo',legendFlux:'Flujo',legendWater:'Agua',
-    q1Title:'Gradiente',q1Text:'Compara concentración interna y externa. ¿Hacia dónde debería moverse el soluto?',q2Title:'Proteínas',q2Text:'Aumenta o reduce canales. ¿Qué ocurre con la velocidad del transporte?',q3Title:'Energía',q3Text:'Activa el transporte activo y reduce ATP. ¿Qué pasa con el movimiento contra gradiente?',
-    logSimple:'<strong>Difusión simple:</strong> las moléculas pequeñas se mueven a favor del gradiente, desde mayor concentración hacia menor concentración, sin usar ATP.',
-    logFacilitated:'<strong>Difusión facilitada:</strong> el soluto se mueve a favor del gradiente usando proteínas de canal o transportadoras. No usa ATP.',
-    logOsmosis:'<strong>Ósmosis:</strong> el agua se mueve a través de la membrana hacia el lado con mayor concentración de solutos.',
-    logActive:'<strong>Transporte activo:</strong> la bomba usa ATP para mover sustancias contra el gradiente. Si falta ATP, el transporte disminuye.'
-  },
-  en:{
-    langBtn:'Español',title:'Membrane Transport BioLab',subtitle:'Simulate simple diffusion, facilitated diffusion, osmosis, and active transport across a cell membrane.',
-    panelTitle:'Experimental panel',controlBadge:'CONTROL',modeLabel:'Transport type',modeSimple:'Simple diffusion',modeFacilitated:'Facilitated diffusion',modeOsmosis:'Osmosis',modeActive:'Active transport',modeHint:'Choose the mechanism you want to observe.',
-    outsideLabel:'Solute outside',outsideHint:'Higher external concentration favors movement down the gradient.',insideLabel:'Solute inside',insideHint:'The difference between outside and inside determines the gradient.',
-    waterOutLabel:'Water outside',waterOutHint:'In osmosis, water moves toward the side with more solute.',channelsLabel:'Channels',channelsHint:'Channels increase the speed of facilitated diffusion.',atpLabel:'Available ATP',atpHint:'Active transport requires ATP to move substances against the gradient.',
-    durationLabel:'Observation time',elapsedLabel:'Elapsed time',start:'Start',pause:'Pause',reset:'Control group',
-    labTitle:'Cell membrane chamber',outsideSide:'Extracellular fluid',insideSide:'Cytoplasm',stateEquilibrium:'Equilibrium in progress',stateActive:'Active pump',stateOsmosis:'Active osmosis',stateLowEnergy:'Not enough ATP',stateStopped:'Time completed',
-    gradientLabel:'Gradient',fluxLabel:'Net flux',osmoticLabel:'Water movement',energyLabel:'Energy used',
-    concTitle:'Concentrations',concNote:'outside / inside',legendOut:'Outside',legendIn:'Inside',fluxTitle:'Flux and osmosis',fluxNote:'time',legendFlux:'Flux',legendWater:'Water',
-    q1Title:'Gradient',q1Text:'Compare internal and external concentration. Which direction should the solute move?',q2Title:'Proteins',q2Text:'Increase or decrease channels. What happens to transport speed?',q3Title:'Energy',q3Text:'Turn on active transport and reduce ATP. What happens to movement against the gradient?',
-    logSimple:'<strong>Simple diffusion:</strong> small molecules move down the gradient, from higher to lower concentration, without ATP.',
-    logFacilitated:'<strong>Facilitated diffusion:</strong> solute moves down the gradient using channel or carrier proteins. It does not use ATP.',
-    logOsmosis:'<strong>Osmosis:</strong> water moves across the membrane toward the side with higher solute concentration.',
-    logActive:'<strong>Active transport:</strong> the pump uses ATP to move substances against the gradient. If ATP is low, transport decreases.'
-  }
-};
+    function t(path) {
+      return path.split('.').reduce((obj, key) => obj && obj[key], TEXT[state.lang]) ?? path;
+    }
 
-function T(k){return I18N[lang][k]||k}
-function inputs(){return{mode:$('mode').value,outside:+$('outside').value,inside:+$('inside').value,waterOut:+$('waterOut').value,channels:+$('channels').value,atp:+$('atp').value,duration:+$('duration').value}}
-function applyLanguage(){
-  ['title','subtitle','panelTitle','controlBadge','modeLabel','modeSimple','modeFacilitated','modeOsmosis','modeActive','modeHint','outsideLabel','outsideHint','insideLabel','insideHint','waterOutLabel','waterOutHint','channelsLabel','channelsHint','atpLabel','atpHint','durationLabel','elapsedLabel','labTitle','outsideSide','insideSide','gradientLabel','fluxLabel','osmoticLabel','energyLabel','concTitle','concNote','legendOut','legendIn','fluxTitle','fluxNote','legendFlux','legendWater','q1Title','q1Text','q2Title','q2Text','q3Title','q3Text'].forEach(id=>{if($(id))$(id).textContent=T(id)});
-  $('langBtn').textContent=T('langBtn');$('playBtn').textContent=running?T('pause'):T('start');$('resetBtn').textContent=T('reset');
-  chooseLog();render();
-}
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    }
 
-function setupMembrane(){
-  const m=$('membrane');m.innerHTML='';
-  for(let i=0;i<13;i++){
-    const top=document.createElement('div');top.className='lipid';top.style.top=(i*42+7)+'px';m.appendChild(top);
-  }
-  ['p1','p2','p3'].forEach((p,i)=>{
-    const pro=document.createElement('div');pro.className='protein '+p;
-    const pore=document.createElement('div');pore.className='pore';
-    pro.appendChild(pore);
-    if(i===1){const lab=document.createElement('div');lab.className='pump-label';lab.textContent='ATP';pro.appendChild(lab)}
-    m.appendChild(pro);
-  });
-}
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+    function mid() { return canvas.clientWidth / 2; }
+    function membraneHalf() { return 13; }
 
-function setParticles(){
-  const chamber=$('chamber');
-  chamber.querySelectorAll('.particle').forEach(e=>e.remove());
-  const inp=inputs();
-  const outN=Math.round(state.outside/4);
-  const inN=Math.round(state.inside/4);
-  const waterN=Math.round(inp.waterOut/7);
-  const atpN=inp.mode==='active'?Math.round(inp.atp/18):0;
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
-  for(let i=0;i<outN;i++)addParticle('solute',5+Math.random()*35,16+Math.random()*72,'S');
-  for(let i=0;i<inN;i++)addParticle('solute',62+Math.random()*32,16+Math.random()*72,'S');
-  for(let i=0;i<waterN;i++)addParticle('water',7+Math.random()*32,15+Math.random()*76,'');
-  for(let i=0;i<atpN;i++)addParticle('atp',62+Math.random()*30,65+Math.random()*22,'ATP');
-  if(inp.mode==='active'){
-    for(let i=0;i<6;i++)addParticle('ion',52+Math.random()*8,18+Math.random()*64,'+');
-  }
-}
+    function addParticle(type, side, amount = 1) {
+      const info = PARTICLES[type];
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const leftSide = side === 'L';
+      for (let i = 0; i < amount; i++) {
+        state.particles.push({
+          type,
+          x: leftSide ? rand(28, mid() - 38) : rand(mid() + 38, w - 28),
+          y: rand(50, h - 42),
+          vx: rand(-1.2, 1.2),
+          vy: rand(-1.2, 1.2),
+          r: info.radius,
+          spin: rand(0, Math.PI * 2),
+          glow: 0
+        });
+      }
+      updateStats();
+    }
 
-function addParticle(cls,x,y,text){
-  const p=document.createElement('div');p.className='particle '+cls;p.textContent=text;
-  p.style.left=x+'%';p.style.top=y+'%';
-  p.style.setProperty('--dur',(3.5+Math.random()*4).toFixed(2)+'s');
-  p.style.setProperty('--dx1',(Math.random()*26-13).toFixed(1)+'px');
-  p.style.setProperty('--dy1',(Math.random()*22-11).toFixed(1)+'px');
-  p.style.setProperty('--dx2',(Math.random()*26-13).toFixed(1)+'px');
-  p.style.setProperty('--dy2',(Math.random()*22-11).toFixed(1)+'px');
-  p.style.setProperty('--dx3',(Math.random()*26-13).toFixed(1)+'px');
-  p.style.setProperty('--dy3',(Math.random()*22-11).toFixed(1)+'px');
-  $('chamber').appendChild(p);
-}
+    function counts() {
+      const base = { water: 0, oxygen: 0, ion: 0, glucose: 0, protein: 0 };
+      const result = { L: { ...base }, R: { ...base } };
+      for (const p of state.particles) {
+        const side = p.x < mid() ? 'L' : 'R';
+        result[side][p.type]++;
+      }
+      return result;
+    }
 
-function calculateFlux(){
-  const inp=inputs();
-  const gradient=state.outside-state.inside;
-  let flux=0, waterFlux=0, energy=0;
+    function solutes(sideCounts) {
+      return sideCounts.oxygen + sideCounts.ion + sideCounts.glucose + sideCounts.protein;
+    }
 
-  if(inp.mode==='simple'){
-    flux=gradient*0.018;
-  }
-  if(inp.mode==='facilitated'){
-    flux=gradient*(0.012+inp.channels/100*0.055);
-  }
-  if(inp.mode==='osmosis'){
-    // El agua se mueve hacia el lado con mayor soluto.
-    waterFlux=(state.inside-state.outside)*0.025;
-    flux=gradient*0.004;
-  }
-  if(inp.mode==='active'){
-    // La bomba mueve hacia adentro aunque el gradiente no lo favorezca.
-    const atpFactor=inp.atp/100;
-    flux=1.35*atpFactor;
-    energy=Math.abs(flux)*atpFactor*2.2;
-    if(inp.atp<15)flux*=0.25;
-  }
+    function setPreset(name) {
+      state.particles = [];
+      state.atp = 0;
+      state.open = { simple: false, aquaporin: false, ion: false, glucose: false, pump: false };
+      if (name === 'osmosis') {
+        state.open.aquaporin = true;
+        addParticle('water', 'L', 48); addParticle('water', 'R', 48);
+        addParticle('protein', 'R', 14); addParticle('glucose', 'R', 18);
+        state.message = t('msg.osmosisPreset');
+      }
+      if (name === 'diffusion') {
+        state.open.simple = true;
+        addParticle('oxygen', 'L', 55); addParticle('water', 'L', 20); addParticle('water', 'R', 20);
+        state.message = t('msg.diffusionPreset');
+      }
+      if (name === 'facilitated') {
+        state.open.ion = true; state.open.glucose = true;
+        addParticle('ion', 'L', 36); addParticle('glucose', 'R', 32);
+        addParticle('water', 'L', 24); addParticle('water', 'R', 24);
+        state.message = t('msg.facilitatedPreset');
+      }
+      if (name === 'active') {
+        state.open.pump = true; state.pumpDirection = 'LR';
+        document.getElementById('pumpDirection').value = 'LR';
+        addParticle('ion', 'L', 12); addParticle('ion', 'R', 36);
+        addParticle('water', 'L', 24); addParticle('water', 'R', 24);
+        state.message = t('msg.activePreset');
+      }
+      if (name === 'clean') {
+        state.open.aquaporin = true;
+        state.message = t('msg.cleanPreset');
+      }
+      renderToggles();
+      updateStats();
+    }
 
-  return{flux,waterFlux,energy,gradient};
-}
+    function isInsideChannel(key, y) {
+      const h = canvas.clientHeight;
+      const slot = CHANNELS[key];
+      const top = h * slot.y;
+      const bottom = top + h * slot.h;
+      return y >= top && y <= bottom;
+    }
 
-function step(){
-  const f=calculateFlux();
-  const inp=inputs();
+    function attemptCross(p, oldX) {
+      const info = PARTICLES[p.type];
+      const c = counts();
+      const fromLeft = oldX < mid();
+      const source = fromLeft ? c.L : c.R;
+      const target = fromLeft ? c.R : c.L;
+      const direction = fromLeft ? 'LR' : 'RL';
+      let pass = false;
+      let message = '';
 
-  state.outside=clamp(state.outside-f.flux,0,100);
-  state.inside=clamp(state.inside+f.flux,0,100);
+      if (info.category === 'small' && state.open.simple) {
+        const down = target.oxygen < source.oxygen;
+        pass = Math.random() < (down ? .78 : .15);
+        message = t('msg.simple');
+      }
 
-  if(inp.mode==='osmosis'){
-    state.waterOut=clamp(state.waterOut-f.waterFlux,0,100);
-    state.waterIn=clamp(state.waterIn+f.waterFlux,0,100);
-  }
+      if (info.category === 'water' && state.open.aquaporin && isInsideChannel('aquaporin', p.y)) {
+        const towardMoreSolutes = solutes(target) > solutes(source);
+        pass = Math.random() < (towardMoreSolutes ? .84 : .24);
+        message = t('msg.osmosis');
+      }
 
-  state.flux=f.flux;
-  state.waterFlux=f.waterFlux;
-  state.energy+=f.energy;
-  time++;
+      if (info.category === 'ion' && state.open.ion && isInsideChannel('ion', p.y)) {
+        const down = target.ion < source.ion;
+        pass = Math.random() < (down ? .78 : .12);
+        message = t('msg.ion');
+      }
 
-  hOut.push(state.outside); hIn.push(state.inside); hFlux.push(state.flux); hWater.push(state.waterFlux);
-  if(hOut.length>90){hOut.shift();hIn.shift();hFlux.shift();hWater.shift();}
-  render();
+      if (info.category === 'glucose' && state.open.glucose && isInsideChannel('glucose', p.y)) {
+        const down = target.glucose < source.glucose;
+        pass = Math.random() < (down ? .72 : .10);
+        message = t('msg.glucose');
+      }
 
-  if(time>=duration)pause(true);
-}
+      if (info.category === 'ion' && state.open.pump && isInsideChannel('pump', p.y)) {
+        if (direction === state.pumpDirection) {
+          pass = Math.random() < .93;
+          message = t('msg.pump');
+          if (pass) state.atp++;
+        }
+      }
 
-function render(){
-  const inp=inputs();
-  $('outsideValue').textContent=round(inp.outside);
-  $('insideValue').textContent=round(inp.inside);
-  $('waterOutValue').textContent=round(inp.waterOut);
-  $('channelsValue').textContent=round(inp.channels)+'%';
-  $('atpValue').textContent=round(inp.atp)+'%';
-  $('elapsedRead').textContent=time+' s / '+inp.duration+' s';
-  $('timeProgress').style.width=Math.min(100,time/inp.duration*100)+'%';
+      if (pass) {
+        state.message = message;
+        p.glow = 1;
+        return true;
+      }
+      return false;
+    }
 
-  const f=calculateFlux();
-  $('gradientMetric').textContent=round(Math.abs(state.outside-state.inside));
-  $('fluxMetric').textContent=state.flux.toFixed(2);
-  $('osmoticMetric').textContent=state.waterFlux.toFixed(2);
-  $('energyMetric').textContent=state.energy.toFixed(1);
+    function updatePhysics() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const leftWall = 10;
+      const rightWall = w - 10;
+      const topWall = 42;
+      const bottomWall = h - 28;
 
-  const arrow=$('flowArrow');
-  arrow.textContent=state.flux>=0?'→':'←';
-  arrow.style.color=inp.mode==='active'? 'var(--yellow)' : (inp.mode==='osmosis'?'var(--water)':'var(--cyan)');
-  arrow.style.left=inp.mode==='osmosis'?'50%':'50%';
-  arrow.style.top=inp.mode==='active'?'55%':'50%';
+      for (const p of state.particles) {
+        const oldX = p.x;
+        const info = PARTICLES[p.type];
+        const heat = state.temperature;
+        p.vx += rand(-.12, .12) * heat;
+        p.vy += rand(-.12, .12) * heat;
 
-  let stateText=T('stateEquilibrium');
-  if(inp.mode==='active')stateText=inp.atp<15?T('stateLowEnergy'):T('stateActive');
-  if(inp.mode==='osmosis')stateText=T('stateOsmosis');
-  if(time>=duration&&!running)stateText=T('stateStopped');
-  $('statePill').textContent=stateText;
+        const max = (info.category === 'large' ? 1.15 : 2.35) * heat;
+        const speed = Math.hypot(p.vx, p.vy) || 1;
+        if (speed > max) {
+          p.vx = p.vx / speed * max;
+          p.vy = p.vy / speed * max;
+        }
 
-  document.querySelectorAll('.protein').forEach(p=>p.style.opacity=inp.channels/100*.75+.25);
-  document.querySelectorAll('.pump-label').forEach(p=>p.style.display=inp.mode==='active'?'block':'none');
+        p.x += p.vx;
+        p.y += p.vy;
+        p.spin += .02 + Math.abs(p.vx) * .01;
+        p.glow *= .92;
 
-  drawConcChart();
-  drawFluxChart();
-}
+        if (p.x < leftWall + p.r) { p.x = leftWall + p.r; p.vx *= -1; }
+        if (p.x > rightWall - p.r) { p.x = rightWall - p.r; p.vx *= -1; }
+        if (p.y < topWall + p.r) { p.y = topWall + p.r; p.vy *= -1; }
+        if (p.y > bottomWall - p.r) { p.y = bottomWall - p.r; p.vy *= -1; }
 
-function chooseLog(){
-  const mode=inputs().mode;
-  $('logBox').innerHTML=mode==='simple'?T('logSimple'):mode==='facilitated'?T('logFacilitated'):mode==='osmosis'?T('logOsmosis'):T('logActive');
-}
+        const reachedMembrane =
+          (oldX < mid() - membraneHalf() && p.x + p.r >= mid() - membraneHalf()) ||
+          (oldX > mid() + membraneHalf() && p.x - p.r <= mid() + membraneHalf());
 
-function reset(){
-  running=false;clearInterval(timer);
-  Object.keys(CONTROL).forEach(k=>$(k).value=CONTROL[k]);
-  duration=CONTROL.duration;
-  time=0;state={outside:80,inside:25,waterOut:75,waterIn:45,flux:0,waterFlux:0,energy:0};
-  hOut=[state.outside];hIn=[state.inside];hFlux=[0];hWater=[0];
-  $('playBtn').textContent=T('start');
-  chooseLog();setupMembrane();setParticles();render();
-}
+        if (reachedMembrane) {
+          const crossed = attemptCross(p, oldX);
+          if (crossed) {
+            p.x = oldX < mid() ? mid() + membraneHalf() + p.r + 2 : mid() - membraneHalf() - p.r - 2;
+          } else {
+            p.x = oldX < mid() ? mid() - membraneHalf() - p.r - 1 : mid() + membraneHalf() + p.r + 1;
+            p.vx *= -.9;
+            p.vy += rand(-.3, .3);
+          }
+        }
+      }
+    }
 
-function preview(){
-  const inp=inputs();
-  if(!running){
-    state.outside=inp.outside;
-    state.inside=inp.inside;
-    state.waterOut=inp.waterOut;
-    hOut=[state.outside];hIn=[state.inside];hFlux=[0];hWater=[0];
-    time=0;
-  }
-  duration=inp.duration;
-  chooseLog();setParticles();render();
-}
+    function roundedRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
 
-function play(){
-  if(running)return;
-  const inp=inputs();duration=inp.duration;
-  if(time>=duration){time=0;hOut=[state.outside];hIn=[state.inside];hFlux=[0];hWater=[0];state.energy=0;}
-  running=true;$('playBtn').textContent=T('pause');
-  timer=setInterval(step,1000);
-}
+    function drawBackground() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#e7f7ff'; ctx.fillRect(0, 0, mid(), h);
+      ctx.fillStyle = '#fff2dc'; ctx.fillRect(mid(), 0, mid(), h);
 
-function pause(completed=false){
-  running=false;clearInterval(timer);
-  $('playBtn').textContent=T('start');
-  render();
-}
+      for (let y = 58; y < h - 30; y += 34) {
+        ctx.strokeStyle = 'rgba(24,50,74,.07)';
+        ctx.beginPath(); ctx.moveTo(18, y); ctx.lineTo(w - 18, y); ctx.stroke();
+      }
 
-function chartBase(c){
-  const ctx=c.getContext('2d'),pad=36,w=c.width-pad*2,h=c.height-pad*2;
-  ctx.clearRect(0,0,c.width,c.height);
-  ctx.strokeStyle='rgba(255,255,255,.09)';ctx.lineWidth=1;
-  for(let i=0;i<=5;i++){const y=pad+h*i/5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+w,y);ctx.stroke();}
-  return{ctx,pad,w,h};
-}
+      ctx.fillStyle = 'rgba(255,255,255,.76)';
+      roundedRect(16, 12, mid() - 34, 30, 15); ctx.fill();
+      roundedRect(mid() + 18, 12, mid() - 34, 30, 15); ctx.fill();
 
-function plotLine(ctx,pad,w,h,arr,color,min=-100,max=100,width=3,dash=[]){
-  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();
-  arr.forEach((v,i)=>{
-    const x=pad+(arr.length===1?0:i/(arr.length-1))*w;
-    const y=pad+h-((v-min)/(max-min))*h;
-    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-  });
-  ctx.stroke();ctx.setLineDash([]);
-}
+      ctx.fillStyle = '#18324a';
+      ctx.font = '700 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t('leftArea'), mid() / 2, 27);
+      ctx.fillText(t('rightArea'), mid() + mid() / 2, 27);
+    }
 
-function drawConcChart(){
-  const c=$('concChart'),{ctx,pad,w,h}=chartBase(c);
-  plotLine(ctx,pad,w,h,hOut,'#ff6cb5',0,100,4);
-  plotLine(ctx,pad,w,h,hIn,'#56f0ff',0,100,4);
-  ctx.fillStyle='#b9d4e7';ctx.font='12px Arial';ctx.fillText('0',12,pad+h);ctx.fillText('100',8,pad+6);
-}
+    function drawMembrane() {
+      const h = canvas.clientHeight;
+      const x = mid();
+      const top = 42;
+      const bottom = h - 28;
+      const half = membraneHalf();
 
-function drawFluxChart(){
-  const c=$('fluxChart'),{ctx,pad,w,h}=chartBase(c);
-  plotLine(ctx,pad,w,h,hFlux,'#37d67a',-4,4,4);
-  plotLine(ctx,pad,w,h,hWater,'#2fb7ff',-4,4,3,[7,5]);
-  ctx.fillStyle='#b9d4e7';ctx.font='12px Arial';ctx.fillText('-4',10,pad+h);ctx.fillText('4',16,pad+6);
-}
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.fillRect(x - half, top, half * 2, bottom - top);
 
-['mode','outside','inside','waterOut','channels','atp','duration'].forEach(id=>{
-  $(id).addEventListener('input',preview);
-  $(id).addEventListener('change',preview);
-});
-$('langBtn').onclick=()=>{lang=lang==='es'?'en':'es';applyLanguage()};
-$('playBtn').onclick=()=>running?pause():play();
-$('resetBtn').onclick=reset;
-reset();applyLanguage();
-</script>
+      for (let y = top + 9; y < bottom; y += 22) {
+        ctx.fillStyle = '#ffd166';
+        ctx.beginPath(); ctx.arc(x - 10, y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 10, y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(132,86,32,.48)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 7, y + 4); ctx.lineTo(x - 2, y + 13);
+        ctx.moveTo(x + 7, y + 4); ctx.lineTo(x + 2, y + 13);
+        ctx.stroke();
+      }
+
+      for (const key of Object.keys(CHANNELS)) {
+        if (!state.open[key]) continue;
+        const slot = CHANNELS[key];
+        const cy = h * slot.y + h * slot.h / 2;
+        const ch = h * slot.h;
+        const cw = key === 'pump' ? 48 : 38;
+        ctx.fillStyle = slot.color + 'dd';
+        roundedRect(x - cw / 2, cy - ch / 2, cw, ch, 16); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.9)';
+        ctx.lineWidth = 3; ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.font = '800 12px system-ui';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(slot.label, x, cy - (key === 'pump' ? 7 : 0));
+        if (key === 'pump') {
+          ctx.font = '900 15px system-ui';
+          ctx.fillText(state.pumpDirection === 'LR' ? '→' : '←', x, cy + 12);
+        }
+      }
+    }
+
+    function drawParticle(p) {
+      const info = PARTICLES[p.type];
+      ctx.save();
+      if (p.glow > .06) {
+        ctx.fillStyle = 'rgba(255,215,80,' + (.28 * p.glow) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 10 * p.glow, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.spin);
+      ctx.fillStyle = info.color;
+      ctx.strokeStyle = 'rgba(255,255,255,.9)';
+      ctx.lineWidth = 1.5;
+
+      if (p.type === 'glucose') {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = Math.PI / 6 + i * Math.PI / 3;
+          const px = Math.cos(a) * p.r;
+          const py = Math.sin(a) * p.r;
+          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (p.type === 'protein') {
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const a = i * Math.PI / 5;
+          const rr = i % 2 ? p.r * .65 : p.r;
+          const px = Math.cos(a) * rr;
+          const py = Math.sin(a) * rr;
+          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      if (p.r >= 6) {
+        ctx.rotate(-p.spin);
+        ctx.fillStyle = 'white';
+        ctx.font = '800 8px system-ui';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(info.symbol, 0, 0);
+      }
+      ctx.restore();
+    }
+
+    function drawATP() {
+      if (!state.open.pump) return;
+      ctx.fillStyle = '#7b1fa2';
+      ctx.font = '800 13px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(t('atp') + state.atp, mid(), canvas.clientHeight * .75);
+    }
+
+    function draw() {
+      drawBackground();
+      drawMembrane();
+      for (const p of state.particles) drawParticle(p);
+      drawATP();
+    }
+
+    function renderMoleculeButtons() {
+      const box = document.getElementById('moleculeButtons');
+      box.innerHTML = '';
+      for (const key of Object.keys(PARTICLES)) {
+        const button = document.createElement('button');
+        button.className = 'chip' + (state.selected === key ? ' active' : '');
+        button.innerHTML = `<span class="dot" style="background:${PARTICLES[key].color}"></span>${t('molecule.' + key)}`;
+        button.onclick = () => {
+          state.selected = key;
+          renderMoleculeButtons();
+        };
+        box.appendChild(button);
+      }
+    }
+
+    function renderToggles() {
+      const box = document.getElementById('toggleBox');
+      box.innerHTML = '';
+      for (const key of Object.keys(state.open)) {
+        const data = t('toggle.' + key);
+        const row = document.createElement('div');
+        row.className = 'toggle';
+        row.innerHTML = `<div><strong>${data[0]}</strong><div class="small">${data[1]}</div></div><div class="switch ${state.open[key] ? 'on' : ''}"></div>`;
+        row.querySelector('.switch').onclick = () => {
+          state.open[key] = !state.open[key];
+          renderToggles();
+        };
+        box.appendChild(row);
+      }
+    }
+
+    function updateStats() {
+      const c = counts();
+      const totalL = Object.values(c.L).reduce((a, b) => a + b, 0);
+      const totalR = Object.values(c.R).reduce((a, b) => a + b, 0);
+      setText('leftTotal', totalL);
+      setText('rightTotal', totalR);
+
+      const list = document.getElementById('barList');
+      list.innerHTML = '';
+      for (const key of Object.keys(PARTICLES)) {
+        const l = c.L[key];
+        const r = c.R[key];
+        const total = Math.max(1, l + r);
+        const pct = Math.round((l / total) * 100);
+        const row = document.createElement('div');
+        row.className = 'barline';
+        row.innerHTML = `<span>${t('molecule.' + key)}</span><div class="track"><div class="fill" style="width:${pct}%; background:${PARTICLES[key].color}"></div></div><span>${l}/${r}</span>`;
+        list.appendChild(row);
+      }
+
+      const solL = solutes(c.L);
+      const solR = solutes(c.R);
+      let gradient = t('msg.balanced');
+      if (solL > solR + 4) gradient = t('msg.moreLeft');
+      if (solR > solL + 4) gradient = t('msg.moreRight');
+      document.getElementById('message').textContent = state.message || gradient;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = state.lang;
+      setText('title', t('title'));
+      setText('subtitle', t('subtitle'));
+      setText('badge', t('badge'));
+      setText('langBtn', t('langBtn'));
+      setText('hint', t('hint'));
+      setText('mainControlsTitle', t('mainControlsTitle'));
+      setText('playBtn', state.running ? t('pause') : t('play'));
+      setText('stepBtn', t('step'));
+      setText('resetBtn', t('reset'));
+      setText('presetLabel', t('presetLabel'));
+      for (const key of Object.keys(t('presets'))) {
+        document.querySelector(`#preset option[value="${key}"]`).textContent = t('presets.' + key);
+      }
+      setText('moleculeTitle', t('moleculeTitle'));
+      setText('addLeftBtn', t('addLeft'));
+      setText('addRightBtn', t('addRight'));
+      setText('transportTitle', t('transportTitle'));
+      setText('pumpDirectionLabel', t('pumpDirectionLabel'));
+      document.querySelector('#pumpDirection option[value="LR"]').textContent = t('pumpLR');
+      document.querySelector('#pumpDirection option[value="RL"]').textContent = t('pumpRL');
+      setText('temperatureTitle', t('temperatureTitle'));
+      setText('temperatureHelp', t('temperatureHelp'));
+      setText('liveDataTitle', t('liveDataTitle'));
+      setText('leftText', t('leftText'));
+      setText('rightText', t('rightText'));
+      setText('challengeTitle', t('challengeTitle'));
+      setText('challengeBtn', t('challengeBtn'));
+      setText('challengeText', t('challenges')[state.challengeIndex]);
+      renderMoleculeButtons();
+      renderToggles();
+      updateStats();
+    }
+
+    function nextChallenge() {
+      const list = t('challenges');
+      state.challengeIndex = (state.challengeIndex + 1) % list.length;
+      setText('challengeText', list[state.challengeIndex]);
+    }
+
+    function bindEvents() {
+      document.getElementById('playBtn').onclick = () => {
+        state.running = !state.running;
+        setText('playBtn', state.running ? t('pause') : t('play'));
+      };
+      document.getElementById('stepBtn').onclick = () => {
+        updatePhysics(); draw(); updateStats();
+      };
+      document.getElementById('resetBtn').onclick = () => setPreset(document.getElementById('preset').value);
+      document.getElementById('preset').onchange = e => setPreset(e.target.value);
+      document.getElementById('addLeftBtn').onclick = () => addParticle(state.selected, 'L', 8);
+      document.getElementById('addRightBtn').onclick = () => addParticle(state.selected, 'R', 8);
+      document.getElementById('temperature').oninput = e => {
+        state.temperature = Number(e.target.value);
+        setText('temperatureValue', state.temperature.toFixed(1) + 'x');
+      };
+      document.getElementById('pumpDirection').onchange = e => { state.pumpDirection = e.target.value; };
+      document.getElementById('challengeBtn').onclick = nextChallenge;
+      document.getElementById('langBtn').onclick = () => {
+        state.lang = state.lang === 'es' ? 'en' : 'es';
+        state.message = '';
+        applyLanguage();
+      };
+      canvas.addEventListener('pointerdown', e => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        addParticle(state.selected, x < mid() ? 'L' : 'R', 5);
+      });
+      window.addEventListener('resize', () => { resizeCanvas(); draw(); });
+    }
+
+    let frame = 0;
+    function loop() {
+      if (state.running) updatePhysics();
+      draw();
+      frame++;
+      if (frame % 12 === 0) updateStats();
+      requestAnimationFrame(loop);
+    }
+
+    resizeCanvas();
+    bindEvents();
+    applyLanguage();
+    setPreset('osmosis');
+    loop();
+  </script>
 </body>
 </html>
