@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Photosynthesis BioLab</title>
+<style>
+:root {
+  --green:#3f8f37;
+  --green2:#70b94c;
+  --leaf:#2fa348;
+  --light:#f5c400;
+  --water:#1496e8;
+  --co2:#606060;
+  --oxygen:#1da9f2;
+  --glucose:#9f57de;
+  --cream:rgba(248,247,237,.88);
+  --panel:rgba(248,247,237,.86);
+  --ink:#263024;
+  --muted:#657060;
+  --line:rgba(70,80,55,.22);
+  --shadow:0 16px 40px rgba(35,45,30,.26);
+  --danger:#d64747;
+  --warn:#c88718;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:#172615;
+  overflow-x:hidden;
+}
+
+.app{
+  position:relative;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:270px minmax(620px,1fr) 270px;
+  grid-template-rows:minmax(610px,1fr) 250px;
+  gap:10px;
+  padding:10px;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(255,255,255,.18),transparent 18%),
+    linear-gradient(135deg,#36462d,#172615 55%,#0f1a0e);
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(12px);
+}
+
+.left-panel{
+  grid-row:1/3;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.right-panel{
+  grid-column:3;
+  grid-row:1/3;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+.scene{
+  grid-column:2;
+  grid-row:1;
+  position:relative;
+  overflow:hidden;
+  min-height:610px;
+  border-radius:20px;
+  box-shadow:0 22px 55px rgba(0,0,0,.35);
+  background-image:url("assets/photosynthesis_background.webp");
+  background-size:cover;
+  background-position:center;
+}
+
+.scene::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 62% 43%,transparent 0 33%,rgba(0,0,0,.04) 40%,rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.18));
+  pointer-events:none;
+}
+
+.bottom{
+  grid-column:2;
+  grid-row:2;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.brand-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  background:rgba(255,255,255,.86);
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
+.brand-icon{
+  width:43px;
+  height:43px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#a7db6d,#3c963c);
+  color:white;
+  font-size:25px;
+  box-shadow:0 8px 16px rgba(44,115,45,.22);
+}
+
+h1{
+  margin:0;
+  font-size:18px;
+  line-height:1.05;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+h1 span{
+  display:block;
+  color:var(--green);
+}
+
+h2{
+  margin:0 0 8px;
+  font-size:14px;
+  color:#345530;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+}
+
+.control-card,.side-card,.chart-card{
+  background:rgba(255,255,255,.80);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 12px 26px rgba(35,45,30,.18);
+}
+
+.control-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:7px;
+  font-size:13px;
+  font-weight:900;
+  color:#345530;
+  text-transform:uppercase;
+}
+
+button,input,select{font-family:inherit}
+
+button{
+  border:0;
+  border-radius:13px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-weight:900;
+  background:linear-gradient(135deg,#75bb58,#3d8933);
+  color:white;
+  box-shadow:0 9px 16px rgba(40,100,35,.24);
+  transition:.18s ease;
+}
+
+button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+button.secondary{background:#eceee7;color:#35422f;border:1px solid rgba(70,80,55,.18)}
+button.ghost{background:rgba(255,255,255,.65);color:#345530;border:1px solid rgba(70,80,55,.18);padding:7px 10px}
+
+.field{
+  padding:8px 0;
+  border-bottom:1px solid rgba(70,80,55,.14);
+}
+
+.field:last-child{border-bottom:0}
+
+label{
+  display:grid;
+  grid-template-columns:28px 1fr auto;
+  gap:7px;
+  align-items:center;
+  margin-bottom:6px;
+  font-size:12.5px;
+  font-weight:850;
+}
+
+.ico{font-size:23px}
+.value{font-weight:1000;color:#3d8138}
+input[type="range"]{width:100%;accent-color:#65ac41}
+
+.scenario-buttons{display:grid;gap:8px}
+.mini-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.play-toggle{width:100%;font-size:15px}
+.control-main{display:flex;align-items:center;justify-content:center;gap:8px}
+
+.time-control{
+  display:grid;
+  gap:6px;
+  padding:8px;
+  border-radius:13px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(70,80,55,.14);
+}
+
+.time-label{
+  display:block;
+  margin:0;
+  font-size:12px;
+  font-weight:900;
+  color:#405238;
+}
+
+#durationSelect{
+  width:100%;
+  padding:8px 9px;
+  border-radius:11px;
+  border:1px solid rgba(70,80,55,.18);
+  background:#fff;
+  color:#35422f;
+  font-weight:800;
+}
+
+.time-progress{
+  height:9px;
+  border-radius:99px;
+  background:#e6e8dd;
+  overflow:hidden;
+}
+
+.time-progress div{
+  height:100%;
+  width:0%;
+  border-radius:99px;
+  background:linear-gradient(90deg,#62b946,#f5c400);
+  transition:width .25s ease;
+}
+
+.time-read{
+  font-size:11.5px;
+  color:#657060;
+}
+
+.time-read b{color:#3d8138}
+
+.molecule{
+  position:absolute;
+  z-index:6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+  border-radius:999px;
+  color:white;
+  text-shadow:0 2px 8px rgba(0,0,0,.45);
+  filter:drop-shadow(0 8px 10px rgba(0,0,0,.25));
+  pointer-events:none;
+}
+
+.co2-bubble{
+  width:42px;height:28px;background:rgba(82,82,82,.86);
+  animation:co2ToLeaf 5.2s linear infinite;
+}
+
+.h2o-bubble{
+  width:42px;height:28px;background:rgba(20,150,232,.9);
+  color:white;
+  animation:waterToRoots 5s linear infinite;
+}
+
+.o2-bubble{
+  width:35px;height:28px;background:rgba(29,169,242,.92);
+  color:white;
+  animation:o2FromLeaf 4.5s linear infinite;
+}
+
+.glucose-bubble{
+  width:34px;height:34px;border-radius:10px;background:rgba(159,87,222,.92);
+  color:white;
+  animation:glucosePulse 3.5s ease-in-out infinite;
+}
+
+@keyframes co2ToLeaf{
+  0%{left:39%;top:38%;opacity:0;scale:.75}
+  18%{opacity:1}
+  100%{left:53%;top:35%;opacity:0;scale:1.08}
+}
+
+@keyframes waterToRoots{
+  0%{left:15%;top:84%;opacity:0;scale:.75}
+  20%{opacity:1}
+  100%{left:32%;top:67%;opacity:0;scale:1.05}
+}
+
+@keyframes o2FromLeaf{
+  0%{left:76%;top:42%;opacity:0;scale:.75}
+  18%{opacity:1}
+  100%{left:89%;top:22%;opacity:0;scale:1.08}
+}
+
+@keyframes glucosePulse{
+  0%,100%{left:70%;top:76%;opacity:.45;scale:.88}
+  50%{left:72%;top:74%;opacity:1;scale:1.1}
+}
+
+.arrow-flow{
+  position:absolute;
+  z-index:5;
+  font-size:36px;
+  font-weight:1000;
+  filter:drop-shadow(0 4px 9px rgba(0,0,0,.32));
+  animation:arrowPulse 1.9s ease-in-out infinite;
+  pointer-events:none;
+}
+
+.arrow-co2{left:43%;top:43%;color:white}
+.arrow-water{left:25%;top:76%;color:#e9f8ff}
+.arrow-o2{right:21%;top:39%;color:#d9f5ff}
+.arrow-light{left:57%;top:16%;color:#ffe73a;font-size:42px}
+
+@keyframes arrowPulse{
+  0%,100%{opacity:.52;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.17)}
+}
+
+.ray-dynamic{
+  position:absolute;
+  z-index:5;
+  left:54%;
+  top:11%;
+  width:8px;
+  height:260px;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,230,45,.95),rgba(255,230,45,.0));
+  transform:rotate(-28deg);
+  box-shadow:0 0 14px rgba(255,230,45,.75);
+  animation:lightPulse 2.7s ease-in-out infinite;
+  pointer-events:none;
+}
+
+.ray-dynamic.r2{left:57%;top:11%;animation-delay:-1s}
+.ray-dynamic.r3{left:60%;top:11%;animation-delay:-1.7s}
+
+@keyframes lightPulse{
+  0%,100%{opacity:.26}
+  50%{opacity:1}
+}
+
+.status-card{
+  text-align:center;
+}
+
+.status-dashboard{
+  padding:0;
+  overflow:hidden;
+  background:rgba(248,247,237,.92);
+  border:2px solid rgba(70,80,55,.24);
+  box-shadow:0 18px 38px rgba(20,35,15,.30), inset 0 0 18px rgba(255,255,255,.45);
+}
+
+.status-head{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:12px 14px 10px;
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(238,238,229,.78));
+  border-bottom:1px solid rgba(70,80,55,.15);
+}
+
+.status-head-icon{
+  font-size:18px;
+  filter:drop-shadow(0 3px 5px rgba(70,120,45,.18));
+}
+
+.status-card h3{
+  margin:0;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+  color:#303a2c;
+}
+
+.status-inner{
+  margin:10px 12px 13px;
+  padding:12px 10px 13px;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(247,247,240,.72));
+  box-shadow:inset 0 0 20px rgba(255,255,255,.60);
+  border:1px solid rgba(70,80,55,.08);
+}
+
+.gauge{
+  position:relative;
+  width:170px;
+  height:108px;
+  margin:0 auto 2px;
+}
+
+.gauge-svg{
+  width:170px;
+  height:108px;
+  display:block;
+  overflow:visible;
+}
+
+.gauge-bg,
+.gauge-arc{
+  fill:none;
+  stroke-linecap:round;
+  stroke-width:18;
+}
+
+.gauge-bg{
+  stroke:#e2e4d9;
+}
+
+.gauge-arc{
+  stroke:url(#none);
+  stroke:#6fbe3f;
+  stroke-dasharray:204;
+  stroke-dashoffset:36;
+  filter:drop-shadow(0 4px 5px rgba(50,90,35,.18));
+  transition:stroke-dashoffset .35s ease, stroke .35s ease;
+}
+
+.gauge-center{
+  position:absolute;
+  left:50%;
+  bottom:8px;
+  width:74px;
+  height:74px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(248,247,237,.94);
+  box-shadow:0 0 0 1px rgba(70,80,55,.06), inset 0 0 18px rgba(255,255,255,.65);
+}
+
+.gauge .leaf-mini{
+  position:absolute;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+  font-size:38px;
+  z-index:2;
+  filter:drop-shadow(0 5px 7px rgba(70,120,45,.22));
+}
+
+.process-label{
+  margin-top:2px;
+  font-size:13px;
+  font-weight:850;
+  color:#303a2c;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+}
+
+.status-word{
+  margin-top:1px;
+  font-size:19px;
+  line-height:1;
+  font-weight:1000;
+  color:#2baa34;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+
+.status-card p{
+  margin:7px auto 0;
+  max-width:185px;
+  color:#596456;
+  font-size:12px;
+  line-height:1.25;
+}
+
+.factor-row,.mol-row,.event-row{
+  display:grid;
+  grid-template-columns:28px 1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid rgba(70,80,55,.14);
+  font-size:12.5px;
+}
+
+.factor-row:last-child,.mol-row:last-child,.event-row:last-child{border-bottom:0}
+.factor-row b,.mol-row b{color:var(--green)}
+.active-event{color:var(--warn);font-weight:900}
+.inactive{color:#858a80}
+
+.chart-card h3{
+  margin:0 0 8px;
+  font-size:14px;
+  text-transform:uppercase;
+  color:#345530;
+}
+
+canvas{
+  width:100%;
+  height:165px;
+  background:rgba(255,255,255,.68);
+  border:1px solid rgba(70,80,55,.14);
+  border-radius:12px;
+}
+
+.legend{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:6px;
+}
+
+.line{
+  width:16px;
+  height:4px;
+  border-radius:99px;
+  display:inline-block;
+  vertical-align:middle;
+  margin-right:5px;
+  background:#1bbd68;
+}
+
+.line.o{background:#228bea}
+.line.g{background:#a657e8}
+.line.c{background:#df9a18}
+
+@media(max-width:1250px){
+  .app{grid-template-columns:270px 1fr;grid-template-rows:auto auto auto}
+  .right-panel{grid-column:1/3;grid-row:3;display:grid;grid-template-columns:repeat(2,1fr)}
+  .bottom{grid-column:1/3;grid-row:4}
+  .scene{grid-column:2;grid-row:1/3}
+}
+
+@media(max-width:880px){
+  .app{display:block;padding:8px}
+  .left-panel,.scene,.right-panel,.bottom{margin-bottom:10px}
+  .bottom{display:block}
+  .chart-card{margin-bottom:10px}
+  .scene{min-height:560px}
+  .right-panel{display:block}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel left-panel">
+    <div class="brand-card">
+      <div class="brand-icon">🌿</div>
+      <div><h1>Photosynthesis <span>BioLab</span></h1></div>
+    </div>
+
+    <div class="control-card">
+      <div class="control-title"><span id="variablesTitle">Variables</span><button class="ghost" id="langBtn">English</button></div>
+      <div class="field"><label><span class="ico">🌞</span><span id="lightLabel">Intensidad de luz</span><span class="value" id="lightValue">70%</span></label><input id="light" type="range" min="0" max="100" value="70"></div>
+      <div class="field"><label><span class="ico">💧</span><span id="waterLabel">Agua (H₂O)</span><span class="value" id="waterValue">75%</span></label><input id="water" type="range" min="0" max="100" value="75"></div>
+      <div class="field"><label><span class="ico">⚫</span><span id="co2Label">Dióxido de carbono</span><span class="value" id="co2Value">60%</span></label><input id="co2" type="range" min="0" max="100" value="60"></div>
+      <div class="field"><label><span class="ico">🌡️</span><span id="tempLabel">Temperatura</span><span class="value" id="tempValue">25 °C</span></label><input id="temperature" type="range" min="0" max="45" value="25"></div>
+      <div class="field"><label><span class="ico">🍃</span><span id="chlLabel">Clorofila</span><span class="value" id="chlValue">80%</span></label><input id="chlorophyll" type="range" min="0" max="100" value="80"></div>
+    </div>
+
+    <div class="control-card">
+      <div class="control-title"><span id="scenarioTitle">Escenario</span></div>
+      <div class="scenario-buttons">
+        <button class="control-main" id="resetBtn">🍃 Grupo control</button>
+        <div class="time-control">
+          <label class="time-label" for="durationSelect"><span id="durationLabel">Tiempo de observación</span></label>
+          <select id="durationSelect">
+            <option value="30">30 s</option>
+            <option value="60">60 s</option>
+            <option value="90">90 s</option>
+            <option value="120">120 s</option>
+          </select>
+          <div class="time-progress"><div id="timeProgress"></div></div>
+          <div class="time-read"><span id="elapsedLabel">Tiempo transcurrido</span>: <b id="elapsedRead">0 s</b></div>
+        </div>
+        <button class="secondary play-toggle" id="playBtn">▶ Iniciar</button>
+        <button id="eventBtn">Aplicar evento ambiental</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="panel scene" id="scene">
+    <div class="ray-dynamic"></div><div class="ray-dynamic r2"></div><div class="ray-dynamic r3"></div>
+    <div class="arrow-flow arrow-light">↘</div>
+    <div class="arrow-flow arrow-co2">→</div>
+    <div class="arrow-flow arrow-water">↗</div>
+    <div class="arrow-flow arrow-o2">↗</div>
+
+    <div class="molecule co2-bubble">CO₂</div>
+    <div class="molecule co2-bubble" style="animation-delay:-1.7s">CO₂</div>
+    <div class="molecule h2o-bubble">H₂O</div>
+    <div class="molecule h2o-bubble" style="animation-delay:-1.8s">H₂O</div>
+    <div class="molecule o2-bubble">O₂</div>
+    <div class="molecule o2-bubble" style="animation-delay:-1.5s">O₂</div>
+    <div class="molecule glucose-bubble">G</div>
+  </main>
+
+  <aside class="right-panel">
+    <section class="side-card status-card status-dashboard">
+      <div class="status-head">
+        <span class="status-head-icon">🌿</span>
+        <h3 id="plantStateTitle">Estado de la planta</h3>
+      </div>
+      <div class="status-inner">
+        <div class="gauge" id="gauge">
+        <svg class="gauge-svg" viewBox="0 0 180 110" aria-hidden="true">
+          <path class="gauge-bg" d="M 25 92 A 65 65 0 0 1 155 92"></path>
+          <path class="gauge-arc" id="gaugeArc" d="M 25 92 A 65 65 0 0 1 155 92"></path>
+        </svg>
+        <div class="gauge-center"></div>
+        <div class="leaf-mini">🍃</div>
+      </div>
+        <div class="process-label" id="processLabel">Fotosíntesis</div>
+        <div id="statusWord" class="status-word">Óptima</div>
+        <p id="statusText">La planta está funcionando en condiciones ideales.</p>
+      </div>
+    </section>
+
+    <section class="side-card">
+      <h2 id="limitingTitle">Factores limitantes</h2>
+      <div class="factor-row"><span>🌞</span><span id="limLight">Luz</span><b id="limLightVal">Ninguno</b></div>
+      <div class="factor-row"><span>💧</span><span id="limWater">Agua</span><b id="limWaterVal">Ninguno</b></div>
+      <div class="factor-row"><span>⚫</span><span id="limCo2">CO₂</span><b id="limCo2Val">Ninguno</b></div>
+      <div class="factor-row"><span>🌡️</span><span id="limTemp">Temperatura</span><b id="limTempVal">Ninguno</b></div>
+      <div class="factor-row"><span>🍃</span><span id="limChl">Clorofila</span><b id="limChlVal">Ninguno</b></div>
+    </section>
+
+    <section class="side-card">
+      <h2 id="eventTitle">Eventos ambientales</h2>
+      <div class="event-row"><span>🌥️</span><span id="shadeEvent">Sombra pasajera</span><b id="shadeState" class="inactive">Inactivo</b></div>
+      <div class="event-row"><span>🥀</span><span id="droughtEvent">Sequía leve</span><b id="droughtState" class="inactive">Inactivo</b></div>
+      <div class="event-row"><span>☀️</span><span id="heatEvent">Ola de calor</span><b id="heatState" class="inactive">Inactivo</b></div>
+    </section>
+
+    <section class="side-card">
+      <h2 id="moleculeTitle">Moléculas en el sistema</h2>
+      <div class="mol-row"><span>⚫</span><span id="co2Read">CO₂ disponible</span><b id="co2Metric">60%</b></div>
+      <div class="mol-row"><span>💧</span><span id="waterRead">H₂O disponible</span><b id="waterMetric">75%</b></div>
+      <div class="mol-row"><span>🔵</span><span id="o2Read">O₂ producido</span><b id="o2Metric">0.0</b></div>
+      <div class="mol-row"><span>🟣</span><span id="glucoseRead">Glucosa producida</span><b id="glucoseMetric">0.0</b></div>
+    </section>
+  </aside>
+
+  <section class="bottom">
+    <div class="chart-card"><h3 id="rateChartTitle">Tasa de fotosíntesis</h3><canvas id="rateChart" width="700" height="280"></canvas><div class="legend"><span><i class="line"></i><span id="rateLegend">Tasa</span></span><span><i class="line c"></i><span id="controlLegend">Control</span></span></div></div>
+    <div class="chart-card"><h3 id="productsChartTitle">Productos generados</h3><canvas id="productsChart" width="700" height="280"></canvas><div class="legend"><span><i class="line o"></i><span id="o2Legend">Oxígeno</span></span><span><i class="line g"></i><span id="glucoseLegend">Glucosa</span></span></div></div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,v));
+const round=v=>Math.round(v);
+let lang='es', running=false, timer=null, time=0, activeEvent='none';
+let selectedDuration=30;
+let rate=82, oxygen=0, glucose=0, history=[82];
+const CONTROL={light:70,water:75,co2:60,temperature:25,chlorophyll:80};
+
+const I18N={
+  es:{langBtn:'English',variablesTitle:'Variables',scenarioTitle:'Escenario',reset:'🍃 Grupo control',start:'▶ Iniciar',pause:'⏸ Pausar',event:'Aplicar evento ambiental',durationLabel:'Tiempo de observación',elapsedLabel:'Tiempo transcurrido',completed:'Completado',lightLabel:'Intensidad de luz',waterLabel:'Agua (H₂O)',co2Label:'Dióxido de carbono',tempLabel:'Temperatura',chlLabel:'Clorofila',plantStateTitle:'Estado de la planta',processLabel:'Fotosíntesis',optimal:'Óptima',low:'Baja',stress:'Estrés',collapse:'Colapso',statusOptimal:'La planta está funcionando en condiciones ideales.',statusLow:'La fotosíntesis disminuyó por un factor limitante.',statusStress:'La planta muestra señales de estrés ambiental.',statusCollapse:'La fotosíntesis casi se detuvo.',limitingTitle:'Factores limitantes',limLight:'Luz',limWater:'Agua',limCo2:'CO₂',limTemp:'Temperatura',limChl:'Clorofila',none:'Ninguno',lowWord:'Bajo',highWord:'Alto',eventTitle:'Eventos ambientales',shadeEvent:'Sombra pasajera',droughtEvent:'Sequía leve',heatEvent:'Ola de calor',inactive:'Inactivo',active:'Activo',moleculeTitle:'Moléculas en el sistema',co2Read:'CO₂ disponible',waterRead:'H₂O disponible',o2Read:'O₂ producido',glucoseRead:'Glucosa producida',rateChartTitle:'Tasa de fotosíntesis',productsChartTitle:'Productos generados',rateLegend:'Tasa',controlLegend:'Control',o2Legend:'Oxígeno',glucoseLegend:'Glucosa'},
+  en:{langBtn:'Español',variablesTitle:'Variables',scenarioTitle:'Scenario',reset:'🍃 Control group',start:'▶ Start',pause:'⏸ Pause',event:'Apply environmental event',durationLabel:'Observation time',elapsedLabel:'Elapsed time',completed:'Completed',lightLabel:'Light intensity',waterLabel:'Water (H₂O)',co2Label:'Carbon dioxide',tempLabel:'Temperature',chlLabel:'Chlorophyll',plantStateTitle:'Plant status',processLabel:'Photosynthesis',optimal:'Optimal',low:'Low',stress:'Stress',collapse:'Collapse',statusOptimal:'The plant is functioning under ideal conditions.',statusLow:'Photosynthesis decreased due to a limiting factor.',statusStress:'The plant shows signs of environmental stress.',statusCollapse:'Photosynthesis has almost stopped.',limitingTitle:'Limiting factors',limLight:'Light',limWater:'Water',limCo2:'CO₂',limTemp:'Temperature',limChl:'Chlorophyll',none:'None',lowWord:'Low',highWord:'High',eventTitle:'Environmental events',shadeEvent:'Temporary shade',droughtEvent:'Mild drought',heatEvent:'Heat wave',inactive:'Inactive',active:'Active',moleculeTitle:'Molecules in the system',co2Read:'Available CO₂',waterRead:'Available H₂O',o2Read:'Produced O₂',glucoseRead:'Produced glucose',rateChartTitle:'Photosynthesis rate',productsChartTitle:'Generated products',rateLegend:'Rate',controlLegend:'Control',o2Legend:'Oxygen',glucoseLegend:'Glucose'}
+};
+function T(k){return I18N[lang][k]||k}
+function sliders(){return{light:+$('light').value,water:+$('water').value,co2:+$('co2').value,temperature:+$('temperature').value,chlorophyll:+$('chlorophyll').value}}
+function isControl(){const s=sliders();return s.light===70&&s.water===75&&s.co2===60&&s.temperature===25&&s.chlorophyll===80}
+function tempFactor(t){return Math.exp(-Math.pow((t-25)/13,2))}
+function saturating(x,k){
+  return x/(x+k);
+}
+
+function calculate(){
+  const s=sliders();
+
+  // Grupo control: condiciones óptimas y estables para comparar experimentos.
+  if(isControl()){
+    return{
+      rate:82,
+      lightF:88,
+      waterF:92,
+      co2F:86,
+      tempF:95,
+      chlF:92,
+      stomataF:92,
+      stress:0
+    };
+  }
+
+  // 1. Luz: aumenta rápido al inicio, luego se satura.
+  // En luz extrema aparece fotoinhibición, por eso la tasa no crece indefinidamente.
+  let lightF=saturating(s.light,28)*128;
+  if(s.light>88) lightF-=Math.pow(s.light-88,1.25)*1.7;
+  lightF=clamp(lightF);
+
+  // 2. Agua: con poca agua se cierran estomas, baja la entrada real de CO₂
+  // y también se limita la fase luminosa.
+  let waterF=saturating(s.water,22)*120;
+  waterF=clamp(waterF);
+
+  let stomataF;
+  if(s.water<15) stomataF=s.water*3.2;
+  else if(s.water<45) stomataF=48+(s.water-15)*1.25;
+  else stomataF=85+(s.water-45)*0.18;
+  stomataF=clamp(stomataF);
+
+  // 3. CO₂: respuesta de saturación. Aumentar CO₂ ayuda más cuando está bajo;
+  // después se vuelve menos limitante.
+  let co2F=saturating(s.co2,35)*142;
+  co2F=clamp(co2F);
+
+  // CO₂ efectivo: aunque haya CO₂ disponible, si falta agua los estomas se cierran.
+  let effectiveCo2F=co2F*(stomataF/100);
+
+  // 4. Temperatura: las enzimas tienen un óptimo cercano a 25 °C.
+  // Frío ralentiza reacciones; calor excesivo reduce eficiencia.
+  let tempF=tempFactor(s.temperature)*100;
+  tempF=clamp(tempF);
+
+  // 5. Clorofila: mejora la captura de luz, pero también tiene saturación.
+  let chlF=saturating(s.chlorophyll,28)*128;
+  chlF=clamp(chlF);
+
+  // Ley del mínimo + interacción multiplicativa:
+  // la fotosíntesis queda limitada por el factor más bajo, pero todos contribuyen.
+  const factors=[lightF,waterF,effectiveCo2F,tempF,chlF];
+  const minFactor=Math.min(...factors);
+  const geometric=Math.pow(
+    (lightF/100)*(waterF/100)*(effectiveCo2F/100)*(tempF/100)*(chlF/100),
+    1/5
+  )*100;
+
+  let raw=0.58*minFactor+0.42*geometric;
+  raw=raw*1.05;
+
+  // Estrés fisiológico acumulado.
+  let stress=0;
+  if(s.light>88) stress+=Math.pow(s.light-88,1.12)*1.8;      // fotoinhibición
+  if(s.water<20) stress+=(20-s.water)*2.8;                    // estrés hídrico
+  if(s.temperature>34) stress+=Math.pow(s.temperature-34,1.25)*3.1; // calor
+  if(s.temperature<8) stress+=(8-s.temperature)*2.4;           // frío severo
+  if(s.chlorophyll<20) stress+=(20-s.chlorophyll)*1.2;         // baja absorción
+
+  // Calor + sequía juntos intensifican el daño.
+  if(s.temperature>34 && s.water<30) stress+=18;
+
+  let rate=clamp(raw-stress*.45);
+  return{
+    rate,
+    lightF,
+    waterF,
+    co2F:effectiveCo2F,
+    tempF,
+    chlF,
+    stomataF,
+    stress
+  }
+}
+function applyLang(){
+  ['variablesTitle','scenarioTitle','durationLabel','elapsedLabel','lightLabel','waterLabel','co2Label','tempLabel','chlLabel','plantStateTitle','processLabel','limitingTitle','limLight','limWater','limCo2','limTemp','limChl','eventTitle','shadeEvent','droughtEvent','heatEvent','moleculeTitle','co2Read','waterRead','o2Read','glucoseRead','rateChartTitle','productsChartTitle','rateLegend','controlLegend','o2Legend','glucoseLegend'].forEach(id=>{if($(id))$(id).textContent=T(id)});
+  $('langBtn').textContent=T('langBtn');$('resetBtn').textContent=T('reset');$('playBtn').textContent=running?T('pause'):T('start');$('pauseBtn').textContent=T('pause');$('eventBtn').textContent=T('event');render()
+}
+function statusWord(){if(rate<8)return T('collapse');if(rate<35)return T('low');if(calculate().stress>22)return T('stress');return T('optimal')}
+function statusText(){if(rate<8)return T('statusCollapse');if(rate<35)return T('statusLow');if(calculate().stress>22)return T('statusStress');return T('statusOptimal')}
+function limitingLabel(val,type){if(type==='temp'){const t=sliders().temperature;if(t<10)return T('lowWord');if(t>34)return T('highWord');return T('none')}return val<45?T('lowWord'):T('none')}
+function step(){
+  const c=calculate();
+  rate+=(c.rate-rate)*.25;
+
+  // O₂ se asocia a la fotólisis del agua; si falta agua, se produce menos.
+  const oxygenYield=(rate/100)*(c.waterF/100)*1.35;
+
+  // La glucosa depende de la fijación de carbono; si CO₂ o estomas limitan, baja.
+  const glucoseYield=(rate/100)*(c.co2F/100)*1.05;
+
+  oxygen+=oxygenYield;
+  glucose+=glucoseYield;
+  time++;
+  history.push(rate);
+  if(history.length>120)history.shift();
+  render();
+
+  if(time>=selectedDuration){
+    pause(true);
+  }
+}
+function render(){
+  const s=sliders(),c=calculate();
+  $('lightValue').textContent=s.light+'%';$('waterValue').textContent=s.water+'%';$('co2Value').textContent=s.co2+'%';$('tempValue').textContent=s.temperature+' °C';$('chlValue').textContent=s.chlorophyll+'%';
+  $('statusWord').textContent=statusWord();$('statusText').textContent=statusText();
+  const arc=$('gaugeArc');
+  if(arc){
+    const length=204;
+    const pct=clamp(rate,0,100)/100;
+    arc.style.strokeDashoffset=(length*(1-pct)).toFixed(1);
+    arc.style.stroke=rate<8?'#d64747':(rate<35||calculate().stress>22?'#c88718':'#6fbe3f');
+  }
+  selectedDuration=+$('durationSelect').value;
+  const progress=selectedDuration?Math.min(100,(time/selectedDuration)*100):0;
+  $('timeProgress').style.width=progress+'%';
+  $('elapsedRead').textContent=time+' s / '+selectedDuration+' s';
+  $('co2Metric').textContent=s.co2+'%';$('waterMetric').textContent=s.water+'%';$('o2Metric').textContent=oxygen.toFixed(1);$('glucoseMetric').textContent=glucose.toFixed(1);
+  $('limLightVal').textContent=limitingLabel(c.lightF);$('limWaterVal').textContent=limitingLabel(c.waterF);$('limCo2Val').textContent=limitingLabel(c.co2F);$('limTempVal').textContent=limitingLabel(c.tempF,'temp');$('limChlVal').textContent=limitingLabel(c.chlF);
+  ['shade','drought','heat'].forEach(e=>{const el=$(e+'State');el.textContent=activeEvent===e?T('active'):T('inactive');el.className=activeEvent===e?'active-event':'inactive'});
+  document.querySelectorAll('.co2-bubble').forEach(el=>{
+    el.style.animationDuration=(7-(c.co2F/100)*3)+'s';
+    el.style.opacity=Math.max(.18,c.co2F/100);
+  });
+  document.querySelectorAll('.h2o-bubble').forEach(el=>{
+    el.style.animationDuration=(7-(c.waterF/100)*3)+'s';
+    el.style.opacity=Math.max(.18,c.waterF/100);
+  });
+  document.querySelectorAll('.o2-bubble').forEach(el=>el.style.opacity=Math.max(.18,(rate/100)*(c.waterF/100)));
+  document.querySelectorAll('.ray-dynamic').forEach(el=>el.style.opacity=Math.max(.16,c.lightF/100));
+  drawRateChart();drawProductsChart();
+}
+function reset(){
+  running=false;
+  clearInterval(timer);
+  time=0;
+  activeEvent='none';
+  selectedDuration=+$('durationSelect').value;
+  Object.keys(CONTROL).forEach(k=>$(k).value=CONTROL[k]);
+  rate=82;
+  oxygen=0;
+  glucose=0;
+  history=[82];
+  $('playBtn').textContent=T('start');
+  render();
+}
+function play(){
+  if(running)return;
+  selectedDuration=+$('durationSelect').value;
+  if(time>=selectedDuration){
+    time=0;
+    oxygen=0;
+    glucose=0;
+    history=[rate];
+  }
+  running=true;
+  $('playBtn').textContent=T('pause');
+  timer=setInterval(step,1000);
+}
+
+function pause(completed=false){
+  running=false;
+  clearInterval(timer);
+  $('playBtn').textContent=T('start');
+  if(completed){
+    $('playBtn').textContent=T('start');
+  }
+}
+function event(){
+  const e=['shade','drought','heat'][Math.floor(Math.random()*3)];
+  activeEvent=e;
+  if(e==='shade')$('light').value=Math.max(0,+$('light').value-35);
+  if(e==='drought')$('water').value=Math.max(0,+$('water').value-38);
+  if(e==='heat')$('temperature').value=Math.min(45,+$('temperature').value+12);
+  render()
+}
+function chartBase(canvas){const ctx=canvas.getContext('2d'),pad=36,w=canvas.width-pad*2,h=canvas.height-pad*2;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(70,90,55,.16)';ctx.lineWidth=1;for(let i=0;i<=5;i++){const y=pad+h*i/5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+w,y);ctx.stroke()}return{ctx,pad,w,h}}
+function drawRateChart(){const c=$('rateChart'),{ctx,pad,w,h}=chartBase(c);function plot(arr,color,width,dash=[]){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();arr.forEach((v,i)=>{const x=pad+(arr.length===1?0:i/(arr.length-1))*w,y=pad+h-(v/100)*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();ctx.setLineDash([])}plot(Array(history.length).fill(82),'#df9a18',3,[8,6]);plot(history,'#1bbd68',4);ctx.fillStyle='#64766e';ctx.font='12px Arial';ctx.fillText('0',12,pad+h);ctx.fillText('100',8,pad+5)}
+function drawProductsChart(){const c=$('productsChart'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);const vals=[oxygen,glucose],labs=[T('o2Legend'),T('glucoseLegend')],cols=['#228bea','#a657e8'];const max=Math.max(1,...vals)*1.2,base=c.height-38;vals.forEach((v,i)=>{const bw=145,gap=85,x=95+i*(bw+gap),hh=(v/max)*(c.height-78);ctx.fillStyle=cols[i];ctx.fillRect(x,base-hh,bw,hh);ctx.fillStyle='#64766e';ctx.font='13px Arial';ctx.fillText(labs[i],x,base+22);ctx.fillText(v.toFixed(1),x,base-hh-8)});ctx.strokeStyle='rgba(70,90,55,.16)';ctx.beginPath();ctx.moveTo(40,base);ctx.lineTo(c.width-35,base);ctx.stroke()}
+['light','water','co2','temperature','chlorophyll'].forEach(id=>$(id).addEventListener('input',render));
+$('durationSelect').addEventListener('change',()=>{
+  selectedDuration=+$('durationSelect').value;
+  if(time>selectedDuration)time=0;
+  render();
+});
+$('langBtn').onclick=()=>{lang=lang==='es'?'en':'es';applyLang()};
+$('resetBtn').onclick=reset;
+$('playBtn').onclick=()=>running?pause():play();
+$('eventBtn').onclick=event;
+reset();applyLang();
+</script>
+</body>
+</html>
