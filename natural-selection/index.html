@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Selección natural: conejos y zorros</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="title-block">
+          <span class="eyebrow" data-i18n="eyebrow">Simulador educativo</span>
+          <h1 data-i18n="title">Selección natural: conejos y zorros</h1>
+          <p data-i18n="subtitle">Mueve el zorro y haz clic solo cuando su boca esté sobre un conejo para cazarlo.</p>
+        </div>
+        <div class="toolbar" aria-label="Opciones del juego">
+          <label class="language-control" for="languageSelect">
+            <span data-i18n="language">Idioma</span>
+            <select id="languageSelect">
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+            </select>
+          </label>
+          <button id="newGameButton" type="button" data-i18n="newGame">Nuevo juego</button>
+          <button id="pauseButton" type="button" aria-pressed="false" data-i18n="pause">Pausa</button>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Controles del simulador">
+        <fieldset>
+          <legend data-i18n="environment">Ambiente</legend>
+          <label>
+            <input type="radio" name="environment" value="light" checked>
+            <span data-i18n="lightEnv">Claro</span>
+          </label>
+          <label>
+            <input type="radio" name="environment" value="dark">
+            <span data-i18n="darkEnv">Oscuro</span>
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend data-i18n="difficulty">Nivel</legend>
+          <label>
+            <input type="radio" name="difficulty" value="easy">
+            <span data-i18n="easy">Fácil</span>
+          </label>
+          <label>
+            <input type="radio" name="difficulty" value="medium" checked>
+            <span data-i18n="medium">Medio</span>
+          </label>
+          <label>
+            <input type="radio" name="difficulty" value="hard">
+            <span data-i18n="hard">Difícil</span>
+          </label>
+        </fieldset>
+        <div class="stat">
+          <span data-i18n="time">Tiempo</span>
+          <strong id="timer">00:30</strong>
+        </div>
+        <div class="stat">
+          <span data-i18n="caught">Cazados</span>
+          <strong id="caught">0</strong>
+        </div>
+        <div class="stat">
+          <span data-i18n="initial">Inicial</span>
+          <strong>50</strong>
+        </div>
+      </section>
+
+      <section class="game-layout">
+        <div class="habitat-wrap">
+          <canvas id="gameCanvas" width="1000" height="650" aria-label="Área de caza con conejos y zorro"></canvas>
+          <div id="message" class="message">Ubica la boca del zorro sobre un conejo y haz clic para cazar.</div>
+          <section id="startPanel" class="start-panel" aria-live="polite">
+            <span class="report-kicker" data-i18n="readyKicker">Antes de comenzar</span>
+            <h2 data-i18n="readyTitle">Iniciar simulación</h2>
+            <p data-i18n="readyText">El zorro solo caza cuando su boca está exactamente sobre un conejo y haces clic. Los conejos pueden escapar y reaparecer en otra parte.</p>
+            <button id="startButton" type="button" data-i18n="startSimulation">Iniciar simulación</button>
+          </section>
+          <section id="endPanel" class="end-panel" aria-live="polite" hidden>
+            <span class="report-kicker" data-i18n="reportKicker">Reporte final</span>
+            <h2 data-i18n="complete">Simulación completa</h2>
+            <p id="endConclusion" class="report-conclusion"></p>
+            <p id="endSummary" class="report-lead"></p>
+            <div id="endMetrics" class="report-metrics"></div>
+            <p id="endReason" class="report-note"></p>
+          </section>
+        </div>
+
+        <aside class="side-panel" aria-label="Resultados y gráficas">
+          <section class="summary">
+            <h2 data-i18n="result">Resultado</h2>
+            <dl>
+              <div>
+                <dt data-i18n="lightRabbits">Conejos claros</dt>
+                <dd><span id="lightCount">25</span> <span data-i18n="remaining">restantes</span></dd>
+              </div>
+              <div>
+                <dt data-i18n="darkRabbits">Conejos oscuros</dt>
+                <dd><span id="darkCount">25</span> <span data-i18n="remaining">restantes</span></dd>
+              </div>
+            </dl>
+            <p id="interpretation">Al iniciar, ambos grupos tienen la misma población.</p>
+          </section>
+
+          <section class="charts" aria-label="Gráficas de población">
+            <article>
+              <h2 id="lightChartTitle">Población de conejos claros: 50%</h2>
+              <canvas id="lightChart" width="360" height="180"></canvas>
+            </article>
+            <article>
+              <h2 id="darkChartTitle">Población de conejos oscuros: 50%</h2>
+              <canvas id="darkChart" width="360" height="180"></canvas>
+            </article>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <aside id="creditBanner" class="credit-banner">
+      <span>Creado por Rafael Otero</span>
+      <button id="closeCredit" type="button" aria-label="Cerrar" data-i18n="close">Cerrar</button>
+    </aside>
+
+    <script src="app.js"></script>
+  </body>
+</html>
