@@ -1,1 +1,2028 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mutation Lab</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17202a;
+        --muted: #667085;
+        --line: #d8dee8;
+        --panel: #ffffff;
+        --page: #f4f7fb;
+        --accent: #167c80;
+        --accent-strong: #0f5f62;
+        --warn: #b54708;
+        --bad: #b42318;
+        --good: #027a48;
+        --violet: #6842c8;
+        --changed: #fff0c2;
+      }
 
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(180deg, rgba(22, 124, 128, 0.08), transparent 34%),
+          var(--page);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      .app-shell {
+        width: min(1380px, calc(100% - 20px));
+        min-height: 100svh;
+        margin: 0 auto;
+        padding: 4px 0;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 6px;
+      }
+
+      .lab-panel,
+      .result-section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 18px 45px rgba(25, 38, 58, 0.08);
+      }
+
+      .lab-panel {
+        padding: 14px;
+      }
+
+      .title-row,
+      .button-row,
+      .top-actions,
+      .workspace,
+      .learning-row,
+      .process-steps,
+      .protein-compare-row,
+      .challenge-row,
+      .protein-strip,
+      .codon-row,
+      .diff-row,
+      .rna-row,
+      .label-line,
+      .section-title {
+        display: flex;
+      }
+
+      .title-row {
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 8px;
+      }
+
+      .top-actions {
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .language-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 800;
+      }
+
+      select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 34px 8px 10px;
+        color: var(--ink);
+        background: #fff;
+        font-weight: 800;
+      }
+
+      .eyebrow {
+        margin: 0 0 2px;
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 0;
+        font-size: clamp(1.45rem, 2.7vw, 2.55rem);
+        line-height: 0.95;
+      }
+
+      h2 {
+        margin-bottom: 8px;
+        font-size: 1rem;
+      }
+
+      .status-pill {
+        flex: 0 0 auto;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 12px;
+        color: var(--accent-strong);
+        font-weight: 800;
+        background: #eef9f8;
+      }
+
+      .workspace {
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .editor {
+        flex: 1 1 58%;
+        min-width: 0;
+      }
+
+      .sequence-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .overview {
+        flex: 1 1 42%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      label,
+      .label-line {
+        margin-bottom: 5px;
+        font-weight: 800;
+      }
+
+      .label-line,
+      .section-title {
+        align-items: center;
+        gap: 8px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 42px;
+        resize: vertical;
+        margin-bottom: 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 7px 10px;
+        color: var(--ink);
+        font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+        font-size: 1rem;
+        line-height: 1.25;
+        text-transform: uppercase;
+      }
+
+      textarea:focus,
+      button:focus-visible,
+      select:focus-visible {
+        outline: 3px solid rgba(22, 124, 128, 0.28);
+        outline-offset: 2px;
+      }
+
+      .button-row {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .learning-row {
+        align-items: stretch;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .control-card {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 67px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px;
+        background: #fbfcfe;
+      }
+
+      .control-card label,
+      .control-title {
+        display: block;
+        margin: 0 0 3px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .control-card select {
+        width: 100%;
+        min-height: 28px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+
+      .mode-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+      }
+
+      .mode-btn {
+        min-height: 28px;
+        padding: 5px 6px;
+        color: var(--ink);
+        background: #edf1f6;
+        font-size: 0.76rem;
+      }
+
+      .mode-btn.active {
+        color: #fff;
+        background: var(--accent);
+      }
+
+      .process-steps {
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+      }
+
+      .process-step {
+        flex: 1 1 0;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 5px;
+        text-align: center;
+        color: #344054;
+        background: #fff;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .process-step.active {
+        border-color: #9e77ed;
+        color: var(--violet);
+        background: #f4f0ff;
+      }
+
+      .challenge-row {
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .challenge-row #challenge-text {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .challenge-row p {
+        margin: 0;
+        color: #344054;
+        max-height: none;
+        overflow: hidden;
+        font-size: 0.82rem;
+        line-height: 1.18;
+      }
+
+      .challenge-result {
+        display: grid;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      .challenge-pill {
+        justify-self: start;
+        border-radius: 999px;
+        padding: 3px 8px;
+        color: var(--bad);
+        background: #fee4e2;
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      .challenge-detail {
+        display: block;
+        max-width: 100%;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.76rem;
+      }
+
+      .mini-action {
+        min-height: 28px;
+        padding: 5px 8px;
+        white-space: nowrap;
+      }
+
+      button {
+        min-height: 42px;
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #fff;
+        background: var(--accent);
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--accent-strong);
+      }
+
+      button.secondary {
+        color: var(--ink);
+        background: #edf1f6;
+      }
+
+      button.secondary:hover {
+        background: #dde5ee;
+      }
+
+      .help-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        min-height: 24px;
+        padding: 0;
+        border: 1px solid #9fb3c8;
+        border-radius: 50%;
+        color: var(--accent-strong);
+        background: #eef9f8;
+        font-size: 0.85rem;
+        line-height: 1;
+      }
+
+      .help-btn:hover {
+        color: #fff;
+        background: var(--accent);
+      }
+
+      .metric {
+        min-height: 58px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+        background: #fbfcfe;
+      }
+
+      .metric span {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 800;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 0.96rem;
+        line-height: 1.15;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 0;
+        min-height: 0;
+        align-content: start;
+        align-items: start;
+      }
+
+      .result-section {
+        min-height: 0;
+        overflow: hidden;
+        padding: 12px;
+      }
+
+      .sequence-section,
+      .rna-section {
+        grid-column: span 6;
+      }
+
+      .translation-section {
+        grid-column: span 4;
+      }
+
+      .consequence-section {
+        grid-column: span 5;
+      }
+
+      .guide-section {
+        grid-column: span 3;
+      }
+
+      .result-section p,
+      .result-section li {
+        color: #344054;
+        line-height: 1.35;
+        font-size: 0.92rem;
+      }
+
+      .result-section ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .result-section.guide-section {
+        padding: 10px 12px;
+      }
+
+      .guide-section h2 {
+        margin-bottom: 6px;
+      }
+
+      .guide-section li,
+      .consequence-section p {
+        font-size: 0.82rem;
+        line-height: 1.18;
+      }
+
+      .guide-section li {
+        margin-bottom: 2px;
+      }
+
+      .guide-section ul {
+        display: block;
+        padding-left: 18px;
+        list-style-position: outside;
+      }
+
+      .sequence-diff,
+      .rna-panel {
+        overflow-x: auto;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+      }
+
+      .diff-row,
+      .rna-row {
+        align-items: center;
+        min-width: max-content;
+        gap: 3px;
+        margin-bottom: 6px;
+      }
+
+      .diff-label {
+        width: 78px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .base {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 27px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        font-family: "Cascadia Mono", Consolas, monospace;
+        font-weight: 800;
+      }
+
+      .base.rna {
+        border-color: #b7d7e8;
+        background: #eff8ff;
+      }
+
+      .base.changed {
+        border-color: #f5c542;
+        background: var(--changed);
+      }
+
+      .translation-table {
+        display: grid;
+        gap: 7px;
+      }
+
+      .codon-row {
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 5px 7px;
+        background: #fbfcfe;
+      }
+
+      .codon {
+        font-family: "Cascadia Mono", Consolas, monospace;
+        font-weight: 900;
+        font-size: 0.9rem;
+      }
+
+      .arrow {
+        color: var(--muted);
+      }
+
+      .tag {
+        border-radius: 999px;
+        padding: 5px 9px;
+        background: #edf1f6;
+        color: #344054;
+        font-size: 0.82rem;
+        font-weight: 900;
+      }
+
+      .tag.changed {
+        background: #fff0c2;
+        color: var(--warn);
+      }
+
+      .tag.stop {
+        background: #fee4e2;
+        color: var(--bad);
+      }
+
+      .tag.same {
+        background: #dcfae6;
+        color: var(--good);
+      }
+
+      .protein-strip {
+        display: none;
+      }
+
+      .protein-compare {
+        display: grid;
+        gap: 3px;
+        margin-top: 6px;
+      }
+
+      .protein-compare-row {
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .protein-compare-label {
+        width: 52px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 900;
+      }
+
+      .impact-meter {
+        margin-top: 6px;
+      }
+
+      .impact-track {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+
+      .impact-step {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 5px;
+        text-align: center;
+        color: var(--muted);
+        background: #fff;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .impact-step.active.low {
+        border-color: #75e0a7;
+        color: var(--good);
+        background: #dcfae6;
+      }
+
+      .impact-step.active.medium {
+        border-color: #fdb022;
+        color: var(--warn);
+        background: #fff0c2;
+      }
+
+      .impact-step.active.high {
+        border-color: #f97066;
+        color: var(--bad);
+        background: #fee4e2;
+      }
+
+      .amino {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 4px 6px;
+        background: #fff;
+        font-weight: 900;
+        font-size: 0.82rem;
+      }
+
+      .amino.changed {
+        border-color: #9e77ed;
+        color: var(--violet);
+        background: #f4f0ff;
+      }
+
+      .amino.stop-amino {
+        border-color: #fda29b;
+        color: var(--bad);
+        background: #fff1f0;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(17, 24, 39, 0.56);
+      }
+
+      .modal-backdrop[hidden] {
+        display: none;
+      }
+
+      .modal {
+        width: min(1120px, calc(100vw - 24px));
+        max-height: calc(100svh - 24px);
+        overflow: auto;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: #fff;
+        box-shadow: 0 28px 70px rgba(12, 18, 28, 0.28);
+      }
+
+      .help-modal {
+        width: min(560px, 100%);
+      }
+
+      .modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border-bottom: 1px solid var(--line);
+        padding: 12px 16px;
+        background: #fff;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .modal-body {
+        padding: 16px;
+      }
+
+      .modal-body p {
+        color: #344054;
+        line-height: 1.65;
+      }
+
+      .glossary-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .glossary-item {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #fbfcfe;
+      }
+
+      .glossary-item strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .icon-button {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
+        padding: 0;
+        border-radius: 50%;
+        color: var(--ink);
+        background: #edf1f6;
+        font-size: 1.5rem;
+        line-height: 1;
+      }
+
+      .icon-button:hover {
+        background: #dde5ee;
+      }
+
+      .code-note {
+        margin: 0;
+        padding: 10px 16px 0;
+        color: #344054;
+        line-height: 1.55;
+      }
+
+      .genetic-code-wrap {
+        --axis-size: 30px;
+        display: grid;
+        grid-template-columns: var(--axis-size) minmax(0, 1fr) var(--axis-size);
+        grid-template-rows: auto auto;
+        gap: 6px;
+        min-width: 0;
+        padding: 12px 16px 16px;
+      }
+
+      .axis {
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        font-weight: 900;
+      }
+
+      .axis-top {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 1.05rem;
+      }
+
+      .axis-left,
+      .axis-right {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-size: 0.95rem;
+      }
+
+      .axis-left {
+        grid-column: 1;
+        grid-row: 2;
+        transform: rotate(180deg);
+      }
+
+      .axis-right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      .genetic-code-table {
+        grid-column: 2;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: 42px repeat(4, minmax(96px, 1fr)) 42px;
+        border: 1px solid #53747c;
+        background: #53747c;
+        gap: 1px;
+      }
+
+      .corner-cell,
+      .letter-head,
+      .first-letter,
+      .third-letter,
+      .codon-cell {
+        background: #f8f9fc;
+      }
+
+      .corner-cell,
+      .letter-head,
+      .first-letter,
+      .third-letter {
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+
+      .letter-head,
+      .first-letter,
+      .third-letter {
+        background: #b9e3ee;
+      }
+
+      .letter-head {
+        min-height: 34px;
+        font-size: 1.35rem;
+      }
+
+      .first-letter {
+        font-size: 1.45rem;
+      }
+
+      .third-letter {
+        grid-template-rows: repeat(4, 1fr);
+        min-height: 112px;
+        color: #12343a;
+      }
+
+      .third-letter span {
+        display: grid;
+        place-items: center;
+      }
+
+      .codon-block {
+        display: grid;
+        grid-template-rows: repeat(4, 1fr);
+      }
+
+      .codon-cell {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        min-height: 28px;
+        padding: 3px 7px;
+        gap: 6px;
+        font-size: 0.86rem;
+      }
+
+      .rna-codon {
+        font-family: "Cascadia Mono", Consolas, monospace;
+        font-weight: 900;
+      }
+
+      .amino-name {
+        color: #232936;
+        font-weight: 800;
+      }
+
+      .codon-cell.start {
+        background: #62c85d;
+      }
+
+      .codon-cell.stop {
+        background: #ee3d20;
+        color: #fff;
+      }
+
+      .codon-cell.stop .amino-name {
+        color: #fff;
+      }
+
+      @media (max-width: 820px) {
+        .workspace,
+        .title-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .sequence-inputs {
+          grid-template-columns: 1fr;
+        }
+
+        .learning-row {
+          flex-direction: column;
+        }
+
+        .overview {
+          grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .sequence-section,
+        .rna-section,
+        .translation-section,
+        .consequence-section,
+        .result-section.guide-section {
+          grid-column: 1 / -1;
+        }
+
+        .guide-section ul {
+          grid-template-columns: 1fr;
+        }
+
+        .lab-panel,
+        .result-section {
+          padding: 18px;
+        }
+
+        .genetic-code-wrap {
+          overflow-x: auto;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .app-shell {
+          width: min(100% - 20px, 1180px);
+          padding: 18px 0;
+        }
+
+        .overview {
+          grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .diff-label {
+          width: 72px;
+        }
+
+        .base {
+          width: 30px;
+          height: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="lab-panel" aria-labelledby="app-title">
+        <div class="title-row">
+          <div>
+            <p class="eyebrow" data-i18n="eyebrow">Simulador de genética</p>
+            <h1 id="app-title">Mutation Lab</h1>
+          </div>
+          <div class="top-actions">
+            <label class="language-label" for="language-select" data-i18n="languageLabel">Idioma</label>
+            <select id="language-select" aria-label="Idioma">
+              <option value="es">Español</option>
+              <option value="en">English</option>
+              <option value="pt">Português</option>
+            </select>
+            <div class="status-pill" id="mutation-status">Listo</div>
+          </div>
+        </div>
+
+        <div class="workspace">
+          <section class="editor" aria-label="Editor de secuencias">
+            <div class="sequence-inputs">
+              <div class="sequence-field">
+                <div class="label-line">
+                  <label for="original-dna" data-i18n="originalDna">ADN original</label>
+                  <button class="help-btn" type="button" data-help="dna" aria-label="Ayuda">?</button>
+                </div>
+                <textarea id="original-dna" spellcheck="false">ATG CCT GAA</textarea>
+              </div>
+
+              <div class="sequence-field">
+                <div class="label-line">
+                  <label for="mutated-dna" data-i18n="mutatedDna">ADN mutado</label>
+                  <button class="help-btn" type="button" data-help="mutation" aria-label="Ayuda">?</button>
+                </div>
+                <textarea id="mutated-dna" spellcheck="false">ATG CAT GAA</textarea>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button id="analyze-btn" type="button" data-i18n="analyze">Analizar mutación</button>
+              <button class="secondary" id="random-btn" type="button" data-i18n="random">Mutación aleatoria</button>
+              <button class="secondary" id="code-btn" type="button" data-i18n="viewCode">Ver Código Genético ARN</button>
+              <button class="secondary" id="glossary-btn" type="button" data-i18n="glossary">Glosario</button>
+              <button class="secondary" id="reset-btn" type="button" data-i18n="reset">Reiniciar</button>
+            </div>
+          </section>
+
+          <section class="overview" aria-label="Resumen de la mutación">
+            <div class="metric">
+              <span data-i18n="typeLabel">Tipo</span>
+              <strong id="mutation-type">Sustitución</strong>
+            </div>
+            <div class="metric">
+              <span data-i18n="aminoLabel">Aminoácido</span>
+              <strong id="amino-change">Pro → His</strong>
+            </div>
+            <div class="metric">
+              <span data-i18n="proteinLabel">Proteína</span>
+              <strong id="protein-impact">Cambió</strong>
+            </div>
+            <div class="metric">
+              <span data-i18n="classificationLabel">Clasificación</span>
+              <strong id="classification">Neutra posible</strong>
+            </div>
+          </section>
+        </div>
+
+        <div class="learning-row">
+          <div class="control-card">
+            <label for="preset-select" data-i18n="presetLabel">Casos prearmados</label>
+            <select id="preset-select"></select>
+          </div>
+          <div class="control-card">
+            <span class="control-title" data-i18n="mutationMode">Tipo guiado</span>
+            <div class="mode-group">
+              <button class="mode-btn active" type="button" data-mode="substitution" data-i18n="modeSubstitution">Sustitución</button>
+              <button class="mode-btn" type="button" data-mode="insertion" data-i18n="modeInsertion">Inserción</button>
+              <button class="mode-btn" type="button" data-mode="deletion" data-i18n="modeDeletion">Deleción</button>
+            </div>
+          </div>
+          <div class="control-card">
+            <span class="control-title" data-i18n="processTitle">Proceso</span>
+            <div class="process-steps">
+              <span class="process-step" data-step="dna" data-i18n="stepDna">ADN</span>
+              <span class="process-step" data-step="rna" data-i18n="stepRna">ARN</span>
+              <span class="process-step" data-step="codons" data-i18n="stepCodons">Codones</span>
+              <span class="process-step" data-step="protein" data-i18n="stepProtein">Proteína</span>
+            </div>
+          </div>
+          <div class="control-card">
+            <span class="control-title" data-i18n="challengeTitle">Modo reto</span>
+            <div class="challenge-row">
+              <p id="challenge-text"></p>
+              <button class="secondary mini-action" id="challenge-btn" type="button" data-i18n="reveal">Revelar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="results-grid">
+        <article class="result-section sequence-section">
+          <div class="section-title">
+            <h2 data-i18n="whatChanged">Qué cambió</h2>
+            <button class="help-btn" type="button" data-help="baseChange" aria-label="Ayuda">?</button>
+          </div>
+          <div id="sequence-diff" class="sequence-diff" aria-live="polite"></div>
+          <p id="change-explanation"></p>
+        </article>
+
+        <article class="result-section rna-section">
+          <div class="section-title">
+            <h2 data-i18n="rnaTitle">ARN mensajero</h2>
+            <button class="help-btn" type="button" data-help="rna" aria-label="Ayuda">?</button>
+          </div>
+          <div class="rna-panel" id="rna-panel"></div>
+          <p data-i18n="rnaNote">El simulador transcribe ADN a ARN cambiando T por U antes de usar el código genético.</p>
+        </article>
+
+        <article class="result-section translation-section">
+          <div class="section-title">
+            <h2 data-i18n="translation">Traducción</h2>
+            <button class="help-btn" type="button" data-help="codon" aria-label="Ayuda">?</button>
+          </div>
+          <div class="translation-table" id="translation-table"></div>
+        </article>
+
+        <article class="result-section consequence-section">
+          <div class="section-title">
+            <h2 data-i18n="consequenceTitle">Consecuencia</h2>
+            <button class="help-btn" type="button" data-help="classification" aria-label="Ayuda">?</button>
+          </div>
+          <p id="consequence"></p>
+          <div class="protein-compare" id="protein-compare"></div>
+          <div class="impact-meter" id="impact-meter"></div>
+          <div class="protein-strip" id="protein-strip"></div>
+        </article>
+
+        <article class="result-section guide-section">
+          <h2 data-i18n="miniGuide">Mini guía</h2>
+          <ul>
+            <li><strong data-i18n="silentTerm">Silenciosa:</strong> <span data-i18n="silentGuide">cambia el ADN, pero no el aminoácido.</span></li>
+            <li><strong data-i18n="neutralTerm">Neutra:</strong> <span data-i18n="neutralGuide">cambia un aminoácido sin producir una señal crítica.</span></li>
+            <li><strong data-i18n="harmfulTerm">Perjudicial:</strong> <span data-i18n="harmfulGuide">aparece un codón STOP temprano o cambia mucho la proteína.</span></li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="code-modal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="code-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" data-i18n="reference">Referencia</p>
+            <h2 id="code-title" data-i18n="codeTitle">Código genético ARN</h2>
+          </div>
+          <button class="icon-button" id="close-code-btn" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <p class="code-note" data-i18n="codeNote">Esta tabla se lee con codones de ARN: U, C, A y G. Cada codón de tres letras apunta a un aminoácido.</p>
+        <div class="genetic-code-wrap">
+          <div class="axis axis-top" data-i18n="secondLetter">Segunda letra</div>
+          <div class="axis axis-left" data-i18n="firstLetter">Primera letra</div>
+          <div class="axis axis-right" data-i18n="thirdLetter">Tercera letra</div>
+          <div class="genetic-code-table" id="genetic-code-table"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="help-modal" hidden>
+      <section class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" data-i18n="helpEyebrow">Pista rápida</p>
+            <h2 id="help-title"></h2>
+          </div>
+          <button class="icon-button" id="close-help-btn" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p id="help-body"></p>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="glossary-modal" hidden>
+      <section class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="glossary-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" data-i18n="reference">Referencia</p>
+            <h2 id="glossary-title" data-i18n="glossary">Glosario</h2>
+          </div>
+          <button class="icon-button" id="close-glossary-btn" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="glossary-list" id="glossary-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const geneticCode = {
+        TTT: ["Phe", "F"], TTC: ["Phe", "F"], TTA: ["Leu", "L"], TTG: ["Leu", "L"],
+        TCT: ["Ser", "S"], TCC: ["Ser", "S"], TCA: ["Ser", "S"], TCG: ["Ser", "S"],
+        TAT: ["Tyr", "Y"], TAC: ["Tyr", "Y"], TAA: ["STOP", "*"], TAG: ["STOP", "*"],
+        TGT: ["Cys", "C"], TGC: ["Cys", "C"], TGA: ["STOP", "*"], TGG: ["Trp", "W"],
+        CTT: ["Leu", "L"], CTC: ["Leu", "L"], CTA: ["Leu", "L"], CTG: ["Leu", "L"],
+        CCT: ["Pro", "P"], CCC: ["Pro", "P"], CCA: ["Pro", "P"], CCG: ["Pro", "P"],
+        CAT: ["His", "H"], CAC: ["His", "H"], CAA: ["Gln", "Q"], CAG: ["Gln", "Q"],
+        CGT: ["Arg", "R"], CGC: ["Arg", "R"], CGA: ["Arg", "R"], CGG: ["Arg", "R"],
+        ATT: ["Ile", "I"], ATC: ["Ile", "I"], ATA: ["Ile", "I"], ATG: ["Met", "M"],
+        ACT: ["Thr", "T"], ACC: ["Thr", "T"], ACA: ["Thr", "T"], ACG: ["Thr", "T"],
+        AAT: ["Asn", "N"], AAC: ["Asn", "N"], AAA: ["Lys", "K"], AAG: ["Lys", "K"],
+        AGT: ["Ser", "S"], AGC: ["Ser", "S"], AGA: ["Arg", "R"], AGG: ["Arg", "R"],
+        GTT: ["Val", "V"], GTC: ["Val", "V"], GTA: ["Val", "V"], GTG: ["Val", "V"],
+        GCT: ["Ala", "A"], GCC: ["Ala", "A"], GCA: ["Ala", "A"], GCG: ["Ala", "A"],
+        GAT: ["Asp", "D"], GAC: ["Asp", "D"], GAA: ["Glu", "E"], GAG: ["Glu", "E"],
+        GGT: ["Gly", "G"], GGC: ["Gly", "G"], GGA: ["Gly", "G"], GGG: ["Gly", "G"],
+      };
+
+      const examples = [
+        ["ATG CCT GAA", "ATG CAT GAA"],
+        ["ATG GCT TTT GAA", "ATG GCC TTT GAA"],
+        ["ATG AAA CCT GGA", "ATG TAA CCT GGA"],
+        ["ATG TCT GAC", "ATG TCA GAC"],
+        ["ATG CAA GGT TCC", "ATG CAG GGT TCC"],
+      ];
+
+      const presets = [
+        { key: "custom", original: "ATG CCT GAA", mutated: "ATG CAT GAA", mode: "substitution" },
+        { key: "silent", original: "ATG GCT TTT GAA", mutated: "ATG GCC TTT GAA", mode: "substitution" },
+        { key: "amino", original: "ATG CCT GAA", mutated: "ATG CAT GAA", mode: "substitution" },
+        { key: "stop", original: "ATG AAA CCT GGA", mutated: "ATG TAA CCT GGA", mode: "substitution" },
+        { key: "insertion", original: "ATG CCT GAA", mutated: "ATG ACC TGA A", mode: "insertion" },
+        { key: "deletion", original: "ATG CCT GAA", mutated: "ATG CTG AA", mode: "deletion" },
+      ];
+
+      const translations = {
+        es: {
+          eyebrow: "Simulador de genética",
+          languageLabel: "Idioma",
+          originalDna: "ADN original",
+          mutatedDna: "ADN mutado",
+          analyze: "Analizar mutación",
+          random: "Mutación aleatoria",
+          viewCode: "Ver Código Genético ARN",
+          glossary: "Glosario",
+          reset: "Reiniciar",
+          presetLabel: "Casos prearmados",
+          mutationMode: "Tipo guiado",
+          modeSubstitution: "Sustitución",
+          modeInsertion: "Inserción",
+          modeDeletion: "Deleción",
+          processTitle: "Proceso",
+          stepDna: "ADN",
+          stepRna: "ARN",
+          stepCodons: "Codones",
+          stepProtein: "Proteína",
+          challengeTitle: "Modo reto",
+          reveal: "Revelar",
+          hide: "Ocultar",
+          challengePrompt: "Antes de mirar: ¿qué crees que pasará con la proteína?",
+          challengeAnswerLabel: "Respuesta",
+          compareOriginal: "Original",
+          compareMutated: "Mutada",
+          impactTitle: "Impacto",
+          impactLow: "Bajo",
+          impactMedium: "Medio",
+          impactHigh: "Alto",
+          typeLabel: "Tipo",
+          aminoLabel: "Aminoácido",
+          proteinLabel: "Proteína",
+          classificationLabel: "Clasificación",
+          whatChanged: "Qué cambió",
+          rnaTitle: "ARN mensajero",
+          rnaNote: "El simulador transcribe ADN a ARN cambiando T por U antes de usar el código genético.",
+          translation: "Traducción",
+          consequenceTitle: "Consecuencia",
+          miniGuide: "Mini guía",
+          silentTerm: "Silenciosa:",
+          neutralTerm: "Neutra:",
+          harmfulTerm: "Perjudicial:",
+          silentGuide: "cambia el ADN, pero no el aminoácido.",
+          neutralGuide: "cambia un aminoácido sin producir una señal crítica.",
+          harmfulGuide: "aparece un codón STOP temprano o cambia mucho la proteína.",
+          reference: "Referencia",
+          codeTitle: "Código genético ARN",
+          codeNote: "Esta tabla se lee con codones de ARN: U, C, A y G. Cada codón de tres letras apunta a un aminoácido.",
+          secondLetter: "Segunda letra",
+          firstLetter: "Primera letra",
+          thirdLetter: "Tercera letra",
+          helpEyebrow: "Pista rápida",
+          close: "Cerrar",
+          incomplete: "Secuencia incompleta",
+          incompleteDetail: "Escribe bases A, T, C o G en ambas secuencias para analizar la mutación.",
+          noDifferences: "No hay diferencias entre las secuencias.",
+          changedBases: (bases, codons) => `${bases} base${bases === 1 ? "" : "s"} cambiada${bases === 1 ? "" : "s"} en ${codons} codón${codons === 1 ? "" : "es"}.`,
+          rowOriginal: "Original",
+          rowMutated: "Mutada",
+          dnaLabel: "ADN",
+          rnaLabel: "ARN",
+          to: "a",
+          changed: "Cambió",
+          same: "Igual",
+          noChange: "Sin cambio",
+          stop: "STOP",
+          mutationTypes: {
+            none: "Sin mutación",
+            substitution: "Sustitución",
+            substitutions: "Sustituciones",
+            insertion: "Inserción",
+            deletion: "Deleción",
+          },
+          impacts: {
+            unchanged: "No cambió",
+            changed: "Cambió",
+            truncated: "Proteína truncada",
+            frame: "Marco alterado",
+          },
+          classifications: {
+            noChange: "Sin cambio",
+            silent: "Silenciosa",
+            harmful: "Perjudicial probable",
+            possibleHarmful: "Perjudicial posible",
+            neutral: "Neutra posible",
+          },
+          details: {
+            unchanged: "Las dos secuencias producen la misma cadena de aminoácidos.",
+            silent: "El ADN cambió, pero el codón nuevo codifica el mismo aminoácido.",
+            stop: "La mutación introdujo un codón STOP temprano, así que la proteína puede quedar incompleta.",
+            frame: "Cambió la longitud de la secuencia. Si la inserción o deleción no conserva grupos de tres bases, puede alterar todos los codones posteriores.",
+            amino: "Cambió al menos un aminoácido. En un organismo real, el efecto depende de la posición y función de esa proteína.",
+          },
+          help: {
+            dna: ["¿Qué es el ADN?", "El ADN guarda la información genética con cuatro bases: A, T, C y G. En este simulador escribes una secuencia corta para ver cómo un cambio puede modificar la proteína final."],
+            rna: ["¿Por qué aparece ARN?", "Para fabricar proteínas, la célula primero transcribe el ADN a ARN mensajero. En esa copia, la T del ADN se reemplaza por U. Por eso ATG se convierte en AUG."],
+            mutation: ["¿Qué es una mutación?", "Una mutación es un cambio en la secuencia. Puede ser una sustitución, inserción o deleción. No todas las mutaciones son dañinas."],
+            baseChange: ["¿Qué indican los cuadros amarillos?", "Marcan las bases que son distintas entre la secuencia original y la mutada. El simulador cuenta cuántas bases y codones fueron afectados."],
+            codon: ["¿Qué es un codón?", "Un codón es un grupo de tres letras de ARN. Cada codón se traduce como un aminoácido específico o como una señal STOP."],
+            classification: ["¿Qué significan las cajas de la proteína?", "Cada caja muestra el aminoácido que se agregaría a la proteína. Por ejemplo, Met significa metionina. STOP no es un aminoácido: es una señal para detener la construcción de la proteína. Si aparece temprano, la proteína puede quedar incompleta."],
+          },
+          presets: {
+            custom: "Personalizado",
+            silent: "Mutación silenciosa",
+            amino: "Cambio de aminoácido",
+            stop: "STOP temprano",
+            insertion: "Inserción",
+            deletion: "Deleción",
+          },
+          glossaryItems: [
+            ["Base nitrogenada", "Letra química del ADN o ARN. En ADN se usan A, T, C y G; en ARN se usa U en lugar de T."],
+            ["Codón", "Grupo de tres letras de ARN que indica un aminoácido o una señal STOP."],
+            ["Aminoácido", "Pieza pequeña que se une con otras para formar una proteína."],
+            ["Proteína", "Cadena de aminoácidos que puede cumplir funciones en la célula."],
+            ["STOP", "Señal que detiene la traducción. Si aparece antes de tiempo, la proteína puede quedar incompleta."],
+            ["Inserción", "Mutación donde se agregan una o más bases."],
+            ["Deleción", "Mutación donde se eliminan una o más bases."],
+          ],
+        },
+        en: {
+          eyebrow: "Genetics simulator",
+          languageLabel: "Language",
+          originalDna: "Original DNA",
+          mutatedDna: "Mutated DNA",
+          analyze: "Analyze mutation",
+          random: "Random mutation",
+          viewCode: "View RNA Genetic Code",
+          glossary: "Glossary",
+          reset: "Reset",
+          presetLabel: "Preset cases",
+          mutationMode: "Guided type",
+          modeSubstitution: "Substitution",
+          modeInsertion: "Insertion",
+          modeDeletion: "Deletion",
+          processTitle: "Process",
+          stepDna: "DNA",
+          stepRna: "RNA",
+          stepCodons: "Codons",
+          stepProtein: "Protein",
+          challengeTitle: "Challenge mode",
+          reveal: "Reveal",
+          hide: "Hide",
+          challengePrompt: "Before looking: what do you think will happen to the protein?",
+          challengeAnswerLabel: "Answer",
+          compareOriginal: "Original",
+          compareMutated: "Mutated",
+          impactTitle: "Impact",
+          impactLow: "Low",
+          impactMedium: "Medium",
+          impactHigh: "High",
+          typeLabel: "Type",
+          aminoLabel: "Amino acid",
+          proteinLabel: "Protein",
+          classificationLabel: "Classification",
+          whatChanged: "What changed",
+          rnaTitle: "Messenger RNA",
+          rnaNote: "The simulator transcribes DNA to RNA by changing T into U before using the genetic code.",
+          translation: "Translation",
+          consequenceTitle: "Consequence",
+          miniGuide: "Mini guide",
+          silentTerm: "Silent:",
+          neutralTerm: "Neutral:",
+          harmfulTerm: "Harmful:",
+          silentGuide: "the DNA changes, but the amino acid does not.",
+          neutralGuide: "an amino acid changes without a critical warning sign.",
+          harmfulGuide: "an early STOP codon appears or the protein changes a lot.",
+          reference: "Reference",
+          codeTitle: "RNA genetic code",
+          codeNote: "This table is read with RNA codons: U, C, A, and G. Each three-letter codon points to an amino acid.",
+          secondLetter: "Second letter",
+          firstLetter: "First letter",
+          thirdLetter: "Third letter",
+          helpEyebrow: "Quick hint",
+          close: "Close",
+          incomplete: "Incomplete sequence",
+          incompleteDetail: "Type A, T, C, or G bases in both sequences to analyze the mutation.",
+          noDifferences: "There are no differences between the sequences.",
+          changedBases: (bases, codons) => `${bases} changed base${bases === 1 ? "" : "s"} across ${codons} codon${codons === 1 ? "" : "s"}.`,
+          rowOriginal: "Original",
+          rowMutated: "Mutated",
+          dnaLabel: "DNA",
+          rnaLabel: "RNA",
+          to: "to",
+          changed: "Changed",
+          same: "Same",
+          noChange: "No change",
+          stop: "STOP",
+          mutationTypes: {
+            none: "No mutation",
+            substitution: "Substitution",
+            substitutions: "Substitutions",
+            insertion: "Insertion",
+            deletion: "Deletion",
+          },
+          impacts: {
+            unchanged: "Unchanged",
+            changed: "Changed",
+            truncated: "Truncated protein",
+            frame: "Reading frame altered",
+          },
+          classifications: {
+            noChange: "No change",
+            silent: "Silent",
+            harmful: "Probably harmful",
+            possibleHarmful: "Possibly harmful",
+            neutral: "Possibly neutral",
+          },
+          details: {
+            unchanged: "Both sequences produce the same amino acid chain.",
+            silent: "The DNA changed, but the new codon still codes for the same amino acid.",
+            stop: "The mutation introduced an early STOP codon, so the protein may be incomplete.",
+            frame: "The sequence length changed. If an insertion or deletion does not preserve groups of three bases, it can alter every codon after it.",
+            amino: "At least one amino acid changed. In a real organism, the effect depends on the position and function of that protein.",
+          },
+          help: {
+            dna: ["What is DNA?", "DNA stores genetic information with four bases: A, T, C, and G. In this simulator you enter a short sequence to see how a change can affect the final protein."],
+            rna: ["Why does RNA appear?", "To make proteins, the cell first transcribes DNA into messenger RNA. In that copy, DNA's T is replaced by U. That is why ATG becomes AUG."],
+            mutation: ["What is a mutation?", "A mutation is a sequence change. It can be a substitution, insertion, or deletion. Not every mutation is harmful."],
+            baseChange: ["What do the yellow boxes mean?", "They mark bases that differ between the original and mutated sequences. The simulator counts how many bases and codons were affected."],
+            codon: ["What is a codon?", "A codon is a group of three RNA letters. Each codon translates into a specific amino acid or a STOP signal."],
+            classification: ["What do the protein boxes mean?", "Each box shows the amino acid that would be added to the protein. For example, Met means methionine. STOP is not an amino acid: it is a signal to stop building the protein. If it appears early, the protein may be incomplete."],
+          },
+          presets: {
+            custom: "Custom",
+            silent: "Silent mutation",
+            amino: "Amino acid change",
+            stop: "Early STOP",
+            insertion: "Insertion",
+            deletion: "Deletion",
+          },
+          glossaryItems: [
+            ["Nitrogen base", "A chemical letter in DNA or RNA. DNA uses A, T, C, and G; RNA uses U instead of T."],
+            ["Codon", "A group of three RNA letters that indicates an amino acid or a STOP signal."],
+            ["Amino acid", "A small building block that joins with others to form a protein."],
+            ["Protein", "A chain of amino acids that can perform functions in the cell."],
+            ["STOP", "A signal that stops translation. If it appears too early, the protein may be incomplete."],
+            ["Insertion", "A mutation where one or more bases are added."],
+            ["Deletion", "A mutation where one or more bases are removed."],
+          ],
+        },
+        pt: {
+          eyebrow: "Simulador de genética",
+          languageLabel: "Idioma",
+          originalDna: "DNA original",
+          mutatedDna: "DNA mutado",
+          analyze: "Analisar mutação",
+          random: "Mutação aleatória",
+          viewCode: "Ver Código Genético ARN",
+          glossary: "Glossário",
+          reset: "Reiniciar",
+          presetLabel: "Casos prontos",
+          mutationMode: "Tipo guiado",
+          modeSubstitution: "Substituição",
+          modeInsertion: "Inserção",
+          modeDeletion: "Deleção",
+          processTitle: "Processo",
+          stepDna: "DNA",
+          stepRna: "RNA",
+          stepCodons: "Códons",
+          stepProtein: "Proteína",
+          challengeTitle: "Modo desafio",
+          reveal: "Revelar",
+          hide: "Ocultar",
+          challengePrompt: "Antes de olhar: o que você acha que acontecerá com a proteína?",
+          challengeAnswerLabel: "Resposta",
+          compareOriginal: "Original",
+          compareMutated: "Mutada",
+          impactTitle: "Impacto",
+          impactLow: "Baixo",
+          impactMedium: "Médio",
+          impactHigh: "Alto",
+          typeLabel: "Tipo",
+          aminoLabel: "Aminoácido",
+          proteinLabel: "Proteína",
+          classificationLabel: "Classificação",
+          whatChanged: "O que mudou",
+          rnaTitle: "RNA mensageiro",
+          rnaNote: "O simulador transcreve DNA para RNA trocando T por U antes de usar o código genético.",
+          translation: "Tradução",
+          consequenceTitle: "Consequência",
+          miniGuide: "Mini guia",
+          silentTerm: "Silenciosa:",
+          neutralTerm: "Neutra:",
+          harmfulTerm: "Prejudicial:",
+          silentGuide: "muda o DNA, mas não muda o aminoácido.",
+          neutralGuide: "muda um aminoácido sem produzir um sinal crítico.",
+          harmfulGuide: "aparece um códon STOP precoce ou a proteína muda muito.",
+          reference: "Referência",
+          codeTitle: "Código genético ARN",
+          codeNote: "Esta tabela é lida com códons de RNA: U, C, A e G. Cada códon de três letras aponta para um aminoácido.",
+          secondLetter: "Segunda letra",
+          firstLetter: "Primeira letra",
+          thirdLetter: "Terceira letra",
+          helpEyebrow: "Dica rápida",
+          close: "Fechar",
+          incomplete: "Sequência incompleta",
+          incompleteDetail: "Digite bases A, T, C ou G nas duas sequências para analisar a mutação.",
+          noDifferences: "Não há diferenças entre as sequências.",
+          changedBases: (bases, codons) => `${bases} base${bases === 1 ? "" : "s"} alterada${bases === 1 ? "" : "s"} em ${codons} códon${codons === 1 ? "" : "s"}.`,
+          rowOriginal: "Original",
+          rowMutated: "Mutada",
+          dnaLabel: "DNA",
+          rnaLabel: "RNA",
+          to: "para",
+          changed: "Mudou",
+          same: "Igual",
+          noChange: "Sem mudança",
+          stop: "STOP",
+          mutationTypes: {
+            none: "Sem mutação",
+            substitution: "Substituição",
+            substitutions: "Substituições",
+            insertion: "Inserção",
+            deletion: "Deleção",
+          },
+          impacts: {
+            unchanged: "Não mudou",
+            changed: "Mudou",
+            truncated: "Proteína truncada",
+            frame: "Quadro alterado",
+          },
+          classifications: {
+            noChange: "Sem mudança",
+            silent: "Silenciosa",
+            harmful: "Provavelmente prejudicial",
+            possibleHarmful: "Possivelmente prejudicial",
+            neutral: "Possivelmente neutra",
+          },
+          details: {
+            unchanged: "As duas sequências produzem a mesma cadeia de aminoácidos.",
+            silent: "O DNA mudou, mas o novo códon codifica o mesmo aminoácido.",
+            stop: "A mutação introduziu um códon STOP precoce, então a proteína pode ficar incompleta.",
+            frame: "O comprimento da sequência mudou. Se a inserção ou deleção não preservar grupos de três bases, pode alterar todos os códons posteriores.",
+            amino: "Pelo menos um aminoácido mudou. Em um organismo real, o efeito depende da posição e da função dessa proteína.",
+          },
+          help: {
+            dna: ["O que é DNA?", "O DNA guarda informação genética com quatro bases: A, T, C e G. Neste simulador você escreve uma sequência curta para ver como uma mudança pode afetar a proteína final."],
+            rna: ["Por que aparece RNA?", "Para produzir proteínas, a célula primeiro transcreve DNA em RNA mensageiro. Nessa cópia, o T do DNA é substituído por U. Por isso ATG vira AUG."],
+            mutation: ["O que é uma mutação?", "Uma mutação é uma mudança na sequência. Pode ser substituição, inserção ou deleção. Nem toda mutação é prejudicial."],
+            baseChange: ["O que indicam os quadros amarelos?", "Eles marcam as bases diferentes entre a sequência original e a mutada. O simulador conta quantas bases e códons foram afetados."],
+            codon: ["O que é um códon?", "Um códon é um grupo de três letras de RNA. Cada códon se traduz como um aminoácido específico ou como um sinal STOP."],
+            classification: ["O que significam as caixas da proteína?", "Cada caixa mostra o aminoácido que seria adicionado à proteína. Por exemplo, Met significa metionina. STOP não é um aminoácido: é um sinal para parar a construção da proteína. Se aparece cedo, a proteína pode ficar incompleta."],
+          },
+          presets: {
+            custom: "Personalizado",
+            silent: "Mutação silenciosa",
+            amino: "Mudança de aminoácido",
+            stop: "STOP precoce",
+            insertion: "Inserção",
+            deletion: "Deleção",
+          },
+          glossaryItems: [
+            ["Base nitrogenada", "Letra química do DNA ou RNA. No DNA são usadas A, T, C e G; no RNA usa-se U no lugar de T."],
+            ["Códon", "Grupo de três letras de RNA que indica um aminoácido ou um sinal STOP."],
+            ["Aminoácido", "Pequena peça que se une a outras para formar uma proteína."],
+            ["Proteína", "Cadeia de aminoácidos que pode cumprir funções na célula."],
+            ["STOP", "Sinal que interrompe a tradução. Se aparece cedo demais, a proteína pode ficar incompleta."],
+            ["Inserção", "Mutação em que uma ou mais bases são adicionadas."],
+            ["Deleção", "Mutação em que uma ou mais bases são removidas."],
+          ],
+        },
+      };
+
+      const rnaOrder = ["U", "C", "A", "G"];
+      let currentLanguage = "es";
+      let activeHelpKey = null;
+      let selectedMode = "substitution";
+      let challengeRevealed = false;
+      let lastAnalysis = null;
+
+      const els = {
+        original: document.querySelector("#original-dna"),
+        mutated: document.querySelector("#mutated-dna"),
+        analyze: document.querySelector("#analyze-btn"),
+        random: document.querySelector("#random-btn"),
+        code: document.querySelector("#code-btn"),
+        reset: document.querySelector("#reset-btn"),
+        language: document.querySelector("#language-select"),
+        preset: document.querySelector("#preset-select"),
+        status: document.querySelector("#mutation-status"),
+        type: document.querySelector("#mutation-type"),
+        aminoChange: document.querySelector("#amino-change"),
+        proteinImpact: document.querySelector("#protein-impact"),
+        classification: document.querySelector("#classification"),
+        diff: document.querySelector("#sequence-diff"),
+        rnaPanel: document.querySelector("#rna-panel"),
+        explanation: document.querySelector("#change-explanation"),
+        table: document.querySelector("#translation-table"),
+        consequence: document.querySelector("#consequence"),
+        strip: document.querySelector("#protein-strip"),
+        compare: document.querySelector("#protein-compare"),
+        impact: document.querySelector("#impact-meter"),
+        challengeText: document.querySelector("#challenge-text"),
+        challengeBtn: document.querySelector("#challenge-btn"),
+        glossary: document.querySelector("#glossary-btn"),
+        codeModal: document.querySelector("#code-modal"),
+        closeCode: document.querySelector("#close-code-btn"),
+        codeTable: document.querySelector("#genetic-code-table"),
+        helpModal: document.querySelector("#help-modal"),
+        closeHelp: document.querySelector("#close-help-btn"),
+        helpTitle: document.querySelector("#help-title"),
+        helpBody: document.querySelector("#help-body"),
+        glossaryModal: document.querySelector("#glossary-modal"),
+        closeGlossary: document.querySelector("#close-glossary-btn"),
+        glossaryList: document.querySelector("#glossary-list"),
+      };
+
+      function t(key) {
+        return translations[currentLanguage][key] ?? translations.es[key] ?? key;
+      }
+
+      function normalizeDna(value) {
+        return value.toUpperCase().replace(/[^ATCG]/g, "");
+      }
+
+      function dnaToRna(sequence) {
+        return sequence.replaceAll("T", "U");
+      }
+
+      function chunkCodons(sequence) {
+        const codons = [];
+        for (let index = 0; index < sequence.length; index += 3) {
+          codons.push(sequence.slice(index, index + 3));
+        }
+        return codons;
+      }
+
+      function translate(sequence) {
+        return chunkCodons(sequence)
+          .filter((codon) => codon.length === 3)
+          .map((codon) => {
+            const amino = geneticCode[codon] ?? ["?", "?"];
+            return { codon, rna: dnaToRna(codon), name: amino[0], symbol: amino[1] };
+          });
+      }
+
+      function getDifferences(original, mutated) {
+        const length = Math.max(original.length, mutated.length);
+        const differences = [];
+        for (let index = 0; index < length; index += 1) {
+          if ((original[index] ?? "-") !== (mutated[index] ?? "-")) {
+            differences.push({ index, from: original[index] ?? "-", to: mutated[index] ?? "-" });
+          }
+        }
+        return differences;
+      }
+
+      function getMutationType(original, mutated, differences) {
+        if (original.length === mutated.length && differences.length === 0) return "none";
+        if (original.length === mutated.length) return differences.length === 1 ? "substitution" : "substitutions";
+        if (original.length < mutated.length) return "insertion";
+        return "deletion";
+      }
+
+      function classify(originalProtein, mutatedProtein, type) {
+        if (type === "none") return { label: "noChange", impact: "unchanged", detail: "unchanged" };
+
+        const originalSymbols = originalProtein.map((item) => item.symbol).join("");
+        const mutatedSymbols = mutatedProtein.map((item) => item.symbol).join("");
+        const stopIndex = mutatedProtein.findIndex((item) => item.symbol === "*");
+        const originalStopIndex = originalProtein.findIndex((item) => item.symbol === "*");
+
+        if (originalSymbols === mutatedSymbols) return { label: "silent", impact: "unchanged", detail: "silent" };
+        if (stopIndex !== -1 && (originalStopIndex === -1 || stopIndex < originalStopIndex)) {
+          return { label: "harmful", impact: "truncated", detail: "stop" };
+        }
+        if (type === "insertion" || type === "deletion") {
+          return { label: "possibleHarmful", impact: "frame", detail: "frame" };
+        }
+        return { label: "neutral", impact: "changed", detail: "amino" };
+      }
+
+      function renderBaseRows(target, rows, differences, useRna = false) {
+        const changed = new Set(differences.map((item) => item.index));
+        const length = Math.max(...rows.map((row) => row.sequence.length));
+        target.innerHTML = rows.map(({ label, sequence }) => {
+          const bases = Array.from({ length }, (_, index) => {
+            const base = sequence[index] ?? "-";
+            const className = ["base", useRna ? "rna" : "", changed.has(index) ? "changed" : ""]
+              .filter(Boolean)
+              .join(" ");
+            return `<span class="${className}">${base}</span>`;
+          }).join("");
+          return `<div class="${useRna ? "rna-row" : "diff-row"}"><span class="diff-label">${label}</span>${bases}</div>`;
+        }).join("");
+      }
+
+      function renderTranslation(originalProtein, mutatedProtein) {
+        const length = Math.max(originalProtein.length, mutatedProtein.length);
+        els.table.innerHTML = Array.from({ length }, (_, index) => {
+          const original = originalProtein[index];
+          const mutated = mutatedProtein[index];
+          const changed = (original?.symbol ?? "-") !== (mutated?.symbol ?? "-");
+          const isStop = mutated?.symbol === "*";
+          const tagClass = isStop ? "tag stop" : changed ? "tag changed" : "tag same";
+          const tagText = isStop ? t("stop") : changed ? t("changed") : t("same");
+          return `
+            <div class="codon-row">
+              <span class="codon">${original?.rna ?? "---"} → ${original?.name ?? "-"}</span>
+              <span class="arrow">${t("to")}</span>
+              <span class="codon">${mutated?.rna ?? "---"} → ${mutated?.name ?? "-"}</span>
+              <span class="${tagClass}">${tagText}</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderProteinStrip(originalProtein, mutatedProtein) {
+        els.strip.innerHTML = mutatedProtein.map((item, index) => {
+          const changed = item.symbol !== originalProtein[index]?.symbol;
+          const isStop = item.symbol === "*";
+          const label = isStop ? t("stop") : item.name;
+          const className = [
+            "amino",
+            changed ? "changed" : "",
+            isStop ? "stop-amino" : "",
+          ].filter(Boolean).join(" ");
+          return `<span class="${className}" title="${item.rna}: ${label}">${label}</span>`;
+        }).join("");
+      }
+
+      function renderProteinCompare(originalProtein, mutatedProtein) {
+        const renderRow = (label, protein, otherProtein) => `
+          <div class="protein-compare-row">
+            <span class="protein-compare-label">${label}</span>
+            ${protein.map((item, index) => {
+              const changed = item.symbol !== otherProtein[index]?.symbol;
+              const isStop = item.symbol === "*";
+              const text = isStop ? t("stop") : item.name;
+              const className = ["amino", changed ? "changed" : "", isStop ? "stop-amino" : ""]
+                .filter(Boolean)
+                .join(" ");
+              return `<span class="${className}" title="${item.rna}: ${text}">${text}</span>`;
+            }).join("")}
+          </div>
+        `;
+        els.compare.innerHTML = [
+          renderRow(t("compareOriginal"), originalProtein, mutatedProtein),
+          renderRow(t("compareMutated"), mutatedProtein, originalProtein),
+        ].join("");
+      }
+
+      function getImpactLevel(classification) {
+        if (classification.label === "noChange" || classification.label === "silent") return "low";
+        if (classification.label === "harmful" || classification.label === "possibleHarmful") return "high";
+        return "medium";
+      }
+
+      function renderImpactMeter(level) {
+        const steps = [
+          ["low", t("impactLow")],
+          ["medium", t("impactMedium")],
+          ["high", t("impactHigh")],
+        ];
+        els.impact.innerHTML = `
+          <span class="control-title">${t("impactTitle")}</span>
+          <div class="impact-track">
+            ${steps.map(([key, label]) => `<span class="impact-step ${key === level ? `active ${key}` : ""}">${label}</span>`).join("")}
+          </div>
+        `;
+      }
+
+      function updateChallenge() {
+        if (!lastAnalysis) {
+          els.challengeText.textContent = t("challengePrompt");
+          els.challengeBtn.textContent = t("reveal");
+          return;
+        }
+        const classification = translations[currentLanguage].classifications[lastAnalysis.classification.label];
+        const detail = translations[currentLanguage].details[lastAnalysis.classification.detail];
+        els.challengeBtn.textContent = challengeRevealed ? t("hide") : t("reveal");
+        if (!challengeRevealed) {
+          els.challengeText.textContent = t("challengePrompt");
+          return;
+        }
+        els.challengeText.innerHTML = `
+          <span class="challenge-result">
+            <span class="challenge-pill" title="${detail}">${t("challengeAnswerLabel")}: ${classification}</span>
+          </span>
+        `;
+      }
+
+      function setMode(mode) {
+        selectedMode = mode;
+        document.querySelectorAll(".mode-btn").forEach((button) => {
+          button.classList.toggle("active", button.dataset.mode === mode);
+        });
+      }
+
+      function applyGuidedMutation(mode) {
+        const original = normalizeDna(els.original.value) || "ATGCCTGAA";
+        let mutated = original;
+        if (mode === "substitution") {
+          const index = Math.min(4, original.length - 1);
+          const options = ["A", "T", "C", "G"].filter((base) => base !== original[index]);
+          mutated = original.slice(0, index) + options[0] + original.slice(index + 1);
+        } else if (mode === "insertion") {
+          mutated = original.slice(0, 3) + "A" + original.slice(3);
+        } else if (mode === "deletion") {
+          mutated = original.length > 4 ? original.slice(0, 4) + original.slice(5) : original.slice(0, -1);
+        }
+        els.mutated.value = chunkCodons(mutated).join(" ");
+        els.preset.value = "custom";
+        challengeRevealed = false;
+        analyze();
+      }
+
+      function getAminoChange(originalProtein, mutatedProtein) {
+        const changed = mutatedProtein.find((item, index) => item.symbol !== originalProtein[index]?.symbol);
+        if (!changed) return t("noChange");
+        const index = mutatedProtein.indexOf(changed);
+        const original = originalProtein[index]?.name ?? "-";
+        return `${original} → ${changed.name}`;
+      }
+
+      function analyze() {
+        const original = normalizeDna(els.original.value);
+        const mutated = normalizeDna(els.mutated.value);
+
+        if (!original || !mutated) {
+          els.status.textContent = t("incomplete");
+          els.consequence.textContent = t("incompleteDetail");
+          els.diff.innerHTML = "";
+          els.rnaPanel.innerHTML = "";
+          els.table.innerHTML = "";
+          els.strip.innerHTML = "";
+          els.compare.innerHTML = "";
+          els.impact.innerHTML = "";
+          lastAnalysis = null;
+          updateChallenge();
+          return;
+        }
+
+        const differences = getDifferences(original, mutated);
+        const mutationType = getMutationType(original, mutated, differences);
+        const originalProtein = translate(original);
+        const mutatedProtein = translate(mutated);
+        const classification = classify(originalProtein, mutatedProtein, mutationType);
+        const impactLevel = getImpactLevel(classification);
+        const changedCodons = new Set(differences.map((item) => Math.floor(item.index / 3)));
+        lastAnalysis = { original, mutated, originalProtein, mutatedProtein, classification, mutationType, impactLevel };
+
+        els.status.textContent = translations[currentLanguage].classifications[classification.label];
+        els.type.textContent = translations[currentLanguage].mutationTypes[mutationType];
+        els.aminoChange.textContent = getAminoChange(originalProtein, mutatedProtein);
+        els.proteinImpact.textContent = translations[currentLanguage].impacts[classification.impact];
+        els.classification.textContent = translations[currentLanguage].classifications[classification.label];
+
+        renderBaseRows(els.diff, [
+          { label: t("rowOriginal"), sequence: original },
+          { label: t("rowMutated"), sequence: mutated },
+        ], differences);
+
+        renderBaseRows(els.rnaPanel, [
+          { label: `${t("rowOriginal")} ${t("rnaLabel")}`, sequence: dnaToRna(original) },
+          { label: `${t("rowMutated")} ${t("rnaLabel")}`, sequence: dnaToRna(mutated) },
+        ], differences, true);
+
+        renderTranslation(originalProtein, mutatedProtein);
+        renderProteinStrip(originalProtein, mutatedProtein);
+        renderProteinCompare(originalProtein, mutatedProtein);
+        renderImpactMeter(impactLevel);
+        document.querySelectorAll(".process-step").forEach((step) => step.classList.add("active"));
+
+        els.explanation.textContent = differences.length === 0
+          ? t("noDifferences")
+          : translations[currentLanguage].changedBases(differences.length, changedCodons.size);
+        els.consequence.textContent = translations[currentLanguage].details[classification.detail];
+        updateChallenge();
+      }
+
+      function aminoForRna(codon) {
+        const dnaCodon = codon.replaceAll("U", "T");
+        return geneticCode[dnaCodon] ?? ["?", "?"];
+      }
+
+      function renderGeneticCode() {
+        const headerCells = [
+          "<div class=\"corner-cell\"></div>",
+          ...rnaOrder.map((letter) => `<div class="letter-head">${letter}</div>`),
+          "<div class=\"corner-cell\"></div>",
+        ];
+
+        const bodyRows = rnaOrder.flatMap((firstLetter) => {
+          const thirdLetters = `<div class="third-letter">${rnaOrder.map((letter) => `<span>${letter}</span>`).join("")}</div>`;
+          const codonBlocks = rnaOrder.map((secondLetter) => {
+            const cells = rnaOrder.map((thirdLetter) => {
+              const codon = `${firstLetter}${secondLetter}${thirdLetter}`;
+              const [name, symbol] = aminoForRna(codon);
+              const className = [
+                "codon-cell",
+                codon === "AUG" ? "start" : "",
+                symbol === "*" ? "stop" : "",
+              ].filter(Boolean).join(" ");
+              const amino = symbol === "*" ? t("stop") : name;
+              return `
+                <div class="${className}" title="${codon}: ${amino}">
+                  <span class="rna-codon">${codon}</span>
+                  <span class="amino-name">${amino}</span>
+                </div>
+              `;
+            }).join("");
+            return `<div class="codon-block">${cells}</div>`;
+          }).join("");
+          return [`<div class="first-letter">${firstLetter}</div>`, codonBlocks, thirdLetters].join("");
+        });
+
+        els.codeTable.innerHTML = [...headerCells, ...bodyRows].join("");
+      }
+
+      function renderPresets() {
+        const current = els.preset.value || "custom";
+        els.preset.innerHTML = presets
+          .map((preset) => `<option value="${preset.key}">${translations[currentLanguage].presets[preset.key]}</option>`)
+          .join("");
+        els.preset.value = presets.some((preset) => preset.key === current) ? current : "custom";
+      }
+
+      function applyPreset(key) {
+        const preset = presets.find((item) => item.key === key) ?? presets[0];
+        els.original.value = preset.original;
+        els.mutated.value = preset.mutated;
+        setMode(preset.mode);
+        challengeRevealed = false;
+        analyze();
+      }
+
+      function renderGlossary() {
+        els.glossaryList.innerHTML = translations[currentLanguage].glossaryItems
+          .map(([term, definition]) => `
+            <div class="glossary-item">
+              <strong>${term}</strong>
+              <span>${definition}</span>
+            </div>
+          `)
+          .join("");
+      }
+
+      function openHelp(key) {
+        activeHelpKey = key;
+        const help = translations[currentLanguage].help[key] ?? translations.es.help[key];
+        els.helpTitle.textContent = help[0];
+        els.helpBody.textContent = help[1];
+        els.helpModal.hidden = false;
+      }
+
+      function applyTranslations() {
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          element.textContent = t(element.dataset.i18n);
+        });
+        renderPresets();
+        renderGlossary();
+        document.querySelectorAll(".help-btn").forEach((button) => {
+          button.setAttribute("aria-label", translations[currentLanguage].helpEyebrow);
+        });
+        els.language.setAttribute("aria-label", t("languageLabel"));
+        els.closeCode.setAttribute("aria-label", t("close"));
+        els.closeHelp.setAttribute("aria-label", t("close"));
+        els.closeGlossary.setAttribute("aria-label", t("close"));
+        renderGeneticCode();
+        setMode(selectedMode);
+        analyze();
+        if (!els.helpModal.hidden && activeHelpKey) openHelp(activeHelpKey);
+      }
+
+      function mutateRandomly() {
+        const [original, mutated] = examples[Math.floor(Math.random() * examples.length)];
+        els.original.value = original;
+        els.mutated.value = mutated;
+        analyze();
+      }
+
+      els.analyze.addEventListener("click", analyze);
+      els.random.addEventListener("click", mutateRandomly);
+      els.code.addEventListener("click", () => {
+        els.codeModal.hidden = false;
+      });
+      els.closeCode.addEventListener("click", () => {
+        els.codeModal.hidden = true;
+      });
+      els.closeHelp.addEventListener("click", () => {
+        els.helpModal.hidden = true;
+      });
+      els.glossary.addEventListener("click", () => {
+        els.glossaryModal.hidden = false;
+      });
+      els.closeGlossary.addEventListener("click", () => {
+        els.glossaryModal.hidden = true;
+      });
+      els.codeModal.addEventListener("click", (event) => {
+        if (event.target === els.codeModal) els.codeModal.hidden = true;
+      });
+      els.helpModal.addEventListener("click", (event) => {
+        if (event.target === els.helpModal) els.helpModal.hidden = true;
+      });
+      els.glossaryModal.addEventListener("click", (event) => {
+        if (event.target === els.glossaryModal) els.glossaryModal.hidden = true;
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          els.codeModal.hidden = true;
+          els.helpModal.hidden = true;
+          els.glossaryModal.hidden = true;
+        }
+      });
+      document.querySelectorAll("[data-help]").forEach((button) => {
+        button.addEventListener("click", () => openHelp(button.dataset.help));
+      });
+      document.querySelectorAll(".mode-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          setMode(button.dataset.mode);
+          applyGuidedMutation(button.dataset.mode);
+        });
+      });
+      els.preset.addEventListener("change", () => {
+        applyPreset(els.preset.value);
+      });
+      els.challengeBtn.addEventListener("click", () => {
+        challengeRevealed = !challengeRevealed;
+        updateChallenge();
+      });
+      els.language.addEventListener("change", () => {
+        currentLanguage = els.language.value;
+        applyTranslations();
+      });
+      els.reset.addEventListener("click", () => {
+        els.original.value = "ATG CCT GAA";
+        els.mutated.value = "ATG CAT GAA";
+        analyze();
+      });
+      els.original.addEventListener("input", () => {
+        els.preset.value = "custom";
+        challengeRevealed = false;
+        analyze();
+      });
+      els.mutated.addEventListener("input", () => {
+        els.preset.value = "custom";
+        challengeRevealed = false;
+        analyze();
+      });
+
+      applyTranslations();
+    </script>
+  </body>
+</html>
