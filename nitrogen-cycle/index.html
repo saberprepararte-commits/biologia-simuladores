@@ -1,1 +1,329 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ciclo del nitrógeno BioLab</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="biolab" aria-label="Laboratorio del ciclo del nitrógeno">
+      <header class="app-header">
+        <img class="brand-mark" src="favicon.svg" alt="" aria-hidden="true" />
+        <div>
+          <h1 data-i18n="title">Ciclo del nitrógeno BioLab</h1>
+          <p data-i18n="subtitle">
+            Explora cómo el nitrógeno cambia entre atmósfera, suelo, microorganismos y plantas.
+          </p>
+        </div>
+        <button class="language-button" type="button" data-lang="en">English</button>
+      </header>
 
+      <section class="workspace">
+        <aside class="side-panel controls-panel" aria-label="Panel de variables">
+          <div class="panel-title-row">
+            <h2 data-i18n="controlPanel">Panel nitrogenado</h2>
+            <span data-i18n="controlTag">CONTROL</span>
+          </div>
+
+          <button class="control-group-button" type="button" data-action="control" data-i18n-html="controlGroup">
+            Grupo control: N₂ atmosférico 78%
+          </button>
+
+          <div class="variable-list">
+            <label class="variable-control">
+              <span class="variable-main">
+                <span class="variable-icon">🌿</span>
+                <span data-i18n="plantsVar">Número de plantas</span>
+                <strong><span data-value="plants">100</span></strong>
+              </span>
+              <input type="range" min="0" max="200" value="100" data-variable="plants" />
+              <small data-i18n="plantsHelp">Controla la demanda de nitrato y la asimilación vegetal.</small>
+            </label>
+
+            <label class="variable-control">
+              <span class="variable-main">
+                <span class="variable-icon">🧫</span>
+                <span data-i18n-html="bacteriaVar">Bacterias fijadoras de N₂</span>
+                <strong><span data-value="bacteria">100</span></strong>
+              </span>
+              <input type="range" min="0" max="200" value="100" data-variable="bacteria" />
+              <small data-i18n="bacteriaHelp">Aumentan la entrada biológica de nitrógeno al suelo.</small>
+            </label>
+
+            <label class="variable-control">
+              <span class="variable-main">
+                <span class="variable-icon">⚗</span>
+                <span data-i18n="ammoniaVar">Amoníaco / amonio</span>
+                <strong><span data-value="ammonia">8</span> mg/kg</strong>
+              </span>
+              <input type="range" min="0" max="80" value="8" data-variable="ammonia" />
+              <small data-i18n="ammoniaHelp">Sustrato que alimenta la nitrificación; en exceso puede estresar raíces.</small>
+            </label>
+
+            <label class="variable-control">
+              <span class="variable-main">
+                <span class="variable-icon">NO₃</span>
+                <span data-i18n="nitrateVar">Nitrato</span>
+                <strong><span data-value="nitrate">25</span> mg/kg</strong>
+              </span>
+              <input type="range" min="0" max="120" value="25" data-variable="nitrate" />
+              <small data-i18n="nitrateHelp">Forma disponible para asimilación; en exceso puede lixiviarse.</small>
+            </label>
+          </div>
+        </aside>
+
+        <section class="main-column" aria-label="Escena principal del ciclo del nitrógeno">
+          <div class="scene-card">
+            <div class="image-wrap">
+              <img
+                class="cycle-image"
+                src="ciclo-nitrogeno-fondo-limpio-v2.png"
+                alt="Infografía del ciclo del nitrógeno"
+              />
+
+              <svg class="molecule-layer" viewBox="0 0 1792 1024" aria-hidden="true">
+                <defs>
+                  <radialGradient id="nitrogenSphere" cx="34%" cy="28%" r="70%">
+                    <stop offset="0%" stop-color="#8ff7ff" />
+                    <stop offset="36%" stop-color="#1b7cff" />
+                    <stop offset="100%" stop-color="#08149e" />
+                  </radialGradient>
+                  <radialGradient id="oxygenSphere" cx="34%" cy="28%" r="70%">
+                    <stop offset="0%" stop-color="#ffaaa2" />
+                    <stop offset="42%" stop-color="#ff3636" />
+                    <stop offset="100%" stop-color="#a60912" />
+                  </radialGradient>
+                  <radialGradient id="hydrogenSphere" cx="34%" cy="28%" r="70%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="62%" stop-color="#e9edf0" />
+                    <stop offset="100%" stop-color="#aeb7be" />
+                  </radialGradient>
+                  <linearGradient id="bondBlue" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#69e7df" />
+                    <stop offset="100%" stop-color="#1778c9" />
+                  </linearGradient>
+                  <linearGradient id="bondWarm" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#ffb4aa" />
+                    <stop offset="100%" stop-color="#d96363" />
+                  </linearGradient>
+
+                  <symbol id="mol-n2" viewBox="-44 -26 88 52">
+                    <g class="molecule-spin slow">
+                      <circle cx="-16" cy="0" r="23" fill="url(#nitrogenSphere)" />
+                      <circle cx="16" cy="0" r="23" fill="url(#nitrogenSphere)" />
+                      <text x="-16" y="7">N</text>
+                      <text x="16" y="7">N</text>
+                    </g>
+                  </symbol>
+
+                  <symbol id="mol-nh4" viewBox="-58 -58 116 116">
+                    <g class="molecule-spin">
+                      <line x1="0" y1="0" x2="0" y2="-38" />
+                      <line x1="0" y1="0" x2="36" y2="20" />
+                      <line x1="0" y1="0" x2="-36" y2="20" />
+                      <line x1="0" y1="0" x2="-4" y2="42" />
+                      <circle cx="0" cy="0" r="24" fill="url(#nitrogenSphere)" />
+                      <circle cx="0" cy="-44" r="16" fill="url(#hydrogenSphere)" />
+                      <circle cx="42" cy="24" r="16" fill="url(#hydrogenSphere)" />
+                      <circle cx="-42" cy="24" r="16" fill="url(#hydrogenSphere)" />
+                      <circle cx="-5" cy="48" r="16" fill="url(#hydrogenSphere)" />
+                    </g>
+                  </symbol>
+
+                  <symbol id="mol-no2" viewBox="-60 -38 120 76">
+                    <g class="molecule-spin">
+                      <line x1="0" y1="0" x2="-38" y2="23" class="warm-bond" />
+                      <line x1="0" y1="0" x2="38" y2="23" class="warm-bond" />
+                      <circle cx="0" cy="0" r="17" fill="url(#nitrogenSphere)" />
+                      <circle cx="-48" cy="30" r="20" fill="url(#oxygenSphere)" />
+                      <circle cx="48" cy="30" r="20" fill="url(#oxygenSphere)" />
+                    </g>
+                  </symbol>
+
+                  <symbol id="mol-no3" viewBox="-82 -82 164 164">
+                    <g class="molecule-spin">
+                      <line x1="0" y1="0" x2="-42" y2="-18" />
+                      <line x1="0" y1="0" x2="42" y2="-18" />
+                      <line x1="0" y1="0" x2="0" y2="45" />
+                      <circle cx="0" cy="0" r="20" fill="url(#nitrogenSphere)" />
+                      <circle cx="-52" cy="-22" r="19" fill="url(#oxygenSphere)" />
+                      <circle cx="52" cy="-22" r="19" fill="url(#oxygenSphere)" />
+                      <circle cx="0" cy="56" r="19" fill="url(#oxygenSphere)" />
+                    </g>
+                  </symbol>
+                </defs>
+
+                <g class="molecule-flow flow-n2">
+                  <use href="#mol-n2" width="70" height="42">
+                    <animateMotion dur="14s" repeatCount="indefinite" path="M135 165 C250 85 420 70 640 80" />
+                  </use>
+                  <use href="#mol-n2" width="62" height="38">
+                    <animateMotion dur="12s" begin="-4s" repeatCount="indefinite" path="M650 145 C520 145 520 270 520 430" />
+                  </use>
+                  <use href="#mol-n2" width="66" height="40">
+                    <animateMotion dur="11s" begin="-6s" repeatCount="indefinite" path="M620 90 C470 75 330 120 305 230 C295 275 292 320 285 360" />
+                  </use>
+                  <use href="#mol-n2" width="66" height="40">
+                    <animateMotion dur="13s" begin="-7s" repeatCount="indefinite" path="M1505 505 C1540 420 1560 340 1560 250 C1560 92 1425 75 1240 85" />
+                  </use>
+                </g>
+
+                <g class="molecule-flow flow-nh4">
+                  <use href="#mol-nh4" width="62" height="62">
+                    <animateMotion dur="11s" repeatCount="indefinite" path="M245 595 C255 760 470 760 790 745" />
+                  </use>
+                  <use href="#mol-nh4" width="56" height="56">
+                    <animateMotion dur="10s" begin="-4s" repeatCount="indefinite" path="M520 560 C540 680 650 735 790 745" />
+                  </use>
+                  <use href="#mol-nh4" width="58" height="58">
+                    <animateMotion dur="9s" begin="-7s" repeatCount="indefinite" path="M840 590 C840 660 835 705 830 745" />
+                  </use>
+                </g>
+
+                <g class="molecule-flow flow-no2">
+                  <use href="#mol-no2" width="70" height="46">
+                    <animateMotion dur="8s" repeatCount="indefinite" path="M820 742 C900 742 990 742 1080 742" />
+                  </use>
+                  <use href="#mol-no2" width="62" height="42">
+                    <animateMotion dur="8s" begin="-3.5s" repeatCount="indefinite" path="M820 742 C900 742 990 742 1080 742" />
+                  </use>
+                </g>
+
+                <g class="molecule-flow flow-no3">
+                  <use href="#mol-no3" width="78" height="78">
+                    <animateMotion dur="9s" repeatCount="indefinite" path="M1085 742 C1195 742 1320 742 1450 742" />
+                  </use>
+                  <use href="#mol-no3" width="76" height="76">
+                    <animateMotion dur="12s" begin="-4s" repeatCount="indefinite" path="M1450 735 C1375 615 1270 505 1055 345" />
+                  </use>
+                  <use href="#mol-no3" width="72" height="72">
+                    <animateMotion dur="13s" begin="-8s" repeatCount="indefinite" path="M1465 735 C1540 620 1535 500 1510 390" />
+                  </use>
+                </g>
+              </svg>
+
+              <div class="diagram-label label-atmosphere" data-diagram-label="atmosphere">Nitrógeno atmosférico (N₂)</div>
+              <div class="diagram-label label-plants" data-diagram-label="plants">Plantas</div>
+              <div class="diagram-label label-assimilation" data-diagram-label="assimilation">Asimilación</div>
+              <div class="diagram-label label-root-bacteria" data-diagram-label="rootBacteria">
+                Bacterias fijadoras de N₂ de las raíces
+              </div>
+              <div class="diagram-label label-soil-bacteria" data-diagram-label="soilBacteria">
+                Bacterias fijadoras de N₂ del suelo
+              </div>
+              <div class="diagram-label label-decomposers" data-diagram-label="decomposers">
+                Descomponedores<br />(bacterias, hongos)
+              </div>
+              <div class="diagram-label label-ammonification" data-diagram-label="ammonification">Amonificación</div>
+              <div class="diagram-label label-ammonium" data-diagram-label="ammonium">
+                Amonio (NH₄⁺)
+              </div>
+              <div class="diagram-label label-nitrification-one" data-diagram-label="nitrification">Nitrificación</div>
+              <div class="diagram-label label-nitrification-two" data-diagram-label="nitrification">Nitrificación</div>
+              <div class="diagram-label label-nitrite" data-diagram-label="nitrite">
+                Nitrito (NO₂⁻)
+              </div>
+              <div class="diagram-label label-nitrate" data-diagram-label="nitrate">
+                Nitrato (NO₃⁻)
+              </div>
+              <div class="diagram-label label-nitrifying" data-diagram-label="nitrifyingBacteria">
+                Bacterias nitrificantes
+              </div>
+              <div class="diagram-label label-denitrifying" data-diagram-label="denitrifyingBacteria">
+                Bacterias desnitrificantes
+              </div>
+              <div class="diagram-label label-denitrification" data-diagram-label="denitrification">Desnitrificación</div>
+            </div>
+          </div>
+
+          <div class="reservoir-grid" aria-label="Reservorios simulados">
+            <article class="reservoir-card">
+              <strong data-reservoir="plantNitrogen">100</strong>
+              <span data-i18n="plantNitrogen">Nitrógeno en plantas</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="soilNitrogen">100</strong>
+              <span data-i18n="soilNitrogen">Nitrógeno en suelo</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="microbialActivity">100</strong>
+              <span data-i18n="microbialActivity">Actividad microbiana</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="systemBalance">100</strong>
+              <span data-i18n="systemBalance">Balance del ciclo</span>
+            </article>
+          </div>
+        </section>
+
+        <aside class="side-panel results-panel" aria-label="Indicadores y consecuencias">
+          <section class="chart-card">
+            <div class="chart-heading">
+              <h2 data-i18n="indicators">Indicadores del ciclo</h2>
+              <span data-i18n="relativeFlow">flujos relativos</span>
+            </div>
+            <div class="bar-chart" aria-hidden="true">
+              <div class="bar-column">
+                <span data-bar="plantAccess"></span>
+                <small data-i18n="plantAccessShort">Plantas</small>
+              </div>
+              <div class="bar-column">
+                <span data-bar="fixation"></span>
+                <small data-i18n="fixationShort">Fij.</small>
+              </div>
+              <div class="bar-column">
+                <span data-bar="leaching"></span>
+                <small data-i18n="leachingShort">Lix.</small>
+              </div>
+              <div class="bar-column">
+                <span data-bar="ammoniaStress"></span>
+                <small data-i18n="stressShort">Estrés</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="chart-heading">
+              <h2 data-i18n="metricsTitle">Lecturas del laboratorio</h2>
+            </div>
+            <div class="ammonia-readout" data-ammonia-readout>
+              <span data-i18n="ammoniaState">Estado del amoníaco</span>
+              <strong data-ammonia-level>Rango óptimo</strong>
+            </div>
+            <div class="ammonia-readout leaching-readout" data-leaching-readout>
+              <span data-i18n="leachingState">Estado de lixiviación</span>
+              <strong data-leaching-level>Retención equilibrada</strong>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span data-i18n="plantAccess">Disponibilidad para plantas</span>
+                <div class="metric-track"><span data-metric="plantAccess"></span></div>
+              </div>
+              <div class="metric">
+                <span data-i18n="fixationMetric">Fijación biológica</span>
+                <div class="metric-track"><span data-metric="fixation"></span></div>
+              </div>
+              <div class="metric">
+                <span data-i18n="leachingRisk">Riesgo de lixiviación</span>
+                <div class="metric-track"><span data-metric="leaching"></span></div>
+              </div>
+              <div class="metric">
+                <span data-i18n="ammoniaStress">Estrés por amoníaco</span>
+                <div class="metric-track"><span data-metric="ammoniaStress"></span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="consequence-card">
+            <h2 data-status-title>Grupo control estable</h2>
+            <p data-consequence>El sistema está en equilibrio para comparar otros tratamientos.</p>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
