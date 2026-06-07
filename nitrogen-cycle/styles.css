@@ -600,10 +600,23 @@ input {
 .bar-column {
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
   align-items: end;
   justify-items: center;
-  gap: 8px;
+  gap: 6px;
+}
+
+.bar-column strong {
+  align-self: start;
+  color: #12324a;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(8, 50, 72, 0.08);
+  white-space: nowrap;
 }
 
 .bar-column span {

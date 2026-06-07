@@ -26,7 +26,7 @@ const translations = {
       microbialActivity: "Actividad microbiana",
       systemBalance: "Balance del ciclo",
       indicators: "Indicadores del ciclo",
-      relativeFlow: "flujos relativos",
+      relativeFlow: "flujos relativos (%)",
       metricsTitle: "Lecturas del laboratorio",
       ammoniaState: "Estado del amoníaco",
       leachingState: "Estado de lixiviación",
@@ -97,7 +97,7 @@ const translations = {
       microbialActivity: "Microbial activity",
       systemBalance: "Cycle balance",
       indicators: "Cycle indicators",
-      relativeFlow: "relative flows",
+      relativeFlow: "relative flows (%)",
       metricsTitle: "Lab readings",
       ammoniaState: "Ammonia state",
       leachingState: "Leaching state",
@@ -157,6 +157,7 @@ const statusTitle = document.querySelector("[data-status-title]");
 const consequenceText = document.querySelector("[data-consequence]");
 const metricBars = document.querySelectorAll("[data-metric]");
 const chartBars = document.querySelectorAll("[data-bar]");
+const chartValues = document.querySelectorAll("[data-bar-value]");
 const reservoirValues = document.querySelectorAll("[data-reservoir]");
 const languageButton = document.querySelector("[data-lang]");
 const textLabels = document.querySelectorAll("[data-i18n]");
@@ -379,6 +380,10 @@ function render() {
     bar.style.height = `${Math.max(2, clamp(metrics[bar.dataset.bar]))}%`;
   });
 
+  chartValues.forEach((value) => {
+    value.textContent = `${Math.round(clamp(metrics[value.dataset.barValue]))}%`;
+  });
+
   reservoirValues.forEach((value) => {
     value.textContent = Math.round(metrics[value.dataset.reservoir]);
   });
@@ -414,5 +419,16 @@ languageButton.addEventListener("click", () => {
   render();
 });
 
+function getScenarioFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const scenario = {};
+  Object.keys(controlGroup).forEach((key) => {
+    if (!params.has(key)) return;
+    const value = Number(params.get(key));
+    if (Number.isFinite(value)) scenario[key] = value;
+  });
+  return Object.keys(scenario).length ? { ...controlGroup, ...scenario } : controlGroup;
+}
+
 renderTranslations();
-setState(controlGroup);
+setState(getScenarioFromUrl());
