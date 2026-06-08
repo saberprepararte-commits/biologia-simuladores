@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cellular Respiration BioLab icon">
+  <defs>
+    <radialGradient id="bg" cx="32%" cy="24%" r="80%">
+      <stop offset="0" stop-color="#7cf4ff"/>
+      <stop offset="0.52" stop-color="#1b9cc2"/>
+      <stop offset="1" stop-color="#073247"/>
+    </radialGradient>
+    <linearGradient id="mito" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffbd73"/>
+      <stop offset="0.58" stop-color="#c84b59"/>
+      <stop offset="1" stop-color="#65308f"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <path d="M25 71c8-29 33-46 68-36 18 5 20 23 5 36-17 15-45 21-67 11-6-3-8-6-6-11Z" fill="url(#mito)" stroke="#fff4cc" stroke-width="6"/>
+  <path d="M40 65c11-13 24-13 35 0s20 13 31 0" fill="none" stroke="#fff1a8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M35 78c11-10 23-10 34 0s22 10 33 0" fill="none" stroke="#fff1a8" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="31" cy="36" r="9" fill="#fff7b7"/>
+  <circle cx="47" cy="31" r="9" fill="#fff7b7"/>
+  <circle cx="63" cy="36" r="9" fill="#fff7b7"/>
+  <text x="64" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#ffffff">ATP</text>
+</svg>

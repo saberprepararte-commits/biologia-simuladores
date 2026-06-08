@@ -1,1 +1,300 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cellular Respiration BioLab</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="favicon.svg" alt="" />
+        </div>
+        <div>
+          <h1 data-i18n="title">Respiración celular BioLab</h1>
+          <p data-i18n="subtitle">Explora cómo la célula transforma glucosa y oxígeno en ATP, CO₂, agua y calor.</p>
+        </div>
+        <button class="language-button" type="button" data-lang="en">English</button>
+      </header>
 
+      <section class="lab-grid">
+        <aside class="side-panel controls-panel" aria-label="Controles de respiración celular">
+          <div class="panel-heading">
+            <h2 data-i18n="controlPanel">Panel celular</h2>
+            <span data-i18n="controlTag">CONTROL</span>
+          </div>
+
+          <button class="control-group-button" type="button" data-action="control" data-i18n="controlGroup">
+            Grupo control: respiración aeróbica estable
+          </button>
+
+          <div class="control-list">
+            <label class="control-item">
+              <span class="control-icon glucose-icon">C₆</span>
+              <span class="control-copy">
+                <span class="control-top">
+                  <span data-i18n="glucoseVar">Glucosa disponible</span>
+                  <strong><span data-value="glucose">90</span> mg/dL</strong>
+                </span>
+                <input type="range" min="20" max="180" value="90" data-variable="glucose" />
+                <small data-i18n="glucoseHelp">Combustible químico que alimenta glucólisis y respiración aeróbica.</small>
+              </span>
+            </label>
+
+            <label class="control-item">
+              <span class="control-icon oxygen-icon">O₂</span>
+              <span class="control-copy">
+                <span class="control-top">
+                  <span data-i18n="oxygenVar">Oxígeno disponible</span>
+                  <strong><span data-value="oxygen">96</span>%</strong>
+                </span>
+                <input type="range" min="30" max="100" value="96" data-variable="oxygen" />
+                <small data-i18n="oxygenHelp">Permite que la cadena de transporte de electrones produzca ATP.</small>
+              </span>
+            </label>
+
+            <label class="control-item">
+              <span class="control-icon mito-icon">ATP</span>
+              <span class="control-copy">
+                <span class="control-top">
+                  <span data-i18n="mitochondriaVar">Actividad mitocondrial</span>
+                  <strong><span data-value="mitochondria">80</span>%</strong>
+                </span>
+                <input type="range" min="10" max="100" value="80" data-variable="mitochondria" />
+                <small data-i18n="mitochondriaHelp">Representa enzimas, membranas internas y capacidad de producir ATP.</small>
+              </span>
+            </label>
+
+            <label class="control-item">
+              <span class="control-icon demand-icon">⚡</span>
+              <span class="control-copy">
+                <span class="control-top">
+                  <span data-i18n="demandVar">Demanda energética</span>
+                  <strong><span data-value="demand">55</span>%</strong>
+                </span>
+                <input type="range" min="10" max="140" value="55" data-variable="demand" />
+                <small data-i18n="demandHelp">Simula reposo, ejercicio o una célula con alta actividad metabólica.</small>
+              </span>
+            </label>
+
+            <label class="control-item">
+              <span class="control-icon temp-icon">°C</span>
+              <span class="control-copy">
+                <span class="control-top">
+                  <span data-i18n="temperatureVar">Temperatura celular</span>
+                  <strong><span data-value="temperature">37</span> °C</strong>
+                </span>
+                <input type="range" min="30" max="44" value="37" data-variable="temperature" />
+                <small data-i18n="temperatureHelp">Afecta la velocidad enzimática; el exceso reduce eficiencia.</small>
+              </span>
+            </label>
+          </div>
+        </aside>
+
+        <section class="simulation-column">
+          <section class="scene-card" aria-label="Simulación de respiración celular">
+            <div class="cell-scene">
+              <img class="cell-asset" src="assets/cell-realistic-ai.png" alt="" />
+              <img class="mitochondrion-asset" src="assets/mitochondrion-ai.png" alt="" />
+
+              <svg class="molecule-layer" viewBox="0 0 1000 620" aria-hidden="true">
+                <defs>
+                  <marker id="arrowCyan" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M1 1 L11 6 L1 11 Z" fill="#37d7f5" />
+                  </marker>
+                  <marker id="arrowGold" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M1 1 L11 6 L1 11 Z" fill="#ffd85f" />
+                  </marker>
+                </defs>
+                <path class="flow glucose-flow" d="M110 210 C205 240 260 320 330 335" marker-end="url(#arrowCyan)" />
+                <path class="flow oxygen-flow" d="M125 420 C255 400 330 370 475 345" marker-end="url(#arrowCyan)" />
+                <path class="flow atp-flow" d="M575 315 C675 220 790 210 910 155" marker-end="url(#arrowGold)" />
+                <path class="flow co2-flow" d="M580 390 C705 438 790 500 910 535" marker-end="url(#arrowCyan)" />
+                <path class="flow water-flow" d="M560 430 C650 505 750 548 875 562" marker-end="url(#arrowCyan)" />
+                <path class="flow lactate-flow" d="M405 352 C305 445 235 505 105 525" marker-end="url(#arrowCyan)" />
+              </svg>
+
+              <img class="particle particle-glucose glucose-a" src="assets/molecule-glucose-ai.png" alt="" />
+              <img class="particle particle-glucose glucose-b" src="assets/molecule-glucose-ai.png" alt="" />
+              <img class="particle particle-o2 oxygen-a" src="assets/molecule-o2-ai.png" alt="" />
+              <img class="particle particle-o2 oxygen-b" src="assets/molecule-o2-ai.png" alt="" />
+              <img class="particle particle-o2 oxygen-c" src="assets/molecule-o2-ai.png" alt="" />
+              <img class="particle particle-o2 oxygen-d" src="assets/molecule-o2-ai.png" alt="" />
+              <img class="particle particle-o2 oxygen-e" src="assets/molecule-o2-ai.png" alt="" />
+              <img class="particle particle-atp atp-a" src="assets/molecule-atp-ai.png" alt="" />
+              <img class="particle particle-atp atp-b" src="assets/molecule-atp-ai.png" alt="" />
+              <img class="particle particle-atp atp-c" src="assets/molecule-atp-ai.png" alt="" />
+              <img class="particle particle-atp atp-d" src="assets/molecule-atp-ai.png" alt="" />
+              <img class="particle particle-atp atp-e" src="assets/molecule-atp-ai.png" alt="" />
+              <img class="particle particle-pyruvate pyruvate-a" src="assets/molecule-pyruvate-ai.png" alt="" />
+              <img class="particle particle-pyruvate pyruvate-b" src="assets/molecule-pyruvate-ai.png" alt="" />
+              <img class="particle particle-pyruvate pyruvate-c" src="assets/molecule-pyruvate-ai.png" alt="" />
+              <img class="particle particle-pyruvate pyruvate-d" src="assets/molecule-pyruvate-ai.png" alt="" />
+              <img class="particle particle-pyruvate pyruvate-e" src="assets/molecule-pyruvate-ai.png" alt="" />
+              <img class="particle particle-co2 co2-a" src="assets/molecule-co2-ai.png" alt="" />
+              <img class="particle particle-co2 co2-b" src="assets/molecule-co2-ai.png" alt="" />
+              <img class="particle particle-co2 co2-c" src="assets/molecule-co2-ai.png" alt="" />
+              <img class="particle particle-co2 co2-d" src="assets/molecule-co2-ai.png" alt="" />
+              <img class="particle particle-h2o water-a" src="assets/molecule-h2o-ai.png" alt="" />
+              <img class="particle particle-h2o water-b" src="assets/molecule-h2o-ai.png" alt="" />
+              <img class="particle particle-h2o water-c" src="assets/molecule-h2o-ai.png" alt="" />
+              <img class="particle particle-h2o water-d" src="assets/molecule-h2o-ai.png" alt="" />
+              <img class="particle particle-lactate lactate-a" src="assets/molecule-lactate-ai.png" alt="" />
+
+              <div class="label label-equation" data-diagram-label="equation">C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP</div>
+              <button class="label label-cytoplasm" type="button" data-process="cytoplasm" data-diagram-label="cytoplasm">Citoplasma</button>
+              <button class="label label-glycolysis" type="button" data-process="glycolysis" data-diagram-label="glycolysis">Glucólisis</button>
+              <button class="label label-pyruvate" type="button" data-process="pyruvate" data-diagram-label="pyruvate">Piruvato</button>
+              <button class="label label-mito" type="button" data-process="mitochondria" data-diagram-label="mitochondria">Mitocondria</button>
+              <button class="label label-krebs" type="button" data-process="krebs" data-diagram-label="krebs">Ciclo de Krebs</button>
+              <button class="label label-etc" type="button" data-process="etc" data-diagram-label="etc">Cadena de transporte de electrones</button>
+              <button class="label label-atp" type="button" data-process="atp" data-diagram-label="atp">ATP</button>
+              <button class="label label-co2" type="button" data-process="co2" data-diagram-label="co2">CO₂</button>
+              <div class="label label-water" data-diagram-label="water">H₂O</div>
+              <button class="label label-lactate" type="button" data-process="lactate" data-diagram-label="lactate">Lactato</button>
+              <button class="label label-extracellular" type="button" data-process="extracellular" data-diagram-label="extracellular">Medio extracelular</button>
+              <button class="heat-cloud" type="button" data-process="heat">
+                <span data-diagram-label="heat">Calor</span>
+              </button>
+              <div class="molecule-legend" aria-label="Nomenclatura molecular">
+                <figure>
+                  <img src="assets/molecule-glucose-ai.png" alt="" />
+                  <figcaption data-i18n="legendGlucose">Glucosa</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-pyruvate-ai.png" alt="" />
+                  <figcaption data-i18n="legendPyruvate">Piruvato</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-o2-ai.png" alt="" />
+                  <figcaption data-i18n="legendOxygen">Oxígeno</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-atp-ai.png" alt="" />
+                  <figcaption data-i18n="legendAtp">ATP</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-co2-ai.png" alt="" />
+                  <figcaption data-i18n="legendCo2">CO₂</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-h2o-ai.png" alt="" />
+                  <figcaption data-i18n="legendWater">Agua</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/molecule-lactate-ai.png" alt="" />
+                  <figcaption data-i18n="legendLactate">Lactato</figcaption>
+                </figure>
+              </div>
+              <aside class="process-popover" data-process-popover aria-live="polite">
+                <button class="process-close" type="button" data-process-close aria-label="Cerrar">×</button>
+                <strong data-process-title>Proceso celular</strong>
+                <p data-process-text>Haz clic en una etiqueta para analizar el proceso.</p>
+              </aside>
+              <aside class="developer-credit" data-developer-credit>
+                <button class="credit-close" type="button" data-credit-close aria-label="Close">×</button>
+                <span data-i18n="creditText">Desarrollada por Rafael Otero</span>
+              </aside>
+            </div>
+          </section>
+
+          <div class="reservoir-grid" aria-label="Reservorios de energía">
+            <article class="reservoir-card">
+              <strong data-reservoir="atp">100</strong>
+              <span data-i18n="atpReservoir">ATP producido</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="co2">100</strong>
+              <span data-i18n="co2Reservoir">CO₂ liberado</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="lactate">0</strong>
+              <span data-i18n="lactateReservoir">Lactato</span>
+            </article>
+            <article class="reservoir-card">
+              <strong data-reservoir="balance">100</strong>
+              <span data-i18n="balanceReservoir">Balance celular</span>
+            </article>
+          </div>
+        </section>
+
+        <aside class="side-panel results-panel" aria-label="Indicadores y consecuencias">
+          <section class="chart-card">
+            <div class="chart-heading">
+              <h2 data-i18n="indicators">Indicadores metabólicos</h2>
+              <span data-i18n="relativeFlow">valores relativos (%)</span>
+            </div>
+            <div class="bar-chart" aria-hidden="true">
+              <div class="bar-column">
+                <strong data-bar-value="atp">0%</strong>
+                <span data-bar="atp"></span>
+                <small data-i18n="atpShort">ATP</small>
+              </div>
+              <div class="bar-column">
+                <strong data-bar-value="oxygenDebt">0%</strong>
+                <span data-bar="oxygenDebt"></span>
+                <small data-i18n="debtShort">Deuda O₂</small>
+              </div>
+              <div class="bar-column">
+                <strong data-bar-value="co2">0%</strong>
+                <span data-bar="co2"></span>
+                <small data-i18n="co2Short">CO₂</small>
+              </div>
+              <div class="bar-column">
+                <strong data-bar-value="lactate">0%</strong>
+                <span data-bar="lactate"></span>
+                <small data-i18n="lactateShort">Lactato</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="chart-heading">
+              <h2 data-i18n="metricsTitle">Lecturas del laboratorio</h2>
+            </div>
+            <div class="readout" data-oxygen-readout>
+              <span data-i18n="oxygenState">Estado del oxígeno</span>
+              <strong data-oxygen-level>Óptimo</strong>
+            </div>
+            <div class="readout" data-temp-readout>
+              <span data-i18n="temperatureState">Estado térmico</span>
+              <strong data-temp-level>Rango enzimático</strong>
+            </div>
+            <div class="metrics">
+              <label>
+                <span data-i18n="atpMetric">Producción de ATP (ATP/glucosa)</span>
+                <strong data-lab-value="atpYield">26.2</strong>
+                <div class="metric-track"><span data-metric="atp"></span></div>
+              </label>
+              <label>
+                <span data-i18n="efficiencyMetric">Eficiencia aeróbica (%)</span>
+                <strong data-lab-value="efficiency">98%</strong>
+                <div class="metric-track"><span data-metric="efficiency"></span></div>
+              </label>
+              <label>
+                <span data-i18n="oxygenDebtMetric">Deuda de oxígeno (% O₂)</span>
+                <strong data-lab-value="oxygenDebt">0%</strong>
+                <div class="metric-track"><span data-metric="oxygenDebt"></span></div>
+              </label>
+              <label>
+                <span data-i18n="lactateMetric">Fermentación láctica (mmol/L)</span>
+                <strong data-lab-value="lactateMmol">0.7</strong>
+                <div class="metric-track"><span data-metric="lactate"></span></div>
+              </label>
+            </div>
+          </section>
+
+          <section class="consequence-card">
+            <h2 data-status-title>Respiración aeróbica estable</h2>
+            <p data-consequence>La célula tiene glucosa, oxígeno y actividad mitocondrial suficientes para producir ATP de forma eficiente.</p>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
