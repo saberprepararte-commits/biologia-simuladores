@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simulador de ósmosis</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="top-strip" aria-label="Referencia superior de ósmosis">
+        <div class="static-reference">
+          <img src="assets/cell-reference.png" alt="Comparación informativa de células en solución hipertónica, isotónica e hipotónica">
+        </div>
+
+        <div class="top-demo" aria-label="Simulador superior de transporte de agua">
+          <div class="top-osmosis-beaker" id="topBeaker">
+            <div class="top-demo-label top-label-water top-label-legend">
+              <div class="mini-water-molecule" aria-hidden="true">
+                <div class="oxygen">O</div>
+                <div class="hydrogen h1">H</div>
+                <div class="hydrogen h2">H</div>
+              </div>
+              <span class="legend-text" id="topLegendWater">moléculas<br>de agua</span>
+            </div>
+
+            <div class="top-demo-label top-label-membrane" id="topLabelMembrane">membrana<br>semipermeable</div>
+
+            <div class="top-demo-label top-label-solute top-label-legend">
+              <div class="mini-solute-sphere" aria-hidden="true"></div>
+              <span class="legend-text" id="topLabelSolute">soluto</span>
+            </div>
+
+            <div class="top-demo-label top-label-left" id="topLabelLeft">menor concentración<br>de soluto</div>
+            <div class="top-demo-label top-label-right" id="topLabelRight">mayor concentración<br>de soluto</div>
+            <div class="top-demo-label top-equilibrium-badge" id="topEquilibriumBadge">equilibrio osmótico</div>
+
+            <div class="top-water-side top-left-water" id="leftWater"></div>
+            <div class="top-water-side top-right-water" id="rightWater"></div>
+
+            <div class="top-solute-layer" id="topSoluteLayer"></div>
+            <div class="top-moving-layer" id="topMovingLayer"></div>
+
+            <div class="top-membrane"></div>
+            <div class="top-membrane-pore"></div>
+            <div class="top-flow-arrow" aria-hidden="true"></div>
+          </div>
+
+          <div class="top-run-controls" aria-label="Controles del simulador superior">
+            <button id="topStartBtn" class="run start" type="button">
+              <span class="play-icon" aria-hidden="true"></span>
+              <span class="run-label">START</span>
+            </button>
+
+            <button id="topPauseBtn" class="run pause" type="button">
+              <span class="pause-icon" aria-hidden="true"></span>
+              <span class="run-label">PAUSE</span>
+            </button>
+
+            <button id="topRestartBtn" class="run restart" type="button">
+              <span class="restart-icon" aria-hidden="true"></span>
+              <span class="run-label">RESTART</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="simulator" aria-label="Simulador de transporte de agua por ósmosis">
+        <aside class="panel controls-panel">
+          <div class="panel-heading">
+            <span class="icon-box sliders" aria-hidden="true"></span>
+            <h1 id="controlsTitle">Controles</h1>
+          </div>
+          <p id="controlsIntro">Ajusta la concentración de sacarosa dentro y fuera de la célula.</p>
+
+          <label class="control-group">
+            <span>
+              <i class="dot dot-in"></i>
+              <span id="insideLabel">Concentración de soluto DENTRO (%)</span>
+            </span>
+            <output id="insideValue">50%</output>
+            <input id="insideSolute" type="range" min="0" max="100" value="50" step="1">
+          </label>
+
+          <label class="control-group">
+            <span>
+              <i class="dot dot-out"></i>
+              <span id="outsideLabel">Concentración de soluto FUERA (%)</span>
+            </span>
+            <output id="outsideValue">50%</output>
+            <input id="outsideSolute" type="range" min="0" max="100" value="50" step="1">
+          </label>
+
+          <div class="quick-title" id="quickTitle">Ajustes rápidos</div>
+          <div class="quick-actions">
+            <button class="preset active" type="button" data-preset="iso" data-inside="50" data-outside="50">Isotónica 50/50</button>
+            <button class="preset" type="button" data-preset="hyper" data-inside="25" data-outside="75">Hipertónica</button>
+            <button class="preset" type="button" data-preset="hypo" data-inside="75" data-outside="25">Hipotónica</button>
+          </div>
+
+          <div class="note" id="soluteNote">Soluto utilizado: sacarosa, que no atraviesa la membrana celular.</div>
+
+          <div class="language-card">
+            <button class="language-toggle" id="languageToggle" type="button" aria-expanded="false" aria-controls="languageMenu">
+              <span id="languageLabel">Idioma</span>
+              <strong id="languageCurrent">Español</strong>
+            </button>
+            <div class="language-menu" id="languageMenu" hidden>
+              <button type="button" data-lang="es">Español</button>
+              <button type="button" data-lang="en">English</button>
+              <button type="button" data-lang="pt">Português</button>
+              <button type="button" data-lang="fr">Français</button>
+              <button type="button" data-lang="it">Italiano</button>
+              <button type="button" data-lang="de">Deutsch</button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="stage-panel">
+          <div class="stage-top">
+            <div class="state-pill"><span id="statePrefix">Estado actual:</span> <strong id="stateLabel">Isotónica</strong></div>
+          </div>
+
+          <div class="stage" id="stage">
+            <div class="particle-field" id="particleField"></div>
+            <div class="outside-solutes" id="outsideSolutes"></div>
+            <div class="water-streams" id="waterStreams"></div>
+            <div class="cell-water-molecules" id="cellWaterMolecules"></div>
+            <div class="cell" id="cell">
+              <div class="cell-body" id="cellBody">
+                <div class="cytoplasm-texture"></div>
+                <div class="inside-water" id="insideWater"></div>
+                <div class="nucleus"></div>
+                <div class="cell-solutes" id="cellSolutes"></div>
+              </div>
+              <div class="phospholipid-layer" id="phospholipidLayer"></div>
+            </div>
+          </div>
+
+          <div class="transport-bar">
+            <div class="transport-item transport-in"><span class="bar-arrow right"></span><span id="transportIn">En solución hipotónica: el agua entra a la célula.</span></div>
+            <div class="transport-item transport-out"><span class="bar-arrow left"></span><span id="transportOut">En solución hipertónica: el agua sale de la célula.</span></div>
+          </div>
+
+          <div class="run-controls" aria-label="Controles de simulación">
+            <button id="startBtn" class="run start" type="button"><span class="play-icon"></span><span class="run-label">START</span></button>
+            <button id="pauseBtn" class="run pause" type="button"><span class="pause-icon"></span><span class="run-label">PAUSE</span></button>
+            <button id="restartBtn" class="run restart" type="button"><span class="restart-icon"></span><span class="run-label">RESTART</span></button>
+          </div>
+        </section>
+
+        <aside class="panel info-panel">
+          <div class="panel-heading">
+            <span class="icon-box info-icon" aria-hidden="true"></span>
+            <h2 id="infoTitle">Información</h2>
+          </div>
+          <article>
+            <h3 id="happeningTitle">Qué está ocurriendo</h3>
+            <p id="explanation">Cuando la concentración de soluto es igual dentro y fuera de la célula, la solución es isotónica y no hay movimiento neto de agua.</p>
+          </article>
+          <article>
+            <h3 id="factsTitle">Datos curiosos</h3>
+            <p id="factsText">Las células de nuestro cuerpo funcionan mejor en ambientes isotónicos. Por ejemplo, la solución salina al 0.9% es casi isotónica para las células humanas.</p>
+          </article>
+          <article class="solution-card">
+            <h3 id="solutionTitle">Tipo de solución</h3>
+            <strong id="solutionName">Isotónica</strong>
+            <span id="solutionDetail">Concentración igual dentro y fuera de la célula.</span>
+          </article>
+        </aside>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
