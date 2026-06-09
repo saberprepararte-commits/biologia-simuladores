@@ -1,1 +1,1579 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enzymes Activity BioLab</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #13202c;
+        --muted: #5f6f7d;
+        --page: #edf4f3;
+        --panel: #ffffff;
+        --panel-soft: #f6fbfa;
+        --line: #d3dfde;
+        --accent: #147c74;
+        --accent-strong: #0b5e58;
+        --warm: #df7b20;
+        --hot: #d13d22;
+        --good: #14804a;
+        --bad: #b42318;
+        --meat: #b76c58;
+        --shadow: 0 18px 45px rgba(20, 35, 44, 0.14);
+      }
 
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 10% 5%, rgba(20, 124, 116, 0.16), transparent 28rem),
+          radial-gradient(circle at 95% 8%, rgba(223, 123, 32, 0.16), transparent 26rem),
+          var(--page);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      .tube:focus-visible {
+        outline: 3px solid rgba(20, 124, 116, 0.3);
+        outline-offset: 3px;
+      }
+
+      .app {
+        width: min(1460px, calc(100% - 20px));
+        height: 100svh;
+        margin: 0 auto;
+        padding: 6px 0;
+        display: grid;
+        grid-template-rows: 78px minmax(0, 1fr) 48px;
+        gap: 6px;
+      }
+
+      .topbar,
+      .panel,
+      .lab-stage,
+      .result-card,
+      .step-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .topbar {
+        min-height: 0;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 auto;
+        border-radius: 8px;
+        display: block;
+        box-shadow: 0 8px 18px rgba(20, 35, 44, 0.16);
+      }
+
+      .eyebrow {
+        margin: 0 0 2px;
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 0;
+        font-size: clamp(1.4rem, 2.45vw, 2.35rem);
+        line-height: 0.98;
+      }
+
+      h2 {
+        margin-bottom: 6px;
+        font-size: 0.9rem;
+      }
+
+      h3 {
+        margin-bottom: 6px;
+        font-size: 0.86rem;
+      }
+
+      .top-actions,
+      .button-row,
+      .metric-row,
+      .legend-row,
+      .tube-meta,
+      .step-status,
+      .timer-row {
+        display: flex;
+      }
+
+      .top-actions {
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .status-pill,
+      .primary-button,
+      .ghost-button {
+        min-height: 36px;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-weight: 900;
+      }
+
+      .status-pill {
+        border: 1px solid rgba(20, 124, 116, 0.26);
+        color: var(--accent-strong);
+        background: #eaf8f6;
+      }
+
+      .primary-button {
+        border: 1px solid var(--accent-strong);
+        color: #fff;
+        background: var(--accent);
+      }
+
+      .ghost-button {
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: #fff;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 225px minmax(0, 1fr) 250px;
+        gap: 6px;
+        min-height: 0;
+      }
+
+      .panel {
+        padding: 8px;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .panel-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .panel-title-row span {
+        color: var(--accent);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .step-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .step-card {
+        padding: 7px;
+        box-shadow: none;
+        background: var(--panel-soft);
+      }
+
+      .step-status {
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 3px;
+        font-weight: 900;
+        font-size: 0.86rem;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #a9b6bd;
+      }
+
+      .step-card.done .dot {
+        background: var(--good);
+      }
+
+      .step-card.active .dot {
+        background: var(--warm);
+        box-shadow: 0 0 0 4px rgba(223, 123, 32, 0.16);
+      }
+
+      .step-card p,
+      .hint,
+      .metric small,
+      .tube-meta,
+      .result-card p {
+        color: var(--muted);
+        line-height: 1.34;
+      }
+
+      .step-card p,
+      .result-card p {
+        margin-bottom: 0;
+        font-size: 0.78rem;
+      }
+
+      .hint {
+        font-size: 0.78rem;
+      }
+
+      .button-row {
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      .button-row button {
+        flex: 1 1 92px;
+        min-height: 34px;
+        padding: 6px 8px;
+        font-size: 0.82rem;
+      }
+
+      .lab-stage {
+        position: relative;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.18)),
+          url("assets/saliva-enzyme-lab-background-v2.png") center / cover no-repeat,
+          #e9f1ef;
+      }
+
+      .stage-scrim {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.2), transparent 22% 76%, rgba(255,255,255,.2)),
+          linear-gradient(180deg, rgba(255,255,255,.12), transparent 42%);
+        pointer-events: none;
+      }
+
+      .zone {
+        position: absolute;
+        border: 2px dashed rgba(255, 255, 255, 0.72);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(2px);
+        color: #fff;
+        text-shadow: 0 1px 3px rgba(0,0,0,.45);
+        font-weight: 900;
+        pointer-events: none;
+      }
+
+      .zone span {
+        position: absolute;
+        left: 10px;
+        top: 8px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        background: rgba(19, 32, 44, 0.48);
+      }
+
+      .rack-zone {
+        left: 5%;
+        top: 33%;
+        width: 31%;
+        height: 42%;
+      }
+
+      .heat-zone {
+        left: 58.2%;
+        top: 24.4%;
+        width: 12.4%;
+        height: 35.6%;
+        border-color: rgba(255, 196, 122, 0.9);
+        background: rgba(218, 89, 35, 0.13);
+      }
+
+      .sample-zone {
+        right: 0.8%;
+        bottom: 11.7%;
+        width: 18.8%;
+        height: 27%;
+        border-color: rgba(255, 232, 197, 0.9);
+        background: rgba(176, 94, 72, 0.12);
+      }
+
+      .flame {
+        position: absolute;
+        left: 64.95%;
+        top: 42.45%;
+        width: 72px;
+        height: 112px;
+        pointer-events: none;
+        transform: translate(-50%, -92%);
+        z-index: 4;
+      }
+
+      .flame::before,
+      .flame::after {
+        content: "";
+        position: absolute;
+      }
+
+      .flame::before {
+        left: 50%;
+        bottom: 5px;
+        width: 58px;
+        height: 90px;
+        margin-left: -29px;
+        border-radius: 50% 50% 45% 45%;
+        background:
+          radial-gradient(circle at 50% 80%, #fff200 0%, #ff9900 35%, #ff3300 65%, transparent 75%);
+        filter: blur(1.2px);
+        transform-origin: bottom center;
+        animation: flameMove 0.18s infinite alternate ease-in-out;
+        box-shadow:
+          0 0 16px #ff6600,
+          0 0 34px #ff3300,
+          0 0 62px rgba(255, 0, 0, 0.72);
+      }
+
+      .flame::after {
+        left: 50%;
+        bottom: 28px;
+        width: 20px;
+        height: 46px;
+        margin-left: -10px;
+        border-radius: 50% 50% 45% 45%;
+        background:
+          radial-gradient(circle at 50% 80%, #ffffff 0%, #ffff99 40%, transparent 75%);
+        animation: whiteFlame 0.2s infinite alternate ease-in-out;
+      }
+
+      .flame span {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .flame span:nth-child(1) {
+        left: 21px;
+        bottom: 18px;
+        width: 34px;
+        height: 64px;
+        border-radius: 50% 50% 40% 40%;
+        background:
+          radial-gradient(circle at 50% 80%, #ffffff 0%, #ffff66 30%, #ff9900 60%, transparent 75%);
+        animation: innerFlame 0.25s infinite alternate ease-in-out;
+      }
+
+      .flame span:nth-child(2) {
+        left: 18px;
+        bottom: 34px;
+        width: 5px;
+        height: 5px;
+        background: #ffcc00;
+        opacity: 0;
+        box-shadow: 0 0 8px #ff6600;
+        animation: sparks 2s infinite ease-out;
+      }
+
+      .flame span:nth-child(3) {
+        left: 44px;
+        bottom: 36px;
+        width: 5px;
+        height: 5px;
+        background: #ffcc00;
+        opacity: 0;
+        box-shadow: 0 0 8px #ff6600;
+        animation: sparks 2.2s 0.55s infinite ease-out;
+      }
+
+      .tube {
+        position: absolute;
+        width: 50px;
+        height: 178px;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        touch-action: none;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+      }
+
+      .tube.dragging {
+        z-index: 20;
+        filter: drop-shadow(0 22px 24px rgba(0,0,0,.3));
+      }
+
+      .tube-glass {
+        position: absolute;
+        left: 5px;
+        right: 5px;
+        top: 0;
+        bottom: 13px;
+        border: 4px solid rgba(235, 250, 255, 0.78);
+        border-radius: 16px 16px 24px 24px;
+        background:
+          linear-gradient(90deg,
+            rgba(255,255,255,0.88) 0%,
+            rgba(255,255,255,0.22) 12%,
+            rgba(160,210,220,0.10) 38%,
+            rgba(255,255,255,0.28) 63%,
+            rgba(255,255,255,0.78) 100%);
+        overflow: hidden;
+        box-shadow:
+          inset 6px 0 10px rgba(255,255,255,0.62),
+          inset -8px 0 12px rgba(40,80,90,0.25),
+          inset 0 -8px 16px rgba(255,255,255,0.55),
+          0 12px 22px rgba(0,0,0,0.22);
+      }
+
+      .tube-glass::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: 4px;
+        right: 4px;
+        height: 18px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at center,
+            rgba(255,255,255,0.95),
+            rgba(210,235,240,0.25) 65%,
+            rgba(255,255,255,0.05));
+        border: 2px solid rgba(255,255,255,0.75);
+        z-index: 7;
+      }
+
+      .tube-glass::after {
+        content: "";
+        position: absolute;
+        inset: 8px 8px auto auto;
+        width: 8px;
+        height: 132px;
+        border-radius: 50px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.08));
+        opacity: 0.85;
+        z-index: 8;
+      }
+
+      .tube-liquid {
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        bottom: 4px;
+        height: 58%;
+        border-radius: 7px 7px 20px 20px;
+        background:
+          radial-gradient(circle at 35% 18%, rgba(255,255,255,0.75), transparent 18%),
+          linear-gradient(90deg, rgba(40, 190, 205, 0.72), rgba(112, 225, 230, 0.92), rgba(24, 150, 170, 0.82));
+        box-shadow:
+          inset 6px 0 12px rgba(255,255,255,0.45),
+          inset -8px 0 14px rgba(0,70,85,0.32),
+          inset 0 -12px 16px rgba(0,100,120,0.28);
+        z-index: 2;
+        transition: background 250ms ease, height 250ms ease;
+      }
+
+      .tube-meniscus {
+        position: absolute;
+        left: 5px;
+        right: 5px;
+        bottom: calc(58% + 1px);
+        height: 13px;
+        border-radius: 50%;
+        background:
+          radial-gradient(ellipse at center,
+            rgba(215,255,255,0.95),
+            rgba(95,210,220,0.55) 58%,
+            rgba(20,130,150,0.15));
+        z-index: 5;
+      }
+
+      .glass-shine {
+        position: absolute;
+        top: 14px;
+        left: 6px;
+        width: 8px;
+        height: 130px;
+        border-radius: 30px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.92), rgba(255,255,255,0.18), rgba(255,255,255,0.55));
+        z-index: 9;
+      }
+
+      .glass-shine.small {
+        left: auto;
+        right: 7px;
+        width: 5px;
+        height: 105px;
+        opacity: 0.5;
+      }
+
+      .tube-bubbles::before,
+      .tube-bubbles::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.55);
+        z-index: 6;
+        animation: bubbleMove 3.5s infinite ease-in-out;
+      }
+
+      .tube-bubbles::before {
+        width: 5px;
+        height: 5px;
+        left: 14px;
+        bottom: 52px;
+      }
+
+      .tube-bubbles::after {
+        width: 4px;
+        height: 4px;
+        right: 13px;
+        bottom: 82px;
+        animation-delay: 1.2s;
+      }
+
+      .tube.heated .tube-liquid {
+        background:
+          radial-gradient(circle at 35% 18%, rgba(255,255,255,0.38), transparent 18%),
+          linear-gradient(90deg, rgba(123, 83, 58, 0.78), rgba(116, 125, 119, 0.82), rgba(68, 78, 78, 0.76));
+        opacity: 0.94;
+      }
+
+      .heat-fog {
+        position: absolute;
+        inset: 12px 5px 30px;
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 45% 40%, rgba(255,255,255,0.55), transparent 28%),
+          radial-gradient(circle at 60% 70%, rgba(255,255,255,0.35), transparent 35%);
+        filter: blur(5px);
+        opacity: 0;
+        z-index: 10;
+        animation: fogPulse 2s infinite ease-in-out;
+      }
+
+      .tube.heated .heat-fog {
+        opacity: 0.55;
+      }
+
+      .tube.meat .tube-liquid::after {
+        content: "";
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: calc(12px + var(--digested, 0%) * 0.34);
+        height: calc(26px - var(--digested, 0%) * 0.2);
+        min-height: 7px;
+        border-radius: 8px 10px 12px 9px;
+        background:
+          radial-gradient(circle at 36% 28%, rgba(255, 247, 214, 0.96), transparent 28%),
+          linear-gradient(145deg, #f4d99e, #c79045);
+        box-shadow: inset -4px -5px 7px rgba(122, 85, 36, 0.22);
+        opacity: calc(1 - var(--digested, 0%) / 132);
+      }
+
+      .tube-label {
+        position: absolute;
+        left: 50%;
+        bottom: 58px;
+        transform: translateX(-50%);
+        min-width: 30px;
+        padding: 3px 6px;
+        border-radius: 999px;
+        color: #0d3d3a;
+        background: rgba(255, 255, 255, 0.84);
+        font-size: 0.78rem;
+        font-weight: 900;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      }
+
+      .tube-badge {
+        position: absolute;
+        left: 50%;
+        bottom: -11px;
+        transform: translateX(-50%);
+        width: max-content;
+        max-width: 86px;
+        padding: 4px 6px;
+        border-radius: 8px;
+        color: #fff;
+        background: rgba(19, 32, 44, 0.7);
+        font-size: 0.68rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .tube.heated .tube-badge {
+        background: rgba(180, 35, 24, 0.86);
+      }
+
+      .tube.active-enzyme .tube-badge {
+        background: rgba(20, 128, 74, 0.86);
+      }
+
+      .meat-pieces {
+        position: absolute;
+        right: 0.7%;
+        bottom: 14.2%;
+        width: 168px;
+        height: 126px;
+        pointer-events: none;
+      }
+
+      .meat-pieces svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(76, 28, 28, 0.22));
+      }
+
+      .timer-panel {
+        position: absolute;
+        left: 50%;
+        bottom: 8px;
+        width: min(92%, 680px);
+        transform: translateX(-50%);
+        padding: 8px 10px;
+        border: 1px solid rgba(255,255,255,.56);
+        border-radius: 8px;
+        background: rgba(255,255,255,.84);
+        backdrop-filter: blur(8px);
+        z-index: 30;
+      }
+
+      .timer-row {
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+        font-weight: 900;
+      }
+
+      .timer-row strong {
+        color: var(--accent-strong);
+        font-size: 1.25rem;
+      }
+
+      .progress-track {
+        height: 13px;
+        border-radius: 999px;
+        background: #dfe9e9;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: var(--progress, 0%);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), #f1b653);
+        transition: width 200ms ease;
+      }
+
+      .right-panel {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        gap: 4px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .metric {
+        padding: 5px 7px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-soft);
+      }
+
+      .metric-row {
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 1px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-weight: 900;
+        font-size: 0.74rem;
+      }
+
+      .metric b {
+        color: var(--accent-strong);
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      .metric small {
+        font-size: 0.68rem;
+        line-height: 1.22;
+      }
+
+      .result-card {
+        padding: 6px 7px;
+        box-shadow: none;
+      }
+
+      .result-card strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 0.78rem;
+        line-height: 1.15;
+      }
+
+      .result-card p {
+        font-size: 0.68rem;
+        line-height: 1.2;
+      }
+
+      .tube-list {
+        display: grid;
+        gap: 3px;
+        overflow: hidden;
+        min-height: 0;
+        max-height: none;
+        padding-right: 2px;
+      }
+
+      .tube-row {
+        display: grid;
+        grid-template-columns: 24px 1fr 30px;
+        gap: 5px;
+        align-items: center;
+        padding: 3px 6px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        font-size: 0.64rem;
+        min-height: 27px;
+      }
+
+      .tube-row b {
+        color: var(--accent-strong);
+      }
+
+      .tube-meta {
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+        font-size: 0.58rem;
+        font-weight: 800;
+      }
+
+      .tag {
+        padding: 1px 4px;
+        border-radius: 999px;
+        background: #edf3f3;
+      }
+
+      .tag.hot {
+        color: #fff;
+        background: var(--bad);
+      }
+
+      .tag.good {
+        color: #fff;
+        background: var(--good);
+      }
+
+      .footer-panel {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 8px;
+        padding: 8px 12px;
+        box-shadow: none;
+      }
+
+      .footer-panel p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        line-height: 1.28;
+      }
+
+      .footer-panel strong {
+        color: var(--accent-strong);
+      }
+
+      @keyframes flameMove {
+        0% {
+          transform: scaleX(1) scaleY(1) rotate(-2deg);
+        }
+        100% {
+          transform: scaleX(1.08) scaleY(0.95) rotate(3deg);
+        }
+      }
+
+      @keyframes innerFlame {
+        0% {
+          transform: translateX(-3px) scaleY(1);
+        }
+        100% {
+          transform: translateX(4px) scaleY(0.9);
+        }
+      }
+
+      @keyframes whiteFlame {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 0.9;
+        }
+        100% {
+          transform: translateY(-8px) scale(0.8);
+          opacity: 0.6;
+        }
+      }
+
+      @keyframes sparks {
+        0% {
+          transform: translateY(0) scale(0.5);
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-92px) translateX(18px) scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes bubbleMove {
+        0%, 100% {
+          transform: translateY(0);
+          opacity: 0.35;
+        }
+        50% {
+          transform: translateY(-18px);
+          opacity: 0.85;
+        }
+      }
+
+      @keyframes fogPulse {
+        0%, 100% {
+          opacity: 0.35;
+          transform: scale(0.96);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.04);
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .workspace {
+          grid-template-columns: 320px minmax(0, 1fr);
+        }
+
+        .right-panel {
+          grid-column: 1 / -1;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: auto 1fr;
+        }
+
+        .right-panel .panel-title-row {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          width: min(100% - 12px, 760px);
+        }
+
+        .topbar,
+        .footer-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .top-actions {
+          justify-content: flex-start;
+        }
+
+        .workspace,
+        .right-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .lab-stage {
+          min-height: 620px;
+        }
+
+        .rack-zone {
+          left: 3%;
+          top: 32%;
+          width: 41%;
+        }
+
+        .heat-zone {
+          left: 48%;
+          width: 22%;
+        }
+
+        .sample-zone {
+          right: 3%;
+          width: 28%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand-mark" src="favicon.svg" alt="" aria-hidden="true" />
+          <div>
+            <p class="eyebrow">Simulador #14 · Laboratorio virtual</p>
+            <h1>Enzymes Activity BioLab</h1>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span class="status-pill" id="statusPill">Prepara el experimento</span>
+          <button class="ghost-button" type="button" id="langButton">English</button>
+          <button class="ghost-button" type="button" id="addMeatButton" data-i18n="addMeat">Agregar almidón a todos</button>
+          <button class="primary-button" type="button" id="runButton" data-i18n="startTime">Iniciar tiempo</button>
+          <button class="ghost-button" type="button" id="resetButton" data-i18n="reset">Reiniciar</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="panel">
+          <div class="panel-title-row">
+            <h2 data-i18n="guideTitle">Guía del laboratorio</h2>
+            <span data-i18n="procedure">Procedimiento</span>
+          </div>
+
+          <div class="step-list">
+            <article class="step-card active" data-step="1">
+              <div class="step-status"><span class="dot"></span><strong data-i18n="step1Title">1. Tubos con saliva</strong></div>
+              <p data-i18n="step1Text">Los 10 tubos comienzan con saliva. La enzima está activa mientras no se caliente en exceso.</p>
+            </article>
+            <article class="step-card" data-step="2">
+              <div class="step-status"><span class="dot"></span><strong data-i18n="step2Title">2. Calentar 5 tubos</strong></div>
+              <p data-i18n="step2Text">Arrastra cinco tubos hacia la zona del mechero para aplicar un tratamiento térmico.</p>
+            </article>
+            <article class="step-card" data-step="3">
+              <div class="step-status"><span class="dot"></span><strong data-i18n="step3Title">3. Agregar almidón</strong></div>
+              <p data-i18n="step3Text">Arrastra tubos a la bandeja o usa el botón superior para agregar almidón a todos.</p>
+            </article>
+            <article class="step-card" data-step="4">
+              <div class="step-status"><span class="dot"></span><strong data-i18n="step4Title">4. Esperar y comparar</strong></div>
+              <p data-i18n="step4Text">Inicia el tiempo y compara cuánto cambia la muestra en cada grupo.</p>
+            </article>
+          </div>
+
+          <div class="button-row">
+            <button class="primary-button" type="button" data-scenario="guided" data-i18n="prepare">Preparar práctica</button>
+            <button class="ghost-button" type="button" data-scenario="expected" data-i18n="expected">Ver resultado esperado</button>
+          </div>
+
+          <p class="hint" style="margin-top: 10px">
+            <span data-i18n="tip">Tip: también puedes arrastrar cada tubo con el mouse o con el dedo en pantalla táctil.</span>
+          </p>
+        </aside>
+
+        <section class="lab-stage" id="stage" aria-label="Mesa de laboratorio interactiva">
+          <div class="stage-scrim" aria-hidden="true"></div>
+          <div class="zone rack-zone"><span data-i18n="rack">Rack de tubos</span></div>
+          <div class="zone heat-zone"><span data-i18n="heat">Calor</span></div>
+          <div class="zone sample-zone"><span data-i18n="meat">Almidón</span></div>
+          <div class="flame" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="meat-pieces" aria-hidden="true">
+            <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="410" cy="440" rx="235" ry="44" fill="rgba(0,0,0,0.12)" />
+              <g transform="translate(135 130)">
+                <path d="M78 118 L232 76 L352 150 L198 205 Z" fill="#f6dfb0" />
+                <path d="M78 118 L198 205 L198 318 L74 244 Z" fill="#d7a760" />
+                <path d="M198 205 L352 150 L354 262 L198 318 Z" fill="#c48c48" />
+                <path d="M110 126 L226 94 L319 152 L201 188 Z" fill="#fff2ca" opacity=".72" />
+                <circle cx="148" cy="159" r="8" fill="#bf8844" opacity=".45" />
+                <circle cx="205" cy="132" r="6" fill="#bf8844" opacity=".36" />
+                <circle cx="255" cy="166" r="7" fill="#bf8844" opacity=".38" />
+              </g>
+              <g transform="translate(328 208) rotate(8)">
+                <path d="M54 92 L190 48 L305 116 L166 168 Z" fill="#f2d79d" />
+                <path d="M54 92 L166 168 L164 270 L52 205 Z" fill="#d09a53" />
+                <path d="M166 168 L305 116 L306 216 L164 270 Z" fill="#b9793f" />
+                <path d="M84 97 L190 65 L277 117 L168 150 Z" fill="#fff0c4" opacity=".7" />
+                <circle cx="125" cy="128" r="7" fill="#ae7436" opacity=".42" />
+                <circle cx="190" cy="105" r="6" fill="#ae7436" opacity=".38" />
+                <circle cx="222" cy="142" r="8" fill="#ae7436" opacity=".32" />
+              </g>
+              <g transform="translate(260 334) rotate(-9) scale(.72)">
+                <path d="M70 95 L190 54 L290 112 L165 162 Z" fill="#f7e1ad" />
+                <path d="M70 95 L165 162 L165 248 L68 192 Z" fill="#d5a15b" />
+                <path d="M165 162 L290 112 L290 198 L165 248 Z" fill="#bd8143" />
+                <path d="M98 99 L190 72 L262 113 L166 144 Z" fill="#fff4cb" opacity=".68" />
+              </g>
+            </svg>
+          </div>
+          <div id="tubeLayer"></div>
+
+          <div class="timer-panel">
+            <div class="timer-row">
+              <span data-i18n="reactionTime">Tiempo de reacción</span>
+              <strong id="timerLabel">00:00</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="timeProgress"></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel right-panel">
+          <div class="panel-title-row">
+            <h2 data-i18n="results">Resultados</h2>
+            <span data-i18n="live">En vivo</span>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-row"><span data-i18n="heatedTubes">Tubos calentados</span><b id="heatedCount">0/5</b></div>
+              <small data-i18n="heatedHelp">Grupo con tratamiento térmico previo.</small>
+            </div>
+            <div class="metric">
+              <div class="metric-row"><span data-i18n="activeDeg">Cambio sin calor</span><b id="activeAverage">0%</b></div>
+              <small data-i18n="activeDegHelp">Promedio en tubos sin calentamiento extremo.</small>
+            </div>
+            <div class="metric">
+              <div class="metric-row"><span data-i18n="heatedDeg">Cambio con calor</span><b id="heatedAverage">0%</b></div>
+              <small data-i18n="heatedDegHelp">Promedio en tubos expuestos al calor.</small>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <strong id="conclusionTitle">Sin datos suficientes</strong>
+            <p id="conclusionText">Calienta cinco tubos, agrega almidón e inicia el tiempo para comparar los resultados.</p>
+          </div>
+
+          <div class="tube-list" id="tubeList" aria-live="polite"></div>
+        </aside>
+      </section>
+
+      <section class="panel footer-panel">
+        <p><strong data-i18n="questionLead">Pregunta guía:</strong> <span data-i18n="questionText">¿qué efecto tiene la temperatura alta sobre la actividad de la saliva frente al almidón?</span></p>
+        <p><strong data-i18n="hypothesisLead">Hipótesis:</strong> <span data-i18n="hypothesisText">si la temperatura modifica la actividad enzimática, los grupos mostrarán cambios diferentes.</span></p>
+        <p><strong data-i18n="keyLead">Lectura clave:</strong> <span data-i18n="keyText">la amilasa salival actúa sobre el almidón; compara ambos grupos antes de concluir.</span></p>
+      </section>
+    </main>
+
+    <script>
+      const stage = document.getElementById("stage");
+      const tubeLayer = document.getElementById("tubeLayer");
+      const tubeList = document.getElementById("tubeList");
+      const runButton = document.getElementById("runButton");
+      const resetButton = document.getElementById("resetButton");
+      const addMeatButton = document.getElementById("addMeatButton");
+      const langButton = document.getElementById("langButton");
+      const statusPill = document.getElementById("statusPill");
+      const timerLabel = document.getElementById("timerLabel");
+      const timeProgress = document.getElementById("timeProgress");
+      const heatedCount = document.getElementById("heatedCount");
+      const activeAverage = document.getElementById("activeAverage");
+      const heatedAverage = document.getElementById("heatedAverage");
+      const conclusionTitle = document.getElementById("conclusionTitle");
+      const conclusionText = document.getElementById("conclusionText");
+
+      const state = {
+        lang: "es",
+        running: false,
+        seconds: 0,
+        maxSeconds: 180,
+        lastTick: performance.now(),
+        tubes: [],
+        drag: null,
+      };
+
+      const i18n = {
+        es: {
+          addMeat: "Agregar almidón a todos",
+          startTime: "Iniciar tiempo",
+          pauseTime: "Pausar tiempo",
+          reset: "Reiniciar",
+          guideTitle: "Guía del laboratorio",
+          procedure: "Procedimiento",
+          step1Title: "1. Tubos con saliva",
+          step1Text: "Los 10 tubos comienzan con saliva. La enzima está activa mientras no se caliente en exceso.",
+          step2Title: "2. Calentar 5 tubos",
+          step2Text: "Arrastra cinco tubos hacia la zona del mechero para aplicar un tratamiento térmico.",
+          step3Title: "3. Agregar almidón",
+          step3Text: "Arrastra tubos a la bandeja o usa el botón superior para agregar almidón a todos.",
+          step4Title: "4. Esperar y comparar",
+          step4Text: "Inicia el tiempo y compara cuánto cambia la muestra en cada grupo.",
+          prepare: "Preparar práctica",
+          expected: "Ver resultado esperado",
+          tip: "Tip: también puedes arrastrar cada tubo con el mouse o con el dedo en pantalla táctil.",
+          rack: "Rack de tubos",
+          heat: "Calor",
+          meat: "Almidón",
+          reactionTime: "Tiempo de reacción",
+          results: "Resultados",
+          live: "En vivo",
+          heatedTubes: "Tubos calentados",
+          heatedHelp: "Grupo con tratamiento térmico previo.",
+          activeDeg: "Cambio sin calor",
+          activeDegHelp: "Promedio del cambio observado en tubos sin calentar.",
+          heatedDeg: "Cambio con calor",
+          heatedDegHelp: "Promedio del cambio observado en tubos calentados.",
+          questionLead: "Pregunta guía:",
+          questionText: "¿qué efecto tiene la temperatura alta sobre la actividad de la saliva frente al almidón?",
+          hypothesisLead: "Hipótesis:",
+          hypothesisText: "si la temperatura modifica la actividad enzimática, los grupos mostrarán cambios diferentes.",
+          keyLead: "Lectura clave:",
+          keyText: "la amilasa salival actúa sobre el almidón; compara ambos grupos antes de concluir.",
+          statusReady: "Prepara el experimento",
+          meatAll: "Almidón agregado a los 10 tubos",
+          needMeat: "Agrega almidón a todos los tubos antes de iniciar",
+          running: "Reacción en curso",
+          paused: "Reacción pausada",
+          finished: "Tiempo finalizado",
+          expectedLoaded: "Resultado esperado cargado",
+          guidedReady: "Cinco tubos recibieron tratamiento térmico; agrega almidón",
+          inactiveByHeat: "tratamiento térmico registrado",
+          sampleAdded: "almidón agregado",
+          active: "Activa",
+          inactive: "Calentada",
+          meatShort: "Almidón",
+          heatMeat: "Calor + almidón",
+          heatedTag: "calentado",
+          activeTag: "activo",
+          withMeat: "almidón",
+          noMeat: "sin almidón",
+          lackingHeatedTitle: "Falta comparar los grupos",
+          lackingHeatedText: "Arrastra cinco tubos al calor para preparar el grupo con tratamiento térmico.",
+          lackingSampleTitle: "Falta agregar almidón",
+          lackingSampleText: "Agrega almidón a los 10 tubos para comparar el cambio entre grupos.",
+          initialTitle: "Observación inicial",
+          initialText: "Observa ambos grupos durante el tiempo de reacción antes de explicar el resultado.",
+          conclusionTitle: "Conclusión sugerida por los datos",
+          conclusionText: "El grupo sin calentamiento mostró mayor cambio en el almidón. Esto sugiere que la temperatura alta redujo la actividad de la amilasa salival.",
+          comparingTitle: "Comparación en proceso",
+          comparingText: "La diferencia entre grupos aún está apareciendo. Deja avanzar el tiempo de reacción.",
+          notEnoughTitle: "Sin datos suficientes",
+          notEnoughText: "Calienta cinco tubos, agrega almidón e inicia el tiempo para comparar los resultados.",
+        },
+        en: {
+          addMeat: "Add starch to all",
+          startTime: "Start timer",
+          pauseTime: "Pause timer",
+          reset: "Reset",
+          guideTitle: "Lab guide",
+          procedure: "Procedure",
+          step1Title: "1. Tubes with saliva",
+          step1Text: "All 10 tubes begin with saliva. The enzyme remains active unless overheated.",
+          step2Title: "2. Heat 5 tubes",
+          step2Text: "Drag five tubes to the burner zone to apply a heat treatment.",
+          step3Title: "3. Add starch",
+          step3Text: "Drag tubes to the tray or use the top button to add starch to all tubes.",
+          step4Title: "4. Wait and compare",
+          step4Text: "Start the timer and compare how much the sample changes in each group.",
+          prepare: "Prepare lab",
+          expected: "Expected result",
+          tip: "Tip: you can drag each tube with the mouse or with your finger on a touch screen.",
+          rack: "Tube rack",
+          heat: "Heat",
+          meat: "Starch",
+          reactionTime: "Reaction time",
+          results: "Results",
+          live: "Live",
+          heatedTubes: "Heated tubes",
+          heatedHelp: "Group with previous heat treatment.",
+          activeDeg: "Change without heat",
+          activeDegHelp: "Average observed change in unheated tubes.",
+          heatedDeg: "Change with heat",
+          heatedDegHelp: "Average observed change in heated tubes.",
+          questionLead: "Guiding question:",
+          questionText: "what effect does high temperature have on saliva activity against starch?",
+          hypothesisLead: "Hypothesis:",
+          hypothesisText: "if temperature changes enzyme activity, both groups will show different results.",
+          keyLead: "Key idea:",
+          keyText: "salivary amylase acts on starch; compare both groups before concluding.",
+          statusReady: "Prepare the experiment",
+          meatAll: "Starch added to all 10 tubes",
+          needMeat: "Add starch to all tubes before starting",
+          running: "Reaction in progress",
+          paused: "Reaction paused",
+          finished: "Time complete",
+          expectedLoaded: "Expected result loaded",
+          guidedReady: "Five tubes received heat treatment; add starch",
+          inactiveByHeat: "heat treatment recorded",
+          sampleAdded: "starch added",
+          active: "Active",
+          inactive: "Heated",
+          meatShort: "Starch",
+          heatMeat: "Heat + starch",
+          heatedTag: "heated",
+          activeTag: "active",
+          withMeat: "starch",
+          noMeat: "no starch",
+          lackingHeatedTitle: "Groups not ready",
+          lackingHeatedText: "Drag five tubes to heat to prepare the heat-treatment group.",
+          lackingSampleTitle: "Starch missing",
+          lackingSampleText: "Add starch to all 10 tubes to compare the change between groups.",
+          initialTitle: "Initial observation",
+          initialText: "Observe both groups during the reaction time before explaining the result.",
+          conclusionTitle: "Conclusion suggested by the data",
+          conclusionText: "The unheated group showed greater change in starch. This suggests high temperature reduced salivary amylase activity.",
+          comparingTitle: "Comparison in progress",
+          comparingText: "The difference between groups is still appearing. Let the reaction continue.",
+          notEnoughTitle: "Not enough data",
+          notEnoughText: "Heat five tubes, add starch, and start the timer to compare results.",
+        },
+      };
+
+      function tr(key) {
+        return i18n[state.lang][key];
+      }
+
+      function setLanguage(lang) {
+        state.lang = lang;
+        document.documentElement.lang = lang;
+        langButton.textContent = lang === "es" ? "English" : "Español";
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          node.textContent = tr(node.dataset.i18n);
+        });
+        statusPill.textContent = state.running ? tr("running") : tr("statusReady");
+        runButton.textContent = state.running ? tr("pauseTime") : tr("startTime");
+        update();
+      }
+
+      const rackPositions = [
+        [11, 41], [17, 41], [23, 41], [29, 41], [35, 41],
+        [11, 63], [17, 63], [23, 63], [29, 63], [35, 63],
+      ];
+
+      function createTubes() {
+        tubeLayer.innerHTML = "";
+        state.tubes = rackPositions.map((position, index) => ({
+          id: index + 1,
+          x: position[0],
+          y: position[1],
+          heated: false,
+          meat: false,
+          digestion: 0,
+          temperature: 37,
+          element: null,
+        }));
+
+        for (const tube of state.tubes) {
+          const button = document.createElement("button");
+          button.className = "tube active-enzyme";
+          button.type = "button";
+          button.dataset.id = tube.id;
+          button.setAttribute("aria-label", `Tubo ${tube.id}`);
+          button.innerHTML = `
+            <span class="tube-glass">
+              <span class="glass-shine"></span>
+              <span class="glass-shine small"></span>
+              <span class="tube-liquid"></span>
+              <span class="tube-meniscus"></span>
+              <span class="tube-bubbles"></span>
+              <span class="heat-fog"></span>
+            </span>
+            <span class="tube-label">${tube.id}</span>
+            <span class="tube-badge">${tr("active")}</span>
+          `;
+          tube.element = button;
+          tubeLayer.appendChild(button);
+          positionTube(tube);
+          button.addEventListener("pointerdown", startDrag);
+        }
+      }
+
+      function positionTube(tube) {
+        tube.element.style.left = `${tube.x}%`;
+        tube.element.style.top = `${tube.y}%`;
+        tube.element.style.setProperty("--digested", `${tube.digestion}%`);
+        tube.element.classList.toggle("heated", tube.heated);
+        tube.element.classList.toggle("meat", tube.meat);
+        tube.element.classList.toggle("active-enzyme", !tube.heated);
+        const badge = tube.element.querySelector(".tube-badge");
+        if (tube.heated && tube.meat) badge.textContent = tr("heatMeat");
+        else if (tube.heated) badge.textContent = tr("inactive");
+        else if (tube.meat) badge.textContent = tr("meatShort");
+        else badge.textContent = tr("active");
+      }
+
+      function startDrag(event) {
+        const tube = state.tubes.find((item) => item.id === Number(event.currentTarget.dataset.id));
+        const rect = stage.getBoundingClientRect();
+        state.drag = {
+          tube,
+          pointerId: event.pointerId,
+          offsetX: event.clientX - (rect.left + (tube.x / 100) * rect.width),
+          offsetY: event.clientY - (rect.top + (tube.y / 100) * rect.height),
+        };
+        tube.element.classList.add("dragging");
+        tube.element.setPointerCapture(event.pointerId);
+      }
+
+      function dragMove(event) {
+        if (!state.drag || event.pointerId !== state.drag.pointerId) return;
+        const rect = stage.getBoundingClientRect();
+        const x = ((event.clientX - rect.left - state.drag.offsetX) / rect.width) * 100;
+        const y = ((event.clientY - rect.top - state.drag.offsetY) / rect.height) * 100;
+        state.drag.tube.x = Math.max(4, Math.min(96, x));
+        state.drag.tube.y = Math.max(12, Math.min(86, y));
+        positionTube(state.drag.tube);
+      }
+
+      function endDrag(event) {
+        if (!state.drag || event.pointerId !== state.drag.pointerId) return;
+        const tube = state.drag.tube;
+        tube.element.classList.remove("dragging");
+
+        if (inside(tube, { x1: 58.2, x2: 70.6, y1: 24.4, y2: 60 })) {
+          tube.heated = true;
+          tube.temperature = 82;
+          tube.digestion = Math.min(tube.digestion, 8);
+          statusPill.textContent = `Tubo ${tube.id}: ${tr("inactiveByHeat")}`;
+        }
+
+        if (inside(tube, { x1: 80.4, x2: 99.2, y1: 61.3, y2: 88.3 })) {
+          tube.meat = true;
+          statusPill.textContent = `Tubo ${tube.id}: ${tr("sampleAdded")}`;
+        }
+
+        positionTube(tube);
+        state.drag = null;
+        update();
+      }
+
+      function inside(tube, box) {
+        return tube.x >= box.x1 && tube.x <= box.x2 && tube.y >= box.y1 && tube.y <= box.y2;
+      }
+
+      function addMeatToAll() {
+        for (const tube of state.tubes) {
+          tube.meat = true;
+          positionTube(tube);
+        }
+        statusPill.textContent = tr("meatAll");
+        update();
+      }
+
+      function prepareExpected() {
+        state.tubes.forEach((tube, index) => {
+          tube.meat = true;
+          tube.heated = index < 5;
+          tube.temperature = tube.heated ? 82 : 37;
+          tube.x = tube.heated ? 61.3 + index * 1.85 : 11 + (index - 5) * 6;
+          tube.y = tube.heated ? 43.5 : 57;
+          tube.digestion = tube.heated ? 6 : 86;
+          positionTube(tube);
+        });
+        state.seconds = 180;
+        state.running = false;
+        runButton.textContent = tr("startTime");
+        statusPill.textContent = tr("expectedLoaded");
+        update();
+      }
+
+      function prepareGuided() {
+        reset();
+        state.tubes.forEach((tube, index) => {
+          tube.meat = false;
+          tube.heated = index < 5;
+          tube.temperature = tube.heated ? 82 : 37;
+          tube.x = tube.heated ? 61.3 + index * 1.85 : rackPositions[index][0];
+          tube.y = tube.heated ? 43.5 : rackPositions[index][1];
+          positionTube(tube);
+        });
+        statusPill.textContent = tr("guidedReady");
+        update();
+      }
+
+      function reset() {
+        state.running = false;
+        state.seconds = 0;
+        state.lastTick = performance.now();
+        runButton.textContent = tr("startTime");
+        statusPill.textContent = tr("statusReady");
+        createTubes();
+        update();
+      }
+
+      function toggleRun() {
+        const allHaveMeat = state.tubes.every((tube) => tube.meat);
+        if (!allHaveMeat) {
+          statusPill.textContent = tr("needMeat");
+          return;
+        }
+        state.running = !state.running;
+        state.lastTick = performance.now();
+        runButton.textContent = state.running ? tr("pauseTime") : tr("startTime");
+        statusPill.textContent = state.running ? tr("running") : tr("paused");
+      }
+
+      function simulationTick(now) {
+        const dt = Math.min(0.08, (now - state.lastTick) / 1000);
+        state.lastTick = now;
+
+        if (state.running) {
+          state.seconds = Math.min(state.maxSeconds, state.seconds + dt * 16);
+          for (const tube of state.tubes) {
+            if (!tube.meat) continue;
+            const rate = tube.heated ? 0.22 : 1.45;
+            const limit = tube.heated ? 12 : 96;
+            tube.digestion = Math.min(limit, tube.digestion + rate * dt * 16);
+            positionTube(tube);
+          }
+          if (state.seconds >= state.maxSeconds) {
+            state.running = false;
+            runButton.textContent = tr("startTime");
+            statusPill.textContent = tr("finished");
+          }
+          update();
+        }
+
+        requestAnimationFrame(simulationTick);
+      }
+
+      function update() {
+        const heated = state.tubes.filter((tube) => tube.heated);
+        const active = state.tubes.filter((tube) => !tube.heated);
+        const activeWithMeat = active.filter((tube) => tube.meat);
+        const heatedWithMeat = heated.filter((tube) => tube.meat);
+        const activeAvg = average(activeWithMeat.map((tube) => tube.digestion));
+        const heatedAvg = average(heatedWithMeat.map((tube) => tube.digestion));
+
+        heatedCount.textContent = `${heated.length}/5`;
+        activeAverage.textContent = `${Math.round(activeAvg)}%`;
+        heatedAverage.textContent = `${Math.round(heatedAvg)}%`;
+        timerLabel.textContent = formatTime(state.seconds);
+        timeProgress.style.setProperty("--progress", `${(state.seconds / state.maxSeconds) * 100}%`);
+
+        updateSteps(heated.length, state.tubes.filter((tube) => tube.meat).length);
+        updateConclusion(activeAvg, heatedAvg, heated.length);
+        renderTubeList();
+      }
+
+      function average(values) {
+        if (!values.length) return 0;
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
+      }
+
+      function formatTime(seconds) {
+        const whole = Math.floor(seconds);
+        const min = String(Math.floor(whole / 60)).padStart(2, "0");
+        const sec = String(whole % 60).padStart(2, "0");
+        return `${min}:${sec}`;
+      }
+
+      function updateSteps(heated, meat) {
+        const step1 = document.querySelector('[data-step="1"]');
+        const step2 = document.querySelector('[data-step="2"]');
+        const step3 = document.querySelector('[data-step="3"]');
+        const step4 = document.querySelector('[data-step="4"]');
+        [step1, step2, step3, step4].forEach((step) => step.classList.remove("active", "done"));
+        step1.classList.add("done");
+        if (heated < 5) step2.classList.add("active");
+        else step2.classList.add("done");
+        if (heated >= 5 && meat < 10) step3.classList.add("active");
+        if (meat >= 10) step3.classList.add("done");
+        if (meat >= 10) step4.classList.add(state.seconds > 0 ? "done" : "active");
+      }
+
+      function updateConclusion(activeAvg, heatedAvg, heated) {
+        if (heated < 5) {
+          conclusionTitle.textContent = tr("lackingHeatedTitle");
+          conclusionText.textContent = tr("lackingHeatedText");
+          return;
+        }
+        if (!state.tubes.every((tube) => tube.meat)) {
+          conclusionTitle.textContent = tr("lackingSampleTitle");
+          conclusionText.textContent = tr("lackingSampleText");
+          return;
+        }
+        if (state.seconds < 20) {
+          conclusionTitle.textContent = tr("initialTitle");
+          conclusionText.textContent = tr("initialText");
+          return;
+        }
+        if (activeAvg - heatedAvg > 35) {
+          conclusionTitle.textContent = tr("conclusionTitle");
+          conclusionText.textContent = tr("conclusionText");
+          return;
+        }
+        conclusionTitle.textContent = tr("comparingTitle");
+        conclusionText.textContent = tr("comparingText");
+      }
+
+      function renderTubeList() {
+        tubeList.innerHTML = state.tubes.map((tube) => {
+          const tempTag = tube.heated ? `<span class="tag hot">${tr("heatedTag")}</span>` : `<span class="tag good">${tr("activeTag")}</span>`;
+          const meatTag = tube.meat ? `<span class="tag">${tr("withMeat")}</span>` : `<span class="tag">${tr("noMeat")}</span>`;
+          return `
+            <div class="tube-row">
+              <b>T${tube.id}</b>
+              <span class="tube-meta">${tempTag}${meatTag}</span>
+              <strong>${Math.round(tube.digestion)}%</strong>
+            </div>
+          `;
+        }).join("");
+      }
+
+      stage.addEventListener("pointermove", dragMove);
+      stage.addEventListener("pointerup", endDrag);
+      stage.addEventListener("pointercancel", endDrag);
+      addMeatButton.addEventListener("click", addMeatToAll);
+      langButton.addEventListener("click", () => setLanguage(state.lang === "es" ? "en" : "es"));
+      runButton.addEventListener("click", toggleRun);
+      resetButton.addEventListener("click", reset);
+      document.querySelector('[data-scenario="guided"]').addEventListener("click", prepareGuided);
+      document.querySelector('[data-scenario="expected"]').addEventListener("click", prepareExpected);
+
+      createTubes();
+      setLanguage("es");
+      requestAnimationFrame(simulationTick);
+    </script>
+  </body>
+</html>
