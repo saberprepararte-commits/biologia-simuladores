@@ -387,25 +387,6 @@
       filter: drop-shadow(0 14px 20px rgba(30, 63, 75, .12));
     }
 
-    .inlet-photo::after {
-      content: "";
-      position: absolute;
-      left: 36.2%;
-      top: 37.8%;
-      width: 2.7%;
-      height: 43.5%;
-      border-radius: 999px;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,.2), rgba(218, 202, 160, .74), rgba(130, 92, 48, .5), rgba(255,255,255,.22));
-      opacity: 0;
-      filter: blur(.28px);
-      transform-origin: top center;
-    }
-
-    .apparatus.testing .inlet-photo::after {
-      animation: inletPour 1.45s ease-in-out both;
-    }
-
     .inlet-tube {
       position: absolute;
       display: none;
@@ -687,13 +668,6 @@
 
     .apparatus.testing .outlet-stream {
       animation: outletFlow 1.55s ease-in-out both;
-    }
-
-    @keyframes inletPour {
-      0% { opacity: 0; transform: translateY(-8px) scaleY(.35); }
-      18% { opacity: .78; transform: translateY(0) scaleY(.92); }
-      58% { opacity: .94; transform: translateY(2px) scaleY(1.06); }
-      100% { opacity: 0; transform: translateY(10px) scaleY(.72); }
     }
 
     @keyframes outletFlow {
