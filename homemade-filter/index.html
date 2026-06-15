@@ -97,7 +97,7 @@
     h1 {
       margin-bottom: 8px;
       font-size: clamp(1.24rem, 2vw, 2rem);
-      line-height: 1.12;
+      line-height: 1.18;
       letter-spacing: 0;
     }
 
@@ -216,6 +216,23 @@
       font-size: 1rem;
     }
 
+    .mobile-move {
+      display: none;
+      gap: 3px;
+      justify-content: end;
+    }
+
+    .move-btn {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #285064;
+      font-weight: 800;
+      line-height: 1;
+    }
+
     .controls {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -302,7 +319,7 @@
       margin-top: 5px;
       font-size: clamp(1.16rem, 2.25vw, 1.8rem);
       font-weight: 800;
-      line-height: 1.08;
+      line-height: 1.14;
     }
 
     .score-badge {
@@ -988,6 +1005,179 @@
       .apparatus { height: min(520px, calc(100vh - 102px)); }
       .section { padding-top: 7px; padding-bottom: 7px; }
       .layer-card small { display: none; }
+    }
+
+    @media (max-width: 720px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      body {
+        min-height: 100dvh;
+        background-attachment: fixed;
+      }
+
+      .app {
+        width: calc(100% - 12px);
+        height: auto;
+        min-height: auto;
+        margin: 6px auto;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        overflow: visible;
+      }
+
+      .panel {
+        border-radius: 8px;
+      }
+
+      .left, .right {
+        overflow: visible;
+        min-height: auto;
+      }
+
+      .brand {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: clamp(1.35rem, 8vw, 1.85rem);
+      }
+
+      .subtitle {
+        display: block;
+        font-size: .78rem;
+      }
+
+      .section {
+        padding: 10px;
+      }
+
+      .choice {
+        min-height: 40px;
+      }
+
+      .layers {
+        gap: 7px;
+      }
+
+      .layer-card {
+        grid-template-columns: 34px 1fr auto;
+        gap: 8px;
+        padding: 6px;
+      }
+
+      .thumb {
+        width: 34px;
+        height: 34px;
+      }
+
+      .grip {
+        display: none;
+      }
+
+      .mobile-move {
+        display: flex;
+      }
+
+      .controls {
+        gap: 8px;
+      }
+
+      .btn {
+        min-height: 42px;
+      }
+
+      .toggle {
+        min-height: 32px;
+      }
+
+      .stage {
+        height: clamp(620px, 92dvh, 730px);
+        min-height: 620px;
+      }
+
+      .stage-header {
+        top: 9px;
+        left: 10px;
+        right: 10px;
+        gap: 8px;
+      }
+
+      .stage-title strong {
+        font-size: .66rem;
+      }
+
+      .stage-title span {
+        font-size: clamp(1rem, 5vw, 1.32rem);
+      }
+
+      .score-badge {
+        min-width: 96px;
+        padding: 7px;
+      }
+
+      .score-badge b {
+        font-size: 1.35rem;
+      }
+
+      .score-badge span {
+        font-size: .6rem;
+      }
+
+      .filter-area {
+        inset: 74px 0 0;
+        padding: 0 4px 6px;
+      }
+
+      .apparatus {
+        width: min(390px, 99%);
+        height: min(640px, calc(92dvh - 74px));
+        min-height: 520px;
+      }
+
+      .legend {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        max-width: none;
+        font-size: .68rem;
+      }
+
+      .flow-label {
+        font-size: .62rem;
+        padding: 4px 7px;
+      }
+
+      .sources {
+        display: grid;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .water-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        height: 640px;
+      }
+
+      .apparatus {
+        height: 560px;
+      }
+
+      .inlet-photo {
+        top: -9.8%;
+        width: 32%;
+      }
     }
   </style>
 </head>
@@ -1699,6 +1889,10 @@
             <div class="thumb ${item.texture}"></div>
             <div><b>${label[0]}</b><small>${label[1]}</small></div>
             <div class="grip">☰</div>
+            <div class="mobile-move" aria-label="Mover capa">
+              <button class="move-btn" type="button" data-move="up" aria-label="Subir capa">↑</button>
+              <button class="move-btn" type="button" data-move="down" aria-label="Bajar capa">↓</button>
+            </div>
           </article>
         `;
       }).join("");
@@ -1724,6 +1918,23 @@
           if (!draggedId || draggedId === targetId) return;
           const next = order.filter(id => id !== draggedId);
           next.splice(next.indexOf(targetId), 0, draggedId);
+          order = next;
+          renderDesign();
+          markDesignChanged();
+        });
+      });
+
+      layersEl.querySelectorAll(".move-btn").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          const card = button.closest(".layer-card");
+          const id = card.dataset.id;
+          const index = order.indexOf(id);
+          const direction = button.dataset.move === "up" ? -1 : 1;
+          const nextIndex = index + direction;
+          if (nextIndex < 0 || nextIndex >= order.length) return;
+          const next = [...order];
+          [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
           order = next;
           renderDesign();
           markDesignChanged();
