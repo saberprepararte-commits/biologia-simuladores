@@ -180,10 +180,12 @@
       background: #fff;
       cursor: grab;
       user-select: none;
+      touch-action: none;
       transition: transform .16s ease, opacity .16s ease, border-color .16s ease;
     }
 
     .layer-card.dragging { opacity: .45; transform: scale(.98); }
+    .layer-card.touch-dragging { opacity: .72; transform: scale(.985); border-color: var(--blue); }
     .layer-card.over { border-color: var(--blue); }
 
     .thumb {
@@ -319,7 +321,7 @@
       margin-top: 5px;
       font-size: clamp(1.16rem, 2.25vw, 1.8rem);
       font-weight: 800;
-      line-height: 1.14;
+      line-height: 1.22;
     }
 
     .score-badge {
@@ -972,6 +974,107 @@
         width: min(480px, 98%);
         height: min(660px, calc(100vh - 98px));
       }
+      .layer-card {
+        grid-template-columns: 30px 1fr auto;
+      }
+      .grip {
+        display: none;
+      }
+      .mobile-move {
+        display: flex;
+      }
+      .bottle {
+        left: 50.1%;
+        top: 17.9%;
+        width: 43.6%;
+        height: 36.1%;
+      }
+    }
+
+    @media (min-width: 721px) and (max-width: 900px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      body {
+        min-height: 100dvh;
+        background-attachment: fixed;
+      }
+
+      .app {
+        width: calc(100% - 14px);
+        height: auto;
+        min-height: auto;
+        margin: 7px auto;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        overflow: visible;
+      }
+
+      .left, .right {
+        overflow: visible;
+        min-height: auto;
+      }
+
+      .brand {
+        padding: 12px 14px;
+      }
+
+      .subtitle {
+        display: block;
+        font-size: .78rem;
+      }
+
+      .water-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .layers {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        max-width: 520px;
+      }
+
+      .stage {
+        height: min(820px, 92dvh);
+        min-height: 720px;
+      }
+
+      .stage-title span {
+        font-size: clamp(1.45rem, 4vw, 2rem);
+      }
+
+      .filter-area {
+        inset: 76px 0 0;
+      }
+
+      .apparatus {
+        width: min(560px, 92%);
+        height: min(720px, calc(92dvh - 78px));
+        min-height: 620px;
+      }
+
+      .bottle {
+        left: 50.2%;
+        top: 17.8%;
+        width: 43.8%;
+        height: 36.2%;
+      }
+
+      .legend {
+        left: 18px;
+        right: auto;
+        bottom: 14px;
+      }
+
+      .sources {
+        display: grid;
+      }
     }
 
     @media (max-height: 690px) {
@@ -1396,6 +1499,7 @@
     let order = [...startingOrder];
     let selectedWater = waterTypes[0];
     let draggedId = null;
+    let pointerDrag = null;
     let lastResult = null;
     let beakerFill = 31;
 
@@ -1896,6 +2000,21 @@
           renderDesign();
           markDesignChanged();
         });
+
+        card.addEventListener("pointerdown", event => {
+          if (event.button !== 0 && event.pointerType === "mouse") return;
+          if (event.target.closest("button, input, label")) return;
+          pointerDrag = {
+            id: card.dataset.id,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            active: false,
+            moved: false
+          };
+          card.setPointerCapture?.(event.pointerId);
+        });
+
       });
 
       layersEl.querySelectorAll(".move-btn").forEach(button => {
@@ -2357,6 +2476,38 @@
       renderLayerCards();
       renderBottle();
     }
+
+    document.addEventListener("pointermove", event => {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return;
+      const distance = Math.hypot(event.clientX - pointerDrag.startX, event.clientY - pointerDrag.startY);
+      if (!pointerDrag.active && distance < 8) return;
+      pointerDrag.active = true;
+      event.preventDefault();
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".layer-card");
+      if (!target || !layersEl.contains(target)) return;
+      const targetId = target.dataset.id;
+      if (!targetId || targetId === pointerDrag.id) return;
+      const next = order.filter(id => id !== pointerDrag.id);
+      next.splice(next.indexOf(targetId), 0, pointerDrag.id);
+      order = next;
+      pointerDrag.moved = true;
+      renderDesign();
+      layersEl.querySelector(`.layer-card[data-id="${pointerDrag.id}"]`)?.classList.add("touch-dragging");
+    }, { passive: false });
+
+    document.addEventListener("pointerup", event => {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return;
+      const moved = pointerDrag.moved;
+      layersEl.querySelectorAll(".layer-card").forEach(item => item.classList.remove("touch-dragging"));
+      pointerDrag = null;
+      if (moved) markDesignChanged();
+    });
+
+    document.addEventListener("pointercancel", event => {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return;
+      layersEl.querySelectorAll(".layer-card").forEach(item => item.classList.remove("touch-dragging"));
+      pointerDrag = null;
+    });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
       order = [...startingOrder];
