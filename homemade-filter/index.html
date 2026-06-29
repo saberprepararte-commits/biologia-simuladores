@@ -1077,11 +1077,151 @@
       }
     }
 
+    @media (min-width: 901px) and (max-width: 1120px) and (orientation: landscape) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      body {
+        min-height: 100dvh;
+        background-attachment: fixed;
+      }
+
+      .app {
+        width: calc(100% - 14px);
+        height: auto;
+        min-height: auto;
+        margin: 7px auto;
+        grid-template-columns: 300px minmax(0, 1fr);
+        grid-template-areas:
+          "left stage"
+          "right right";
+        gap: 8px;
+        overflow: visible;
+      }
+
+      .left {
+        grid-area: left;
+        height: calc(100dvh - 14px);
+        min-height: 650px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .stage {
+        grid-area: stage;
+        height: calc(100dvh - 14px);
+        min-height: 650px;
+      }
+
+      .right {
+        grid-area: right;
+        display: grid;
+        grid-template-columns: minmax(300px, .9fr) minmax(360px, 1.1fr);
+        align-items: start;
+        overflow: visible;
+      }
+
+      .right .section {
+        border-bottom: 0;
+        border-right: 1px solid var(--line);
+      }
+
+      .right .section:nth-child(2n) {
+        border-right: 0;
+      }
+
+      .right .section:first-child,
+      .right .section:nth-child(2) {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .subtitle {
+        display: block;
+        font-size: .72rem;
+      }
+
+      .water-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .layers {
+        gap: 7px;
+      }
+
+      .layer-card {
+        grid-template-columns: 34px 1fr auto;
+        padding: 6px;
+      }
+
+      .thumb {
+        width: 34px;
+        height: 34px;
+      }
+
+      .filter-area {
+        inset: 76px 0 0;
+        padding: 0 6px 8px;
+      }
+
+      .apparatus {
+        width: min(660px, 96%);
+        height: min(720px, calc(100dvh - 86px));
+        min-height: 560px;
+      }
+
+      .bottle {
+        left: 50.2%;
+        top: 17.7%;
+        width: 45.4%;
+        height: 36.4%;
+      }
+
+      .stage-title span {
+        font-size: clamp(1.35rem, 3.6vw, 2rem);
+      }
+
+      .score-badge {
+        min-width: 112px;
+      }
+
+      .legend {
+        left: 18px;
+        bottom: 14px;
+      }
+
+      .sources {
+        display: grid;
+      }
+    }
+
     @media (max-height: 690px) {
       .subtitle, .challenge-card:nth-child(3), .sources { display: none; }
       .apparatus { height: min(520px, calc(100vh - 102px)); }
       .section { padding-top: 7px; padding-bottom: 7px; }
       .layer-card small { display: none; }
+    }
+
+    @media (min-width: 901px) and (max-width: 1120px) and (orientation: landscape) and (max-height: 690px) {
+      .apparatus {
+        width: min(620px, 96%);
+        height: min(620px, calc(100dvh - 82px));
+        min-height: 540px;
+      }
+
+      .bottle {
+        left: 50.2%;
+        top: 17.7%;
+        width: 45.4%;
+        height: 36.4%;
+      }
+
+      .sources {
+        display: grid;
+      }
     }
 
     @media (max-width: 720px) {
