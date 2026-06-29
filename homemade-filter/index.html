@@ -80,6 +80,60 @@
       backdrop-filter: blur(14px);
     }
 
+    .intro-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(18, 32, 43, .34);
+      backdrop-filter: blur(5px);
+    }
+
+    .intro-modal.is-hidden {
+      display: none;
+    }
+
+    .intro-card {
+      width: min(520px, 100%);
+      border: 1px solid rgba(215, 224, 231, .95);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .95);
+      box-shadow: 0 22px 52px rgba(18, 32, 43, .24);
+      padding: 22px;
+    }
+
+    .intro-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      line-height: 1.18;
+      color: var(--ink);
+    }
+
+    .intro-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.45;
+    }
+
+    .intro-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .intro-close {
+      border: 1px solid #0e92ce;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      padding: 9px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(14, 146, 206, .18);
+    }
+
     .left, .right {
       display: flex;
       flex-direction: column;
@@ -481,9 +535,9 @@
 
     .bottle {
       position: absolute;
-      left: 50.3%;
+      left: 50.2%;
       top: 17.5%;
-      width: 46.5%;
+      width: 43.2%;
       height: 36.8%;
       transform: translateX(-50%);
       border: 0;
@@ -984,9 +1038,9 @@
         display: flex;
       }
       .bottle {
-        left: 50.2%;
+        left: 50.15%;
         top: 17.6%;
-        width: 46.2%;
+        width: 43.2%;
         height: 36.9%;
       }
     }
@@ -1374,6 +1428,16 @@
     </aside>
   </main>
 
+  <div class="intro-modal" id="introModal" role="dialog" aria-modal="true" aria-labelledby="introTitle" aria-describedby="introBody">
+    <div class="intro-card">
+      <h2 id="introTitle" data-i18n="introTitle">Recomendación de uso</h2>
+      <p id="introBody" data-i18n="introBody">Este simulador fue diseñado de forma nativa para computadores de escritorio y portátiles, donde se aprovecha mejor la distribución completa de controles, filtro y resultados. Si lo utiliza en una tableta, se recomienda el modo vertical para conservar una experiencia más estable y evitar posibles desajustes visuales.</p>
+      <div class="intro-actions">
+        <button class="intro-close" id="introClose" type="button" data-i18n="introClose">Entendido</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const materials = [
       {
@@ -1515,28 +1579,30 @@
     const apparatus = document.querySelector(".apparatus");
     const runBtn = document.getElementById("runBtn");
     const languageGrid = document.getElementById("languageGrid");
+    const introModal = document.getElementById("introModal");
+    const introClose = document.getElementById("introClose");
     let currentLang = "es";
     const languages = [
       ["es", "ES"], ["en", "EN"], ["pt", "PT"], ["fr", "FR"], ["de", "DE"], ["it", "IT"]
     ];
     const uiText = {
       es: {
-        appTitle: "Filtro casero simulado", subtitle: "Ordena los materiales, ejecuta pruebas y compara cómo cambian la turbidez, olor/color y riesgo biológico.", initialWater: "Agua inicial", filterLayers: "Capas del filtro", dragHint: "arrastra", testDesign: "Probar diseño", reset: "Reiniciar", disinfection: "Desinfección posterior", biofilm: "Maduración biológica del filtro", lab: "Laboratorio interactivo", headline: "Diseña, observa, explica", estimated: "purificación estimada", inlet: "Entrada", outlet: "Salida", results: "Resultados", turbidity: "Turbidez y sólidos", chem: "Olor, color y orgánicos", micro: "Riesgo microbiológico", flow: "Caudal esperado", safetyLabel: "Seguridad:", safetyText: "este simulador estima mejoras de calidad. Un filtro casero reduce partículas y algunos contaminantes, pero no garantiza agua potable. Para consumo real se requiere desinfección validada y control de la fuente.", diagnosisTitle: "Diagnóstico", stemTitle: "Indagación STEM", references: "Referencias", translate: "Traducir"
+        appTitle: "Filtro casero simulado", subtitle: "Ordena los materiales, ejecuta pruebas y compara cómo cambian la turbidez, olor/color y riesgo biológico.", initialWater: "Agua inicial", filterLayers: "Capas del filtro", dragHint: "arrastra", testDesign: "Probar diseño", reset: "Reiniciar", disinfection: "Desinfección posterior", biofilm: "Maduración biológica del filtro", lab: "Laboratorio interactivo", headline: "Diseña, observa, explica", estimated: "purificación estimada", inlet: "Entrada", outlet: "Salida", results: "Resultados", turbidity: "Turbidez y sólidos", chem: "Olor, color y orgánicos", micro: "Riesgo microbiológico", flow: "Caudal esperado", safetyLabel: "Seguridad:", safetyText: "este simulador estima mejoras de calidad. Un filtro casero reduce partículas y algunos contaminantes, pero no garantiza agua potable. Para consumo real se requiere desinfección validada y control de la fuente.", diagnosisTitle: "Diagnóstico", stemTitle: "Indagación STEM", references: "Referencias", translate: "Traducir", introTitle: "Recomendación de uso", introBody: "Este simulador fue diseñado de forma nativa para computadores de escritorio y portátiles, donde se aprovecha mejor la distribución completa de controles, filtro y resultados. Si lo utiliza en una tableta, se recomienda el modo vertical para conservar una experiencia más estable y evitar posibles desajustes visuales.", introClose: "Entendido"
       },
       en: {
-        appTitle: "Simulated homemade filter", subtitle: "Order the materials, run tests, and compare changes in turbidity, odor/color, and biological risk.", initialWater: "Initial water", filterLayers: "Filter layers", dragHint: "drag", testDesign: "Test design", reset: "Reset", disinfection: "Post-disinfection", biofilm: "Biological filter maturation", lab: "Interactive laboratory", headline: "Design, observe, explain", estimated: "estimated purification", inlet: "Inlet", outlet: "Outlet", results: "Results", turbidity: "Turbidity and solids", chem: "Odor, color and organics", micro: "Microbiological risk", flow: "Expected flow", safetyLabel: "Safety:", safetyText: "this simulator estimates quality improvements. A homemade filter reduces particles and some contaminants, but it does not guarantee potable water. Real consumption requires validated disinfection and source control.", diagnosisTitle: "Diagnosis", stemTitle: "STEM inquiry", references: "References", translate: "Translate"
+        appTitle: "Simulated homemade filter", subtitle: "Order the materials, run tests, and compare changes in turbidity, odor/color, and biological risk.", initialWater: "Initial water", filterLayers: "Filter layers", dragHint: "drag", testDesign: "Test design", reset: "Reset", disinfection: "Post-disinfection", biofilm: "Biological filter maturation", lab: "Interactive laboratory", headline: "Design, observe, explain", estimated: "estimated purification", inlet: "Inlet", outlet: "Outlet", results: "Results", turbidity: "Turbidity and solids", chem: "Odor, color and organics", micro: "Microbiological risk", flow: "Expected flow", safetyLabel: "Safety:", safetyText: "this simulator estimates quality improvements. A homemade filter reduces particles and some contaminants, but it does not guarantee potable water. Real consumption requires validated disinfection and source control.", diagnosisTitle: "Diagnosis", stemTitle: "STEM inquiry", references: "References", translate: "Translate", introTitle: "Recommended use", introBody: "This simulator was designed natively for desktop and laptop computers, where the full arrangement of controls, filter and results is best supported. If you use it on a tablet, portrait orientation is recommended for a more stable experience and to reduce possible visual layout issues.", introClose: "Got it"
       },
       pt: {
-        appTitle: "Filtro caseiro simulado", subtitle: "Ordene os materiais, execute testes e compare mudanças na turbidez, odor/cor e risco biológico.", initialWater: "Água inicial", filterLayers: "Camadas do filtro", dragHint: "arraste", testDesign: "Testar desenho", reset: "Reiniciar", disinfection: "Desinfecção posterior", biofilm: "Maturação biológica do filtro", lab: "Laboratório interativo", headline: "Desenhe, observe, explique", estimated: "purificação estimada", inlet: "Entrada", outlet: "Saída", results: "Resultados", turbidity: "Turbidez e sólidos", chem: "Odor, cor e orgânicos", micro: "Risco microbiológico", flow: "Vazão esperada", safetyLabel: "Segurança:", safetyText: "este simulador estima melhorias de qualidade. Um filtro caseiro reduz partículas e alguns contaminantes, mas não garante água potável. Para consumo real é necessária desinfecção validada e controle da fonte.", diagnosisTitle: "Diagnóstico", stemTitle: "Investigação STEM", references: "Referências", translate: "Traduzir"
+        appTitle: "Filtro caseiro simulado", subtitle: "Ordene os materiais, execute testes e compare mudanças na turbidez, odor/cor e risco biológico.", initialWater: "Água inicial", filterLayers: "Camadas do filtro", dragHint: "arraste", testDesign: "Testar desenho", reset: "Reiniciar", disinfection: "Desinfecção posterior", biofilm: "Maturação biológica do filtro", lab: "Laboratório interativo", headline: "Desenhe, observe, explique", estimated: "purificação estimada", inlet: "Entrada", outlet: "Saída", results: "Resultados", turbidity: "Turbidez e sólidos", chem: "Odor, cor e orgânicos", micro: "Risco microbiológico", flow: "Vazão esperada", safetyLabel: "Segurança:", safetyText: "este simulador estima melhorias de qualidade. Um filtro caseiro reduz partículas e alguns contaminantes, mas não garante água potável. Para consumo real é necessária desinfecção validada e controle da fonte.", diagnosisTitle: "Diagnóstico", stemTitle: "Investigação STEM", references: "Referências", translate: "Traduzir", introTitle: "Recomendação de uso", introBody: "Este simulador foi desenvolvido nativamente para computadores de mesa e notebooks, onde a distribuição completa dos controles, do filtro e dos resultados funciona melhor. Ao usá-lo em um tablet, recomenda-se a orientação vertical para uma experiência mais estável e para evitar possíveis ajustes visuais.", introClose: "Entendi"
       },
       fr: {
-        appTitle: "Filtre maison simulé", subtitle: "Ordonnez les matériaux, lancez des tests et comparez la turbidité, l'odeur/couleur et le risque biologique.", initialWater: "Eau initiale", filterLayers: "Couches du filtre", dragHint: "glisser", testDesign: "Tester", reset: "Réinitialiser", disinfection: "Désinfection finale", biofilm: "Maturation biologique", lab: "Laboratoire interactif", headline: "Concevoir, observer, expliquer", estimated: "purification estimée", inlet: "Entrée", outlet: "Sortie", results: "Résultats", turbidity: "Turbidité et solides", chem: "Odeur, couleur et organiques", micro: "Risque microbiologique", flow: "Débit attendu", safetyLabel: "Sécurité:", safetyText: "ce simulateur estime des améliorations de qualité. Un filtre maison réduit les particules et certains contaminants, mais ne garantit pas une eau potable.", diagnosisTitle: "Diagnostic", stemTitle: "Démarche STEM", references: "Références", translate: "Traduire"
+        appTitle: "Filtre maison simulé", subtitle: "Ordonnez les matériaux, lancez des tests et comparez la turbidité, l'odeur/couleur et le risque biologique.", initialWater: "Eau initiale", filterLayers: "Couches du filtre", dragHint: "glisser", testDesign: "Tester", reset: "Réinitialiser", disinfection: "Désinfection finale", biofilm: "Maturation biologique", lab: "Laboratoire interactif", headline: "Concevoir, observer, expliquer", estimated: "purification estimée", inlet: "Entrée", outlet: "Sortie", results: "Résultats", turbidity: "Turbidité et solides", chem: "Odeur, couleur et organiques", micro: "Risque microbiologique", flow: "Débit attendu", safetyLabel: "Sécurité:", safetyText: "ce simulateur estime des améliorations de qualité. Un filtre maison réduit les particules et certains contaminants, mais ne garantit pas une eau potable.", diagnosisTitle: "Diagnostic", stemTitle: "Démarche STEM", references: "Références", translate: "Traduire", introTitle: "Conseil d'utilisation", introBody: "Ce simulateur a été conçu nativement pour les ordinateurs de bureau et portables, où l'ensemble des commandes, du filtre et des résultats est mieux exploité. Sur tablette, l'orientation verticale est recommandée pour une expérience plus stable et pour limiter les éventuels décalages visuels.", introClose: "Compris"
       },
       de: {
-        appTitle: "Simulierter Hausfilter", subtitle: "Ordne die Materialien, führe Tests aus und vergleiche Trübung, Geruch/Farbe und biologisches Risiko.", initialWater: "Ausgangswasser", filterLayers: "Filterschichten", dragHint: "ziehen", testDesign: "Design testen", reset: "Zurücksetzen", disinfection: "Nachdesinfektion", biofilm: "Biologische Reifung", lab: "Interaktives Labor", headline: "Entwerfen, beobachten, erklären", estimated: "geschätzte Reinigung", inlet: "Einlass", outlet: "Auslass", results: "Ergebnisse", turbidity: "Trübung und Feststoffe", chem: "Geruch, Farbe und Organik", micro: "Mikrobiologisches Risiko", flow: "Erwarteter Durchfluss", safetyLabel: "Sicherheit:", safetyText: "dieser Simulator schätzt Qualitätsverbesserungen. Ein Hausfilter reduziert Partikel und einige Schadstoffe, garantiert aber kein Trinkwasser.", diagnosisTitle: "Diagnose", stemTitle: "STEM-Forschung", references: "Referenzen", translate: "Übersetzen"
+        appTitle: "Simulierter Hausfilter", subtitle: "Ordne die Materialien, führe Tests aus und vergleiche Trübung, Geruch/Farbe und biologisches Risiko.", initialWater: "Ausgangswasser", filterLayers: "Filterschichten", dragHint: "ziehen", testDesign: "Design testen", reset: "Zurücksetzen", disinfection: "Nachdesinfektion", biofilm: "Biologische Reifung", lab: "Interaktives Labor", headline: "Entwerfen, beobachten, erklären", estimated: "geschätzte Reinigung", inlet: "Einlass", outlet: "Auslass", results: "Ergebnisse", turbidity: "Trübung und Feststoffe", chem: "Geruch, Farbe und Organik", micro: "Mikrobiologisches Risiko", flow: "Erwarteter Durchfluss", safetyLabel: "Sicherheit:", safetyText: "dieser Simulator schätzt Qualitätsverbesserungen. Ein Hausfilter reduziert Partikel und einige Schadstoffe, garantiert aber kein Trinkwasser.", diagnosisTitle: "Diagnose", stemTitle: "STEM-Forschung", references: "Referenzen", translate: "Übersetzen", introTitle: "Nutzungsempfehlung", introBody: "Dieser Simulator wurde nativ für Desktop- und Laptop-Computer entwickelt, auf denen die vollständige Anordnung von Bedienelementen, Filter und Ergebnissen am besten unterstützt wird. Bei der Nutzung auf einem Tablet wird das Hochformat empfohlen, um eine stabilere Darstellung zu erhalten und mögliche visuelle Verschiebungen zu vermeiden.", introClose: "Verstanden"
       },
       it: {
-        appTitle: "Filtro domestico simulato", subtitle: "Ordina i materiali, esegui prove e confronta torbidità, odore/colore e rischio biologico.", initialWater: "Acqua iniziale", filterLayers: "Strati del filtro", dragHint: "trascina", testDesign: "Prova progetto", reset: "Ripristina", disinfection: "Disinfezione finale", biofilm: "Maturazione biologica", lab: "Laboratorio interattivo", headline: "Progetta, osserva, spiega", estimated: "purificazione stimata", inlet: "Entrata", outlet: "Uscita", results: "Risultati", turbidity: "Torbidità e solidi", chem: "Odore, colore e organici", micro: "Rischio microbiologico", flow: "Flusso previsto", safetyLabel: "Sicurezza:", safetyText: "questo simulatore stima miglioramenti di qualità. Un filtro domestico riduce particelle e alcuni contaminanti, ma non garantisce acqua potabile.", diagnosisTitle: "Diagnosi", stemTitle: "Indagine STEM", references: "Riferimenti", translate: "Traduci"
+        appTitle: "Filtro domestico simulato", subtitle: "Ordina i materiali, esegui prove e confronta torbidità, odore/colore e rischio biologico.", initialWater: "Acqua iniziale", filterLayers: "Strati del filtro", dragHint: "trascina", testDesign: "Prova progetto", reset: "Ripristina", disinfection: "Disinfezione finale", biofilm: "Maturazione biologica", lab: "Laboratorio interattivo", headline: "Progetta, osserva, spiega", estimated: "purificazione stimata", inlet: "Entrata", outlet: "Uscita", results: "Risultati", turbidity: "Torbidità e solidi", chem: "Odore, colore e organici", micro: "Rischio microbiologico", flow: "Flusso previsto", safetyLabel: "Sicurezza:", safetyText: "questo simulatore stima miglioramenti di qualità. Un filtro domestico riduce particelle e alcuni contaminanti, ma non garantisce acqua potabile.", diagnosisTitle: "Diagnosi", stemTitle: "Indagine STEM", references: "Riferimenti", translate: "Traduci", introTitle: "Uso consigliato", introBody: "Questo simulatore è stato progettato nativamente per computer desktop e portatili, dove la disposizione completa di controlli, filtro e risultati funziona al meglio. Se viene utilizzato su tablet, si consiglia l'orientamento verticale per mantenere un'esperienza più stabile ed evitare possibili disallineamenti visivi.", introClose: "Ho capito"
       }
     };
     const materialText = {
@@ -2318,8 +2384,8 @@
       };
       const totalWeight = order.reduce((sum, id) => sum + (weights[id] || 1), 0);
       const usableHeight = rect.height * .985;
-      const x = -rect.width * .018;
-      const width = rect.width * 1.036;
+      const x = rect.width * .012;
+      const width = rect.width * .976;
       let currentY = rect.height * .004;
 
       order.forEach((id, index) => {
@@ -2531,11 +2597,18 @@
     disinfectEl.addEventListener("change", markDesignChanged);
     biofilmEl.addEventListener("change", markDesignChanged);
     window.addEventListener("resize", drawCanvasLayers);
+    introClose.addEventListener("click", () => {
+      introModal.classList.add("is-hidden");
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") introModal.classList.add("is-hidden");
+    });
 
     renderLanguageButtons();
     applyLanguage();
     renderDesign();
     renderPendingResults();
+    introClose.focus();
   </script>
 </body>
 </html>
